@@ -13,3 +13,6 @@ license = {text = "MIT"}
 
 [tool.pdm]
 distribution = false
+
+[tool.setuptools.package-data]
+nonebot_plugin_aawarframe = ["assets/**/*", "assets/*", "assets/**/*.*"]
