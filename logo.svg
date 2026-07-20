@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 386.72 76.9">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ce589b;
+      }
+
+      .cls-2 {
+        font-family: CascadiaMonoRoman-Bold, 'Cascadia Mono';
+        font-size: 60px;
+        font-variation-settings: 'wght' 700;
+        font-weight: 700;
+      }
+
+      .cls-3 {
+        fill: #231815;
+      }
+
+      .cls-4 {
+        fill: #a21434;
+      }
+    </style>
+  </defs>
+  <text class="cls-2" transform="translate(0 50.8)"><tspan class="cls-4" x="0" y="0">A</tspan><tspan class="cls-3" x="35.16" y="0">a </tspan><tspan class="cls-1" x="105.47" y="0">W</tspan><tspan class="cls-3" x="140.62" y="0">arframe</tspan></text>
+</svg>
