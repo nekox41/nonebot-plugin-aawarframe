@@ -1,7 +1,7 @@
 <div align="center">
-  <a href="https://v2.nonebot.dev/store"><img src="https://github.com/nekox41/nonebot-plugin-aawarframe/logo.png" width="180" height="180" alt="aawarframeLogo"></a>
+  <a href="https://v2.nonebot.dev/store"><img src="https://github.com/nekox41/nonebot-plugin-aawarframe/blob/master/logo.png" width="180" height="180" alt="aawarframeLogo"></a>
   <br>
-  <p><img src="https://github.com/nekox41/nonebot-plugin-aawarframe/logo.svg" width="240" alt="aawarframeLogo"></p>
+  <p><img src="https://github.com/nekox41/nonebot-plugin-aawarframe/blob/master/logo.svg" width="240" alt="aawarframeLogo"></p>
 </div>
 
 <div align="center">
