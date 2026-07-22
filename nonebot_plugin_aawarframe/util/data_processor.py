@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Union
 from nonebot.log import logger
 
 # ---------- 加载映射文件 ----------
-_ASSETS_DIR = Path(__file__).parent / "assets"
+_ASSETS_DIR = Path(__file__).parent.parent / "assets"
 
 def _load_json(filename: str) -> Dict:
     path = _ASSETS_DIR / filename

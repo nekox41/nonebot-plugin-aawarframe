@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "nekox41",email = "aameow@outlook.com"},
 ]
-dependencies = ["nonebot2>=2.5.0", "httpx~=0.28.1", "nonebot-plugin-htmlkit>=0.1.0rc5", "nonebot-adapter-onebot>=2.4.6"]
+dependencies = ["nonebot2>=2.5.0", "httpx~=0.28.1", "nonebot-plugin-htmlkit>=0.1.0rc5", "nonebot-adapter-onebot>=2.4.6", "playwright>=1.40.0"]
 requires-python = "==3.12.*"
 readme = "README.md"
 license = {text = "MIT"}

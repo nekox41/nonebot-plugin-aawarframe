@@ -1,7 +1,7 @@
 <div align="center">
-  <a href="https://v2.nonebot.dev/store"><img src="https://github.com/nekox41/nonebot-plugin-aawarframe/blob/master/logo.png" width="180" height="180" alt="aawarframeLogo"></a>
+  <a href="https://v2.nonebot.dev/store"><img src="https://github.com/nekox41/nonebot-plugin-aawarframe/blob/master/imgs/logo.png" width="180" height="180" alt="aawarframeLogo"></a>
   <br>
-  <p><img src="https://github.com/nekox41/nonebot-plugin-aawarframe/blob/master/logo.svg" width="240" alt="aawarframeLogo"></p>
+  <p><img src="https://github.com/nekox41/nonebot-plugin-aawarframe/blob/master/imgs/logo.svg" width="240" alt="aawarframeLogo"></p>
 </div>
 
 <div align="center">
@@ -66,20 +66,12 @@ _✨ Aa 的 Warframe 助手，用于查询游戏状态。 ✨_
 
 </details>
 
-## ⚙️ 配置
-
-在 nonebot2 项目的`.env`文件中添加下表中的必填配置
-
-| 配置项 | 必填 | 默认值 | 说明 |
-|:-----:|:----:|:----:|:----:|
-| 配置项1 | 是 | 无 | 配置说明 |
-| 配置项2 | 否 | 无 | 配置说明 |
-
 ## 🎉 使用
 ### 指令表
-| 指令 | 权限 | 需要@ | 范围 | 说明 |
-|:-----:|:----:|:----:|:----:|:----:|
-| 指令1 | 主人 | 否 | 私聊 | 指令说明 |
-| 指令2 | 群员 | 是 | 群聊 | 指令说明 |
+|  指令  | 权限  | 需要@ | 范围 |    说明    |
+|:----:|:---:|:---:|:--:|:--------:|
+| 夜灵平原 | 所有人 |  否  | 群聊 | 返回夜灵平原时间 |
+| 时光科研 | 所有人 |  否  | 群聊 | 返回本周时光科研 |
+| 深层科研 | 所有人 |  否  | 群聊 | 返回本周深层科研 |
 ### 效果图
-如果有效果图的话
+<p><img src="https://github.com/nekox41/nonebot-plugin-aawarframe/blob/master/imgs/example1.png" alt="效果图1"></p>
