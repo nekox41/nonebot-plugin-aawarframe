@@ -1,7 +1,7 @@
 [project]
 name = "nonebot-plugin-aawarframe"
-version = "0.1.2"
-description = "Default template for PDM package"
+version = "0.2.2"
+description = "aa 的 Warframe 助手"
 authors = [
     {name = "nekox41",email = "aameow@outlook.com"},
 ]
