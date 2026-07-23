@@ -10,12 +10,16 @@ requires-python = "==3.12.*"
 readme = "README.md"
 license = "MIT"
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nonebot_plugin_aawarframe*"]
+
+[tool.setuptools.package-data]
+nonebot_plugin_aawarframe = ["assets/**/*"]
+
 
 [tool.pdm]
 distribution = false
 
 [tool.setuptools]
 packages = ["nonebot_plugin_aawarframe"]
-
-[tool.setuptools.package-data]
-nonebot_plugin_aawarframe = ["assets/**/*", "assets/*", "assets/**/*.*"]
