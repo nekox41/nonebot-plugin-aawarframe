@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-aawarframe"
-version = "0.2.5"
+version = "0.2.6"
 description = "aa 的 Warframe 助手"
 authors = [
     {name = "nekox41",email = "aameow@outlook.com"},
