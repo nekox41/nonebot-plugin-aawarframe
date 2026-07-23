@@ -20,6 +20,3 @@ nonebot_plugin_aawarframe = ["assets/**/*"]
 
 [tool.pdm]
 distribution = false
-
-[tool.setuptools]
-packages = ["nonebot_plugin_aawarframe"]
