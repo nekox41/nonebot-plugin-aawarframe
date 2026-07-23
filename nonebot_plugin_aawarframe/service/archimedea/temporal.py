@@ -23,6 +23,5 @@ async def gen_temporal_img() -> MessageSegment:
         return MessageSegment.text("未找到时光科研数据")
     data = transform_to_archimedea_data(target)
     html = render_archimedea_panel(data, str(_TEMPLATE_DIR / "archimedea.html"))
-    print(html)
     img_bytes = await html_to_pic(html)
     return MessageSegment.image(img_bytes)
