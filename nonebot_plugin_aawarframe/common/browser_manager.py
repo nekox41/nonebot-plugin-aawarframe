@@ -4,13 +4,13 @@
 # 2026年7月22日
 
 from typing import Optional
-
+from pathlib import Path
 from nonebot.log import logger
 from playwright.async_api import Browser, Page, Playwright, async_playwright
 
 _playwright: Optional[Playwright] = None
 _browser: Optional[Browser] = None
-
+TEMPLATES_DIR = Path(__file__).parent .parent / "assets" / "templates"
 
 async def _launch_browser() -> Browser:
     """启动无头 Chromium 浏览器实例"""
@@ -57,3 +57,8 @@ async def shutdown_browser():
         await _playwright.stop()
         _playwright = None
     logger.info("Playwright 浏览器已关闭")
+
+def read_template(name: str) -> str:
+    """根据文件名从 templates 下读取模板，返回字符串。"""
+    with open(TEMPLATES_DIR / f"{name}.html", "r", encoding="utf-8") as f:
+        return f.read()

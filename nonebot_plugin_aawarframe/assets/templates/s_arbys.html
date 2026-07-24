@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>即将到来的 S 级任务 · 樱花</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            background: linear-gradient(135deg, #fff0f5, #ffe4f0, #f8e1f0);
+            color: #5c2a3a;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 25%, rgba(255, 182, 193, 0.28) 0%, transparent 50%),
+                radial-gradient(circle at 75% 35%, rgba(255, 120, 160, 0.22) 0%, transparent 48%),
+                radial-gradient(circle at 40% 80%, rgba(255, 200, 220, 0.25) 0%, transparent 45%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            color: #e06a9a;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #c05a8a;
+            font-size: 1.15rem;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .task-item {
+            background: rgba(255, 245, 250, 0.96);
+            border: 3px solid #ff8fab;
+            border-radius: 22px;
+            padding: 22px 28px;
+            box-shadow: 0 18px 45px rgba(255, 105, 180, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-item::before {
+            content: "🌸";
+            position: absolute;
+            font-size: 48px;
+            opacity: 0.12;
+            top: 20px;
+            right: 28px;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .name {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #5c2a3a;
+            flex: 1;
+        }
+
+        .tier {
+            background: linear-gradient(90deg, #ffd1e6, #ff9eb5);
+            color: #d14a7e;
+            font-size: 1.45rem;
+            font-weight: 700;
+            padding: 6px 20px;
+            border-radius: 30px;
+            box-shadow: 0 0 12px rgba(255, 105, 180, 0.4);
+        }
+
+        .info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            font-size: 1.05rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .label {
+            color: #c05a8a;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .time {
+            font-size: 1.15rem;
+            color: #d14a7e;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✦ 即将到来的 S 级任务 ✦</h1>
+            <p>5个即将到来的 S 级仲裁</p>
+        </div>
+
+        <div class="task-list" id="task-list">
+            <!-- JS 动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        const data = {{DATA}};
+
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleString('zh-CN', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('task-list');
+            container.innerHTML = '';
+
+            data.forEach(task => {
+                const div = document.createElement('div');
+                div.className = 'task-item';
+                div.innerHTML = `
+                    <div class="task-header">
+                        <div class="name">${task.name}</div>
+                        <div class="tier">S</div>
+                    </div>
+                    <div class="info">
+                        <div class="info-item">
+                            <span class="label">星球</span>
+                            <span>${task.map}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">类型</span>
+                            <span>${task.type}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">派系</span>
+                            <span>${task.faction}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">开始时间</span>
+                            <span class="time">${formatDateTime(task.start)}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.onload = renderTasks;
+    </script>
+</body>
+</html>
