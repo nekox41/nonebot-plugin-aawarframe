@@ -31,7 +31,7 @@ async def _init_browser():
         logger.warning(f"Chromium 安装检查失败: {e}")
         return
     # 预启动浏览器，避免首次调用时的冷启动延迟
-    from .util.browser_manager import get_browser
+    from .common.browser_manager import get_browser
     await get_browser()
 
 

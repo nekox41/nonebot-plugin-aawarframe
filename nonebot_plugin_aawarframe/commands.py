@@ -1,8 +1,8 @@
 from nonebot import on_command
 from .service.archimedea.deep import gen_deep_img
 from .service.archimedea.temporal import gen_temporal_img
-from .service.cycle.eidolon import gen_eidolon_img
-
+from .service.earth import gen_eidolon_img
+from .service.arbys import gen_current_arbys_img
 # 夜灵平原
 cetus = on_command("夜灵平原")
 
@@ -23,3 +23,11 @@ deep = on_command("深层科研")
 @deep.handle()
 async def deep_handle():
     await deep.finish(await gen_deep_img())
+
+current_arbys = on_command("仲裁")
+@current_arbys.handle()
+async def current_arbys_handle():
+    await current_arbys.finish(await gen_current_arbys_img())
+
+today_arbys = on_command("今日仲裁")
+fast_arbys = on_command("高效仲裁")

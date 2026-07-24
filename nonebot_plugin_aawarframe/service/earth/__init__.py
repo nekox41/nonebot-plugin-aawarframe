@@ -8,8 +8,8 @@ from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import MessageSegment
 
-from ...util.browser_manager import html_to_pic
-from ...util.data_fetcher import fetch_world_state
+from ...common.browser_manager import html_to_pic
+from ...common.data_fetcher import fetch_world_state
 
 
 _CST = timezone(timedelta(hours=8))  # 中国标准时间 UTC+8

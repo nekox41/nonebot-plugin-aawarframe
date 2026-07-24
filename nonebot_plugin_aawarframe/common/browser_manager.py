@@ -40,6 +40,7 @@ async def html_to_pic(html: str) -> bytes:
     page: Page = await browser.new_page()
     try:
         await page.set_content(html, wait_until="networkidle")
+        await page.wait_for_timeout(3000)
         body = page.locator("body")
         return await body.screenshot(type="png")
     finally:
