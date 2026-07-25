@@ -9,7 +9,7 @@ from nonebot.adapters.onebot.v11 import MessageSegment
 
 from .data_processor import extract_conquests, render_archimedea_panel, transform_to_archimedea_data
 from ...common.browser_manager import html_to_pic
-from ...common.data_fetcher import fetch_world_state
+from ...common import fetch_world_state
 
 _TEMPLATE_DIR = Path(__file__).parent.parent.parent / "assets" / "templates"
 

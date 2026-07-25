@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>普通裂缝 · 樱花</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            width: 800px;
+            margin: 0 auto;
+            font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+            background: linear-gradient(135deg, #fff0f5, #ffe4f0, #f8e1f0);
+            color: #5c2a3a;
+            padding: 28px 0 32px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 25%, rgba(255, 182, 193, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 75% 35%, rgba(255, 120, 160, 0.2) 0%, transparent 48%),
+                radial-gradient(circle at 40% 80%, rgba(255, 200, 220, 0.22) 0%, transparent 45%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            width: 90%;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 26px;
+        }
+
+        .header h1 {
+            font-size: 2.3rem;
+            color: #e06a9a;
+            letter-spacing: 2px;
+        }
+
+        .group {
+            margin-bottom: 24px;
+        }
+
+        .group-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-left: 2px;
+        }
+
+        .group-title .modifier {
+            background: linear-gradient(90deg, #ffd1e6, #ff9eb5);
+            color: #d14a7e;
+            font-size: 1.15rem;
+            font-weight: 700;
+            padding: 5px 16px;
+            border-radius: 9999px;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+        }
+
+        .group-title .count {
+            font-size: 0.92rem;
+            color: #c05a8a;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .task-item {
+            background: rgba(255, 245, 250, 0.97);
+            border: 2px solid #ffb3c6;
+            border-radius: 15px;
+            padding: 12px 16px;
+            box-shadow: 0 5px 18px rgba(255, 140, 170, 0.14);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-item::before {
+            content: "🌸";
+            position: absolute;
+            font-size: 32px;
+            opacity: 0.07;
+            top: 6px;
+            right: 12px;
+        }
+
+        .left {
+            width: 145px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .region {
+            font-size: 1.18rem;
+            font-weight: 600;
+            color: #5c2a3a;
+            line-height: 1.2;
+        }
+
+        .name {
+            font-size: 0.95rem;
+            color: #c05a8a;
+            margin-top: 2px;
+        }
+
+        .faction {
+            position: absolute;
+            top: -3px;
+            right: 0;
+            background: #ffe4f0;
+            color: #d14a7e;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            border: 1px solid #ffb3c6;
+        }
+
+        .type {
+            flex: 1;
+            font-size: 1.28rem;
+            font-weight: 700;
+            color: #e06a9a;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .right {
+            width: 125px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .remain {
+            font-size: 0.92rem;
+            color: #b36a7f;
+            font-weight: 500;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✦ {{TITLE}} ✦</h1>
+        </div>
+
+        <div id="groups">
+            <!-- JS 动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        const data = {{DATA}};
+
+        const order = ["古纪", "前纪", "中纪", "后纪", "安魂", "全能"];
+
+        function getRemaining(endMs) {
+            const diff = Number(endMs) - Date.now();
+            if (diff <= 0) return "已结束";
+
+            const totalSeconds = Math.floor(diff / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            if (hours > 0) {
+                return `${hours}小时${minutes}分${seconds.toString().padStart(2, '0')}秒`;
+            } else {
+                return `${minutes}分${seconds.toString().padStart(2, '0')}秒`;
+            }
+        }
+
+        function render() {
+            const groups = {};
+            data.forEach(task => {
+                if (!groups[task.modifier]) groups[task.modifier] = [];
+                groups[task.modifier].push(task);
+            });
+
+            const sortedKeys = Object.keys(groups).sort((a, b) => {
+                return (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) -
+                       (order.indexOf(b) === -1 ? 99 : order.indexOf(b));
+            });
+
+            const container = document.getElementById('groups');
+            container.innerHTML = '';
+
+            sortedKeys.forEach(mod => {
+                const tasks = groups[mod];
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'group';
+
+                groupDiv.innerHTML = `
+                    <div class="group-title">
+                        <div class="modifier">${mod}</div>
+                        <div class="count">${tasks.length} 个任务</div>
+                    </div>
+                    <div class="task-list">
+                        ${tasks.map(task => `
+                            <div class="task-item">
+                                <div class="left">
+                                    <div class="faction">${task.faction}</div>
+                                    <div class="region">${task.region}</div>
+                                    <div class="name">${task.name}</div>
+                                </div>
+                                <div class="type">${task.type}</div>
+                                <div class="right">
+                                    <div class="remain">${getRemaining(task.end)}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(groupDiv);
+            });
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>
