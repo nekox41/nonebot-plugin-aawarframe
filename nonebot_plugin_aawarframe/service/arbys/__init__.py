@@ -13,7 +13,7 @@ def read_final_arbys() -> dict:
         f.close()
     return final_arbys
 
-async def gen_current_arbys_img() -> Message:
+async def gen_current_arbys_img() -> MessageSegment:
     # 读取 final_arbys
     final_arbys = read_final_arbys()
 
@@ -34,9 +34,9 @@ async def gen_current_arbys_img() -> Message:
 
     html = template.replace("{{DATA}}", data_json)
     img = await html_to_pic(html)
-    return Message(MessageSegment.image(img))
+    return MessageSegment.image(img)
 
-async def gen_today_arbys_img() -> Message:
+async def gen_today_arbys_img() -> MessageSegment:
     """
     仲裁任务固定每小时一个，获取今天 00:00:00 时的时间戳为第一个，此后每 3600 秒一个，一直到 23:00:00
     :return:
@@ -58,9 +58,9 @@ async def gen_today_arbys_img() -> Message:
     data_json = json.dumps(today_list, ensure_ascii=False, indent=4)
     template = read_template("today_arbys")
     img = await html_to_pic(template.replace("{{DATA}}", data_json))
-    return Message(MessageSegment.image(img))
+    return MessageSegment.image(img)
 
-async def gen_s_arbys_img() -> Message:
+async def gen_s_arbys_img() -> MessageSegment:
     """
     筛选出 5 个即将到来的 S 级仲裁。
     :return:
@@ -83,4 +83,4 @@ async def gen_s_arbys_img() -> Message:
     template = read_template("s_arbys")
     data_json = json.dumps(s_list, ensure_ascii=False, indent=4)
     img = await html_to_pic(template.replace("{{DATA}}", data_json))
-    return Message(MessageSegment.image(img))
+    return MessageSegment.image(img)
