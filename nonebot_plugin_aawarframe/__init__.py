@@ -1,6 +1,5 @@
 from nonebot import require
 require("nonebot_plugin_htmlrender")
-
 from nonebot.plugin import PluginMetadata
 from . import commands
 

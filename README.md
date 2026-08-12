@@ -21,7 +21,7 @@ _✨ Aa 的 Warframe 助手，用于查询游戏状态。 ✨_
 
 </div>
 
-## 📖 介绍
+## 介绍
 
 这是一个用于游戏 Warframe 的插件，提供游戏内的信息查询功能。
 
@@ -36,7 +36,7 @@ _✨ Aa 的 Warframe 助手，用于查询游戏状态。 ✨_
   - [x] 未来 5 个 S 级仲裁时间
 - [ ] Warframe Market 商品信息查询
 
-## 💿 安装
+## 安装
 
 <details open>
 <summary>使用 nb-cli 安装</summary>
@@ -77,7 +77,25 @@ _✨ Aa 的 Warframe 助手，用于查询游戏状态。 ✨_
 
 </details>
 
-## 🎉 使用
+
+## 配置
+### nonebot-plugin-htmlrender
+
+> [!IMPORTANT]
+> 
+> 项目的图片渲染依赖 `nonebot-plugin-htmlrender >= 0.8`
+> 
+> 此版本的`htmlrender`需要配置渲染图片所使用的后端，项目依赖`playwright`后端。`htmlrender`会在启动时自动检测并安装`playwright`，但探测路径与默认安装路径不一致，若不手动配置会出现错误。
+> 
+> 下面是使用本地浏览器的配置说明，如果你希望使用`htmlrender`推荐的`Docker`部署，请查看：[远程 Playwright 部署¶
+](https://kexue-z.github.io/nonebot-plugin-htmlrender/0.8.1/configuration/remote-playwright/)
+
+|配置项| 值           | 是否必须 |说明|
+|---|-------------|-----|---|
+|RENDER__PROVIDER| playwright  |是|指定`playwright`后端|
+|RENDER__PROVIDER_CONFIG__STORAGE_PATH| `your/path` |是|指定浏览器安装与探测路径|
+
+## 使用
 ### 指令表
 |  指令  | 权限  | 需要@ | 范围 |        说明        |
 |:----:|:---:|:---:|:--:|:----------------:|
