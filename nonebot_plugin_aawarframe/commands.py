@@ -1,4 +1,5 @@
 from nonebot import on_command
+from nonebot.params import CommandArg
 from .service.archimedea.deep import gen_deep_img
 from .service.archimedea.temporal import gen_temporal_img
 from .service.earth import gen_eidolon_img

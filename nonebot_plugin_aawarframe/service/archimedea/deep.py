@@ -8,7 +8,7 @@ from pathlib import Path
 from nonebot.adapters.onebot.v11 import MessageSegment
 
 from .data_processor import extract_conquests, render_archimedea_panel, transform_to_archimedea_data
-from ...common.browser_manager import html_to_pic
+from nonebot_plugin_htmlrender import render_html
 from ...common import fetch_world_state
 
 _TEMPLATE_DIR = Path(__file__).parent.parent.parent / "assets" / "templates"
@@ -23,5 +23,5 @@ async def gen_deep_img() -> MessageSegment:
         return MessageSegment.text("未找到深层科研数据")
     data = transform_to_archimedea_data(target)
     html = render_archimedea_panel(data, str(_TEMPLATE_DIR / "archimedea.html"))
-    img_bytes = await html_to_pic(html)
-    return MessageSegment.image(img_bytes)
+    img = await render_html(html)
+    return MessageSegment.image(bytes(img))

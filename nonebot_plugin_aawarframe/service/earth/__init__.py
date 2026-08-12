@@ -8,8 +8,8 @@ from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import MessageSegment
 
-from ...common.browser_manager import html_to_pic
-from ...common import fetch_world_state
+from nonebot_plugin_htmlrender import render_html
+from ...common import fetch_world_state, read_template
 
 
 _CST = timezone(timedelta(hours=8))  # 中国标准时间 UTC+8
@@ -91,10 +91,6 @@ async def extract_data() -> dict[str, object]:
 
     return result
 
-
-_TEMPLATE_DIR = Path(__file__).parent.parent.parent / "assets" / "templates"
-
-
 async def gen_eidolon_img() -> MessageSegment:
     """生成夜灵平原时钟图片"""
     data = await extract_data()
@@ -106,16 +102,13 @@ async def gen_eidolon_img() -> MessageSegment:
     )
 
     # 读取模板文件
-    template_path = _TEMPLATE_DIR /  "eidolon_clock.html"
-    with open(template_path, "r", encoding="utf-8") as f:
-        template = f.read()
-
+    template = await read_template("eidolon_clock.html")
     # 填充模板占位符
     html = template.replace("{{CURRENT_STATE}}", data["Current"])
     html = html.replace("{{REMAINING_TIME}}", data["ToEnd"])
     html = html.replace("{{NIGHT_TIMES_ROWS}}", night_rows)
 
     # 生成图片（CSS 已内联，无需 base_url）
-    img_bytes = await html_to_pic(html)
+    img = await render_html(html)
 
-    return MessageSegment.image(img_bytes)
+    return MessageSegment.image(bytes(img))

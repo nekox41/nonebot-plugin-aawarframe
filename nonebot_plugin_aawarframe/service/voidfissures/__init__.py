@@ -1,8 +1,8 @@
 import json
 from typing import List
 
-from ...common import fetch_world_state
-from ...common.browser_manager import html_to_pic, read_template
+from ...common import fetch_world_state, read_template
+from nonebot_plugin_htmlrender import render_html
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from pathlib import Path
 
@@ -61,11 +61,12 @@ async def gen_void_fissures_img(is_hard: bool) -> MessageSegment:
             "modifier": void_level_map(void_fissure.get("Modifier", "null")),
         })
 
-    template = read_template("void_fissures")
+    template = await read_template("void_fissures.html")
     if is_hard:
         title = "虚空裂缝（钢铁）"
     else:
         title = "虚空裂缝（普通）"
     template = template.replace("{{TITLE}}", title)
     template =template.replace("{{DATA}}", json.dumps(vf_data, ensure_ascii=False, indent=4))
-    return MessageSegment.image(await html_to_pic(template))
+    img = await render_html(template)
+    return MessageSegment.image(bytes(img))

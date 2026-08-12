@@ -1,9 +1,11 @@
 import json
 from pathlib import Path
 import time
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
-from ...common.browser_manager import html_to_pic, read_template
+from nonebot.adapters.onebot.v11 import MessageSegment
+from ...common import read_template
+from nonebot_plugin_htmlrender import render_html
 from datetime import datetime
+
 
 asset = Path(__file__).parent.parent.parent / "assets"
 
@@ -30,11 +32,11 @@ async def gen_current_arbys_img() -> MessageSegment:
 
     data_json = json.dumps({"current": current_arby, "next": next_arby}, ensure_ascii=False, indent=4)
 
-    template = read_template("current_arbys")
+    template = await read_template("current_arbys.html")
 
     html = template.replace("{{DATA}}", data_json)
-    img = await html_to_pic(html)
-    return MessageSegment.image(img)
+    img = await render_html(html)
+    return MessageSegment.image(bytes(img))
 
 async def gen_today_arbys_img() -> MessageSegment:
     """
@@ -56,9 +58,9 @@ async def gen_today_arbys_img() -> MessageSegment:
             today_list.append(arby)
 
     data_json = json.dumps(today_list, ensure_ascii=False, indent=4)
-    template = read_template("today_arbys")
-    img = await html_to_pic(template.replace("{{DATA}}", data_json))
-    return MessageSegment.image(img)
+    template = await read_template("today_arbys.html")
+    img = await render_html(template.replace("{{DATA}}", data_json))
+    return MessageSegment.image(bytes(img))
 
 async def gen_s_arbys_img() -> MessageSegment:
     """
@@ -80,7 +82,7 @@ async def gen_s_arbys_img() -> MessageSegment:
                 s_list.append(arby)
                 if len(s_list) == 5:
                     break
-    template = read_template("s_arbys")
+    template = await read_template("s_arbys.html")
     data_json = json.dumps(s_list, ensure_ascii=False, indent=4)
-    img = await html_to_pic(template.replace("{{DATA}}", data_json))
-    return MessageSegment.image(img)
+    img = await render_html(template.replace("{{DATA}}", data_json))
+    return MessageSegment.image(bytes(img))
