@@ -37,7 +37,7 @@ _✨ Aa 的 Warframe 助手，用于查询游戏状态。 ✨_
 - [ ] Warframe Market 商品信息查询
 
 ## 安装
-
+### 安装插件
 <details open>
 <summary>使用 nb-cli 安装</summary>
 在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
@@ -77,7 +77,19 @@ _✨ Aa 的 Warframe 助手，用于查询游戏状态。 ✨_
 
 </details>
 
+### 安装 Playwright
+建议手动安装`Playwright`，并指定目录，随后在下面的配置中指定相同的目录，避免`nonebot-plugin-htmlrender`插件报错。  
 
+Linux：
+```bash
+PLAYWRIGHT_BROWSERS_PATH=YOUR/PATH python -m playwright install --with-deps chromium
+```
+
+Windows：
+```Powershell
+$Env:PLAYWRIGHT_BROWSERS_PATH="YOUR/PATH"
+playwright install --with-deps chromium
+```
 ## 配置
 ### nonebot-plugin-htmlrender
 
@@ -90,10 +102,10 @@ _✨ Aa 的 Warframe 助手，用于查询游戏状态。 ✨_
 > 下面是使用本地浏览器的配置说明，如果你希望使用`htmlrender`推荐的`Docker`部署，请查看：[远程 Playwright 部署¶
 ](https://kexue-z.github.io/nonebot-plugin-htmlrender/0.8.1/configuration/remote-playwright/)
 
-|配置项| 值           | 是否必须 |说明|
-|---|-------------|-----|---|
-|RENDER__PROVIDER| playwright  |是|指定`playwright`后端|
-|RENDER__PROVIDER_CONFIG__STORAGE_PATH| `your/path` |是|指定浏览器安装与探测路径|
+|配置项| 值        | 是否必须 |说明|
+|---|----------|-----|---|
+|RENDER__PROVIDER| playwright |是|指定`playwright`后端|
+|RENDER__PROVIDER_CONFIG__STORAGE_PATH|先前的安装目录|是|指定浏览器安装与探测路径|
 
 ## 使用
 ### 指令表
