@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+        {{ base_css | safe }}
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: #fff7fa;
+        }
+
+        body {
+            min-width: 0;
+            overflow-x: visible;
+        }
+
+        /*
+         * 允许截图画布根据长用户名自然变宽。
+         */
+        .orders-page.sakura-page {
+            width: max-content;
+            min-width: 100%;
+            min-height: 100vh;
+            box-sizing: border-box;
+            padding: 24px;
+        }
+
+        .orders-container {
+            width: max-content;
+            min-width: 680px;
+            max-width: none;
+            margin: 0 auto;
+        }
+
+        .orders-stack {
+            width: max-content;
+            min-width: 100%;
+            gap: 14px;
+        }
+
+        /* =========================
+           商品头部
+           ========================= */
+
+        .orders-header {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+            padding: 18px;
+        }
+
+        .orders-header::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(
+                    circle at 12% 0%,
+                    rgba(255, 255, 255, 0.92),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 92% 18%,
+                    rgba(255, 143, 180, 0.18),
+                    transparent 30%
+                );
+        }
+
+        .orders-header > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .orders-item-info {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-areas:
+                "kicker meta"
+                "title meta"
+                "slug meta";
+            column-gap: 18px;
+            row-gap: 4px;
+            align-items: center;
+            min-width: 0;
+            padding: 16px 18px;
+            border: 1px solid rgba(255, 143, 180, 0.22);
+            border-radius: 18px;
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(255, 255, 255, 0.74),
+                    rgba(255, 244, 248, 0.72)
+                );
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        }
+
+        .orders-item-info .sakura-kicker {
+            grid-area: kicker;
+            display: inline-flex;
+            width: fit-content;
+            align-items: center;
+            gap: 6px;
+            margin: 0;
+            padding: 4px 9px;
+            color: var(--sk-primary-deep);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            border: 1px solid rgba(255, 143, 180, 0.26);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.68);
+        }
+
+        .orders-item-info .sakura-kicker::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            flex: 0 0 auto;
+            border-radius: 999px;
+            background: var(--sk-primary-deep);
+            box-shadow: 0 0 0 4px rgba(255, 143, 180, 0.16);
+        }
+
+        .orders-item-title {
+            grid-area: title;
+            min-width: 0;
+            margin: 2px 0 0;
+            color: var(--sk-text);
+            font-size: 27px;
+            line-height: 1.12;
+            font-weight: 950;
+            letter-spacing: -0.045em;
+            overflow-wrap: anywhere;
+        }
+
+        .orders-item-slug {
+            grid-area: slug;
+            width: fit-content;
+            max-width: 100%;
+            margin: 2px 0 0;
+            padding: 4px 8px;
+            color: #8f5368;
+            font-size: 11px;
+            line-height: 1.35;
+            font-family:
+                ui-monospace,
+                SFMono-Regular,
+                Menlo,
+                Consolas,
+                monospace;
+            overflow-wrap: anywhere;
+            border-radius: 8px;
+            background: rgba(255, 244, 248, 0.8);
+        }
+
+        .orders-item-meta {
+            grid-area: meta;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 7px;
+            min-width: max-content;
+            margin: 0;
+        }
+
+        .orders-item-meta .sakura-tag {
+            justify-content: center;
+            min-width: 58px;
+            padding-inline: 9px;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(255, 111, 159, 0.1);
+        }
+
+        /* =========================
+           商品摘要
+           ========================= */
+
+        .orders-summary-grid {
+            display: grid;
+            grid-column: 1 / -1;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 0;
+        }
+
+        .orders-summary-cell {
+            min-width: 0;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 143, 180, 0.22);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.64);
+        }
+
+        .orders-summary-label {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--sk-muted);
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .orders-summary-value {
+            color: var(--sk-text);
+            font-size: 16px;
+            font-weight: 950;
+            white-space: nowrap;
+        }
+
+        /* =========================
+           买卖订单区域
+           ========================= */
+
+        /*
+         * 使用 max-content，让表格按照最长用户名决定宽度。
+         */
+        .orders-market-grid {
+            display: grid;
+            grid-template-columns: max-content max-content;
+            gap: 14px;
+            width: max-content;
+            align-items: start;
+        }
+
+        .orders-section {
+            width: max-content;
+            min-width: 0;
+            padding: 16px;
+        }
+
+        .orders-section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 11px;
+        }
+
+        .orders-section-title {
+            margin: 0;
+            color: var(--sk-text);
+            font-size: 17px;
+            line-height: 1.3;
+            font-weight: 850;
+        }
+
+        .orders-section-desc {
+            margin: 3px 0 0;
+            color: var(--sk-muted);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .orders-side-badge {
+            flex: 0 0 auto;
+            padding: 5px 8px;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        /* =========================
+           订单表格
+           ========================= */
+
+        .orders-table-wrap {
+            width: max-content;
+            min-width: 100%;
+            overflow: visible;
+            border-radius: 13px;
+            box-shadow: none;
+        }
+
+        /*
+         * 不能使用 table-layout: fixed，
+         * 否则长用户名会被列宽限制。
+         */
+        .orders-table {
+            width: max-content;
+            min-width: 100%;
+            table-layout: auto;
+            font-size: 12px;
+            border-collapse: collapse;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 9px 8px;
+            white-space: nowrap;
+        }
+
+        .orders-table th {
+            font-size: 10px;
+            letter-spacing: 0.02em;
+        }
+
+        /*
+         * 清除原有百分比列宽限制。
+         */
+        .orders-table th:nth-child(1),
+        .orders-table th:nth-child(2),
+        .orders-table th:nth-child(3),
+        .orders-table th:nth-child(4) {
+            width: auto;
+        }
+
+        /*
+         * 第一列根据用户名实际长度撑开。
+         */
+        .orders-table th:first-child,
+        .orders-table td:first-child {
+            min-width: max-content;
+            white-space: nowrap;
+        }
+
+        .orders-table th:not(:first-child),
+        .orders-table td:not(:first-child) {
+            white-space: nowrap;
+        }
+
+        .orders-user {
+            width: max-content;
+            min-width: max-content;
+        }
+
+        .orders-user-info {
+            width: max-content;
+            min-width: max-content;
+        }
+
+        /*
+         * 完整显示用户名：
+         * 不截断、不隐藏、不显示省略号、不换行。
+         */
+        .orders-username {
+            width: max-content;
+            min-width: max-content;
+            max-width: none;
+            overflow: visible;
+            color: var(--sk-text);
+            font-size: 12px;
+            font-weight: 800;
+            text-overflow: clip;
+            white-space: nowrap;
+        }
+
+        .orders-user-meta {
+            width: max-content;
+            max-width: none;
+            margin-top: 1px;
+            color: var(--sk-muted);
+            font-size: 9px;
+            white-space: nowrap;
+        }
+
+        .orders-price,
+        .orders-total {
+            font-size: 13px;
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .orders-unit {
+            color: var(--sk-muted);
+            font-size: 9px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* =========================
+           空状态
+           ========================= */
+
+        .orders-empty {
+            width: max-content;
+            min-width: 100%;
+            box-sizing: border-box;
+            padding: 22px;
+            color: var(--sk-muted);
+            font-size: 13px;
+            text-align: center;
+            border: 1px dashed var(--sk-border);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        /* =========================
+           游戏指令
+           ========================= */
+
+        .orders-command-card {
+            padding: 18px 20px;
+        }
+
+        .orders-command-label {
+            margin: 0 0 9px;
+            color: var(--sk-text);
+            font-size: 14px;
+            font-weight: 850;
+        }
+
+        .orders-command-help {
+            margin: 0 0 10px;
+            color: var(--sk-muted);
+            font-size: 12px;
+        }
+
+        .orders-command {
+            display: block;
+            overflow-wrap: anywhere;
+            padding: 13px 14px;
+            color: #703147;
+            font-size: 12px;
+            line-height: 1.65;
+            font-family:
+                ui-monospace,
+                SFMono-Regular,
+                Menlo,
+                Consolas,
+                monospace;
+            border: 1px solid rgba(255, 143, 180, 0.28);
+            border-radius: 13px;
+            background: #fff4f8;
+        }
+
+        /* =========================
+           统计数据
+           ========================= */
+
+        .orders-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .orders-stat {
+            min-width: 0;
+            padding: 15px;
+        }
+
+        .orders-stat .sakura-stat-label {
+            font-size: 11px;
+        }
+
+        .orders-stat .sakura-stat-value {
+            font-size: 25px;
+        }
+
+        .orders-stat .sakura-stat-note {
+            margin-top: 5px;
+            font-size: 10px;
+        }
+
+        /* =========================
+           页脚
+           ========================= */
+
+        .orders-footer {
+            margin: 0;
+            color: var(--sk-muted);
+            font-size: 11px;
+            text-align: center;
+            white-space: nowrap;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="sakura-page orders-page">
+        <main class="sakura-container orders-container">
+            <div class="sakura-stack orders-stack">
+
+                <section class="sakura-card sakura-card-glow orders-header">
+
+                <div class="orders-item-info">
+                    <div class="sakura-kicker">Warframe Market</div>
+
+                    <h1 class="orders-item-title">
+                        {{ item_name }}
+                    </h1>
+
+                    <p class="orders-item-slug">
+                        {{ item_slug }}
+                    </p>
+
+                    <div class="orders-item-meta">
+                        {% if item_tradable %}
+                        <span class="sakura-tag sakura-tag-success">可交易</span>
+                        {% else %}
+                        <span class="sakura-tag sakura-tag-danger">不可交易</span>
+                        {% endif %}
+
+                        {% if item_vaulted %}
+                        <span class="sakura-tag sakura-tag-accent">已绝版</span>
+                        {% endif %}
+
+                        {% if item_rarity %}
+                        <span class="sakura-tag">{{ item_rarity }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                    <div class="orders-summary-grid">
+                        <div class="orders-summary-cell">
+                            <span class="orders-summary-label">交易税</span>
+                            <span class="orders-summary-value">
+                                {{ trading_tax }} <span class="orders-unit">Credits</span>
+                            </span>
+                        </div>
+
+                        <div class="orders-summary-cell">
+                            <span class="orders-summary-label">最低卖价</span>
+                            <span class="orders-summary-value">
+                                {{ lowest_sell_price }} <span class="orders-unit">Platinum</span>
+                            </span>
+                        </div>
+
+                        <div class="orders-summary-cell">
+                            <span class="orders-summary-label">最高买价</span>
+                            <span class="orders-summary-value">
+                                {{ highest_buy_price }} <span class="orders-unit">Platinum</span>
+                            </span>
+                        </div>
+                    </div>
+                </section>
+                <div class="orders-market-grid">
+                    <section class="sakura-card sakura-card-soft orders-section">
+                        <div class="orders-section-head">
+                            <div>
+                                <h2 class="orders-section-title">卖家报价</h2>
+                                <p class="orders-section-desc">当前最低价的前 5 条卖单</p>
+                            </div>
+                            <span class="sakura-badge orders-side-badge">SELL · {{ sell_orders | length }}</span>
+                        </div>
+
+                        {% if sell_orders %}
+                        <div class="sakura-table-wrap orders-table-wrap">
+                            <table class="sakura-table orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>用户</th>
+                                        <th class="is-num">单价</th>
+                                        <th class="is-num">每笔数量</th>
+                                        <th class="is-num">总价</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in sell_orders %}
+                                    <tr>
+                                        <td>
+                                            <div class="orders-user">
+                                                <div class="orders-user-info">
+                                                    <div class="orders-username">
+                                                        {{ order.username }}
+                                                    </div>
+                                                    <div class="orders-user-meta">
+                                                        {{ order.status_label }} · {{ order.platform }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="is-num">
+                                            <span class="orders-price">{{ order.platinum }}</span>
+                                        </td>
+                                        <td class="is-num">
+                                            {{ order.trade_quantity }}
+                                        </td>
+                                        <td class="is-num">
+                                            <span class="orders-total">{{ order.total_price }}</span>
+                                            <span class="orders-unit">P</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="orders-empty">暂无符合条件的卖单。</div>
+                        {% endif %}
+                    </section>
+
+                    <section class="sakura-card sakura-card-soft orders-section">
+                        <div class="orders-section-head">
+                            <div>
+                                <h2 class="orders-section-title">买家报价</h2>
+                                <p class="orders-section-desc">当前最高价的前 3 条买单</p>
+                            </div>
+                            <span class="sakura-badge orders-side-badge">BUY · {{ buy_orders | length }}</span>
+                        </div>
+
+                        {% if buy_orders %}
+                        <div class="sakura-table-wrap orders-table-wrap">
+                            <table class="sakura-table orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>用户</th>
+                                        <th class="is-num">单价</th>
+                                        <th class="is-num">每笔数量</th>
+                                        <th class="is-num">总价</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in buy_orders %}
+                                    <tr>
+                                        <td>
+                                            <div class="orders-user">
+                                                <div class="orders-user-info">
+                                                    <div class="orders-username">
+                                                        {{ order.username }}
+                                                    </div>
+                                                    <div class="orders-user-meta">
+                                                        {{ order.status_label }} · {{ order.platform }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="is-num">
+                                            <span class="orders-price">{{ order.platinum }}</span>
+                                        </td>
+                                        <td class="is-num">
+                                            {{ order.trade_quantity }}
+                                        </td>
+                                        <td class="is-num">
+                                            <span class="orders-total">{{ order.total_price }}</span>
+                                            <span class="orders-unit">P</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="orders-empty">暂无符合条件的买单。</div>
+                        {% endif %}
+                    </section>
+                </div>
+                {% if command %}
+                <section class="sakura-card orders-command-card">
+                    <p class="orders-command-label">游戏私聊指令</p>
+                    <p class="orders-command-help">
+                        提取图片文字，复制下面的内容，粘贴到游戏聊天窗口中。
+                    </p>
+                    <code class="orders-command">{{ command }}</code>
+                </section>
+                {% endif %}
+
+                <section class="orders-stat-grid">
+                    <div class="sakura-stat orders-stat">
+                        <p class="sakura-stat-label">48 小时成交量</p>
+                        <p class="sakura-stat-value">
+                            {{ statistics["48hours"]["volume"] }}
+                        </p>
+                        <p class="sakura-stat-note">近 48 小时累计成交</p>
+                    </div>
+
+                    <div class="sakura-stat orders-stat">
+                        <p class="sakura-stat-label">48 小时成交均价</p>
+                        <p class="sakura-stat-value">
+                            {{ statistics["48hours"]["avg_price"] }}
+                        </p>
+                        <p class="sakura-stat-note">按成交量加权</p>
+                    </div>
+
+                    <div class="sakura-stat orders-stat">
+                        <p class="sakura-stat-label">90 天成交量</p>
+                        <p class="sakura-stat-value">
+                            {{ statistics["90days"]["volume"] }}
+                        </p>
+                        <p class="sakura-stat-note">近 90 天累计成交</p>
+                    </div>
+
+                    <div class="sakura-stat orders-stat">
+                        <p class="sakura-stat-label">90 天成交均价</p>
+                        <p class="sakura-stat-value">
+                            {{ statistics["90days"]["avg_price"] }}
+                        </p>
+                        <p class="sakura-stat-note">按成交量加权</p>
+                    </div>
+                </section>
+
+
+                <p class="orders-footer">
+                    数据来源：Warframe Market · 统计时间：{{ updated_at }}
+                </p>
+
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,903 @@
+/* ================================
+   Sakura Pink UI Theme
+   樱粉色现代展示模板 CSS
+   ================================ */
+
+:root,
+.sakura-theme {
+  --sk-bg: #fff7fa;
+  --sk-bg-2: #ffeef5;
+  --sk-surface: rgba(255, 255, 255, 0.78);
+  --sk-surface-solid: #ffffff;
+  --sk-surface-soft: #fff4f8;
+
+  --sk-primary: #ff6f9f;
+  --sk-primary-2: #ff8fb4;
+  --sk-primary-3: #ffc2d6;
+  --sk-primary-deep: #d94675;
+
+  --sk-accent: #b76ef5;
+  --sk-accent-soft: #f3e4ff;
+
+  --sk-text: #382832;
+  --sk-text-soft: #755765;
+  --sk-muted: #a88294;
+
+  --sk-border: rgba(255, 143, 180, 0.32);
+  --sk-border-strong: rgba(255, 111, 159, 0.5);
+
+  --sk-success: #42b883;
+  --sk-warning: #ffb020;
+  --sk-danger: #ef476f;
+  --sk-info: #5aa9ff;
+
+  --sk-radius-xs: 8px;
+  --sk-radius-sm: 12px;
+  --sk-radius-md: 18px;
+  --sk-radius-lg: 26px;
+  --sk-radius-xl: 34px;
+
+  --sk-shadow-sm: 0 6px 18px rgba(255, 111, 159, 0.12);
+  --sk-shadow-md: 0 14px 38px rgba(255, 111, 159, 0.18);
+  --sk-shadow-lg: 0 24px 70px rgba(190, 80, 130, 0.22);
+
+  --sk-font:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC",
+    Arial, sans-serif;
+}
+
+/* ========== Base ========== */
+
+.sakura-page,
+.sakura-theme {
+  box-sizing: border-box;
+  min-height: 100vh;
+  margin: 0;
+  padding: 40px;
+  color: var(--sk-text);
+  font-family: var(--sk-font);
+  line-height: 1.65;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(255, 194, 214, 0.75) 0, transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(243, 228, 255, 0.95) 0, transparent 26%),
+    radial-gradient(circle at 70% 86%, rgba(255, 143, 180, 0.32) 0, transparent 30%),
+    linear-gradient(135deg, #fff9fb 0%, #ffeef5 48%, #fff7fb 100%);
+}
+
+.sakura-page *,
+.sakura-theme * {
+  box-sizing: border-box;
+}
+
+.sakura-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(255, 111, 159, 0.18) 1.2px, transparent 1.4px),
+    radial-gradient(circle, rgba(183, 110, 245, 0.12) 1px, transparent 1.2px);
+  background-size: 34px 34px, 52px 52px;
+  opacity: 0.6;
+}
+
+.sakura-page a,
+.sakura-theme a {
+  color: var(--sk-primary-deep);
+  text-decoration: none;
+}
+
+.sakura-page a:hover,
+.sakura-theme a:hover {
+  text-decoration: underline;
+}
+
+/* ========== Layout ========== */
+
+.sakura-container {
+  position: relative;
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.sakura-container-sm {
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+
+.sakura-container-lg {
+  width: min(1360px, 100%);
+  margin: 0 auto;
+}
+
+.sakura-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sakura-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sakura-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sakura-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.sakura-col-3 { grid-column: span 3; }
+.sakura-col-4 { grid-column: span 4; }
+.sakura-col-5 { grid-column: span 5; }
+.sakura-col-6 { grid-column: span 6; }
+.sakura-col-7 { grid-column: span 7; }
+.sakura-col-8 { grid-column: span 8; }
+.sakura-col-9 { grid-column: span 9; }
+.sakura-col-12 { grid-column: span 12; }
+
+/* ========== Hero / Header ========== */
+
+.sakura-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 44px;
+  border: 1px solid var(--sk-border);
+  border-radius: var(--sk-radius-xl);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 244, 248, 0.72)),
+    linear-gradient(135deg, rgba(255, 111, 159, 0.12), rgba(183, 110, 245, 0.08));
+  box-shadow: var(--sk-shadow-lg);
+}
+
+.sakura-hero::after {
+  content: "";
+  position: absolute;
+  right: -90px;
+  top: -90px;
+  width: 260px;
+  height: 260px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(255, 143, 180, 0.52), transparent 66%);
+}
+
+.sakura-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin-bottom: 12px;
+  padding: 6px 12px;
+  color: var(--sk-primary-deep);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--sk-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.sakura-kicker::before {
+  content: "✦";
+  color: var(--sk-primary);
+}
+
+.sakura-title {
+  margin: 0;
+  color: var(--sk-text);
+  font-size: clamp(32px, 5vw, 58px);
+  line-height: 1.08;
+  font-weight: 850;
+  letter-spacing: -0.045em;
+}
+
+.sakura-title-gradient {
+  background: linear-gradient(90deg, #d94675, #ff6f9f, #b76ef5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sakura-subtitle {
+  max-width: 760px;
+  margin: 14px 0 0;
+  color: var(--sk-text-soft);
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.sakura-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+/* ========== Sections ========== */
+
+.sakura-section {
+  margin-top: 28px;
+}
+
+.sakura-section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.sakura-section-title {
+  margin: 0;
+  color: var(--sk-text);
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.sakura-section-desc {
+  margin: 6px 0 0;
+  color: var(--sk-muted);
+  font-size: 14px;
+}
+
+/* ========== Cards ========== */
+
+.sakura-card {
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+  border: 1px solid var(--sk-border);
+  border-radius: var(--sk-radius-lg);
+  background: var(--sk-surface);
+  box-shadow: var(--sk-shadow-md);
+  backdrop-filter: blur(18px);
+}
+
+.sakura-card-solid {
+  background: var(--sk-surface-solid);
+}
+
+.sakura-card-soft {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 244, 248, 0.88));
+}
+
+.sakura-card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 111, 159, 0.38), rgba(183, 110, 245, 0.2));
+}
+
+.sakura-card-title {
+  margin: 0 0 8px;
+  color: var(--sk-text);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 800;
+}
+
+.sakura-card-desc {
+  margin: 0;
+  color: var(--sk-text-soft);
+  font-size: 14px;
+}
+
+.sakura-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 143, 180, 0.22);
+}
+
+/* ========== Buttons ========== */
+
+.sakura-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 18px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--sk-primary), var(--sk-primary-deep));
+  box-shadow: 0 10px 24px rgba(255, 111, 159, 0.34);
+  cursor: default;
+}
+
+.sakura-btn-secondary {
+  color: var(--sk-primary-deep);
+  border: 1px solid var(--sk-border-strong);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--sk-shadow-sm);
+}
+
+.sakura-btn-ghost {
+  color: var(--sk-text-soft);
+  border: 1px solid rgba(117, 87, 101, 0.14);
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ========== Badges / Tags ========== */
+
+.sakura-badge,
+.sakura-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 11px;
+  color: var(--sk-primary-deep);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.2;
+  white-space: nowrap;
+  border: 1px solid var(--sk-border);
+  border-radius: 999px;
+  background: rgba(255, 244, 248, 0.86);
+}
+
+.sakura-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 0 4px rgba(255, 111, 159, 0.12);
+}
+
+.sakura-tag-accent {
+  color: #8747c4;
+  border-color: rgba(183, 110, 245, 0.32);
+  background: var(--sk-accent-soft);
+}
+
+.sakura-tag-success {
+  color: #167754;
+  border-color: rgba(66, 184, 131, 0.28);
+  background: rgba(66, 184, 131, 0.1);
+}
+
+.sakura-tag-warning {
+  color: #9a6400;
+  border-color: rgba(255, 176, 32, 0.3);
+  background: rgba(255, 176, 32, 0.12);
+}
+
+.sakura-tag-danger {
+  color: #b92b51;
+  border-color: rgba(239, 71, 111, 0.28);
+  background: rgba(239, 71, 111, 0.1);
+}
+
+/* ========== Lists ========== */
+
+.sakura-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sakura-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 143, 180, 0.24);
+  border-radius: var(--sk-radius-md);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.sakura-list-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--sk-primary-2), var(--sk-primary-deep));
+  box-shadow: 0 8px 18px rgba(255, 111, 159, 0.26);
+}
+
+.sakura-list-content {
+  min-width: 0;
+}
+
+.sakura-list-title {
+  margin: 0;
+  color: var(--sk-text);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.sakura-list-desc {
+  margin: 3px 0 0;
+  color: var(--sk-text-soft);
+  font-size: 13px;
+}
+
+/* ========== Stats ========== */
+
+.sakura-stat {
+  padding: 22px;
+  border: 1px solid var(--sk-border);
+  border-radius: var(--sk-radius-lg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 244, 248, 0.7));
+  box-shadow: var(--sk-shadow-sm);
+}
+
+.sakura-stat-label {
+  margin: 0 0 8px;
+  color: var(--sk-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sakura-stat-value {
+  margin: 0;
+  color: var(--sk-text);
+  font-size: 34px;
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.sakura-stat-note {
+  margin: 8px 0 0;
+  color: var(--sk-primary-deep);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ========== Tables ========== */
+
+.sakura-table-wrap {
+  overflow: hidden;
+  border: 1px solid var(--sk-border);
+  border-radius: var(--sk-radius-lg);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: var(--sk-shadow-sm);
+}
+
+.sakura-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--sk-text);
+  font-size: 14px;
+}
+
+.sakura-table thead th {
+  padding: 14px 16px;
+  color: var(--sk-primary-deep);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-align: left;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #fff4f8, #ffeaf2);
+  border-bottom: 1px solid var(--sk-border);
+}
+
+.sakura-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 143, 180, 0.18);
+}
+
+.sakura-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.sakura-table tbody tr:nth-child(even) {
+  background: rgba(255, 244, 248, 0.46);
+}
+
+.sakura-table .is-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========== Timeline ========== */
+
+.sakura-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sakura-timeline::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(var(--sk-primary-3), rgba(255, 143, 180, 0));
+}
+
+.sakura-timeline-item {
+  position: relative;
+  padding-left: 44px;
+}
+
+.sakura-timeline-dot {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 22px;
+  height: 22px;
+  border: 5px solid #ffffff;
+  border-radius: 999px;
+  background: var(--sk-primary);
+  box-shadow: 0 0 0 1px var(--sk-border), 0 8px 18px rgba(255, 111, 159, 0.28);
+}
+
+.sakura-timeline-title {
+  margin: 0;
+  color: var(--sk-text);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.sakura-timeline-desc {
+  margin: 4px 0 0;
+  color: var(--sk-text-soft);
+  font-size: 13px;
+}
+
+/* ========== Quote / Callout / Alert ========== */
+
+.sakura-quote,
+.sakura-callout,
+.sakura-alert {
+  position: relative;
+  padding: 18px 20px;
+  border: 1px solid var(--sk-border);
+  border-radius: var(--sk-radius-lg);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--sk-shadow-sm);
+}
+
+.sakura-quote {
+  padding-left: 24px;
+  font-size: 18px;
+  font-weight: 650;
+  color: var(--sk-text);
+}
+
+.sakura-quote::before {
+  content: "“";
+  position: absolute;
+  right: 22px;
+  bottom: -18px;
+  color: rgba(255, 111, 159, 0.2);
+  font-size: 96px;
+  line-height: 1;
+  font-family: Georgia, serif;
+}
+
+.sakura-callout {
+  border-left: 5px solid var(--sk-primary);
+}
+
+.sakura-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sakura-alert-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: #ffffff;
+  border-radius: 12px;
+  background: var(--sk-primary);
+}
+
+.sakura-alert-title {
+  margin: 0;
+  font-weight: 850;
+}
+
+.sakura-alert-desc {
+  margin: 3px 0 0;
+  color: var(--sk-text-soft);
+  font-size: 13px;
+}
+
+/* ========== Progress ========== */
+
+.sakura-progress {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 194, 214, 0.38);
+}
+
+.sakura-progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--sk-primary), var(--sk-accent));
+  box-shadow: 0 0 18px rgba(255, 111, 159, 0.38);
+}
+
+.sakura-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sakura-meter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--sk-text-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ========== Avatar / Media ========== */
+
+.sakura-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  overflow: hidden;
+  color: #ffffff;
+  font-weight: 850;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--sk-primary), var(--sk-accent));
+  box-shadow: 0 10px 22px rgba(255, 111, 159, 0.28);
+}
+
+.sakura-avatar-sm {
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+}
+
+.sakura-avatar-lg {
+  width: 68px;
+  height: 68px;
+  font-size: 24px;
+}
+
+.sakura-media {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--sk-border);
+  border-radius: var(--sk-radius-lg);
+  background: #fff;
+  box-shadow: var(--sk-shadow-sm);
+}
+
+.sakura-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ========== Chips / Pills ========== */
+
+.sakura-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sakura-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 12px;
+  color: var(--sk-text-soft);
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 143, 180, 0.26);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.sakura-chip-active {
+  color: #ffffff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--sk-primary), var(--sk-primary-deep));
+}
+
+/* ========== Forms / Display Fields ========== */
+
+.sakura-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.sakura-label {
+  color: var(--sk-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sakura-input,
+.sakura-select,
+.sakura-textarea,
+.sakura-display-value {
+  width: 100%;
+  padding: 12px 14px;
+  color: var(--sk-text);
+  font: inherit;
+  border: 1px solid var(--sk-border);
+  border-radius: var(--sk-radius-sm);
+  background: rgba(255, 255, 255, 0.76);
+  outline: none;
+}
+
+.sakura-display-value {
+  font-weight: 750;
+}
+
+/* ========== Decorative ========== */
+
+.sakura-divider {
+  height: 1px;
+  margin: 22px 0;
+  border: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 111, 159, 0.45), transparent);
+}
+
+.sakura-ribbon {
+  position: absolute;
+  top: 18px;
+  right: -34px;
+  width: 132px;
+  padding: 6px 0;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 850;
+  text-align: center;
+  transform: rotate(35deg);
+  background: linear-gradient(135deg, var(--sk-primary), var(--sk-primary-deep));
+  box-shadow: 0 8px 18px rgba(255, 111, 159, 0.3);
+}
+
+.sakura-petal {
+  position: absolute;
+  width: 20px;
+  height: 14px;
+  border-radius: 90% 10% 90% 10%;
+  background: linear-gradient(135deg, #ffc2d6, #ff8fb4);
+  opacity: 0.72;
+  transform: rotate(-18deg);
+}
+
+.sakura-petal-1 { top: 22px; left: 28px; }
+.sakura-petal-2 { right: 42px; bottom: 32px; transform: rotate(24deg); opacity: 0.5; }
+.sakura-petal-3 { right: 120px; top: 72px; transform: rotate(-38deg); opacity: 0.42; }
+
+/* ========== Utility ========== */
+
+.sakura-mt-0 { margin-top: 0; }
+.sakura-mt-8 { margin-top: 8px; }
+.sakura-mt-12 { margin-top: 12px; }
+.sakura-mt-16 { margin-top: 16px; }
+.sakura-mt-24 { margin-top: 24px; }
+.sakura-mt-32 { margin-top: 32px; }
+
+.sakura-text-muted { color: var(--sk-muted); }
+.sakura-text-soft { color: var(--sk-text-soft); }
+.sakura-text-primary { color: var(--sk-primary-deep); }
+
+.sakura-center { text-align: center; }
+.sakura-right { text-align: right; }
+
+.sakura-bold { font-weight: 800; }
+.sakura-nowrap { white-space: nowrap; }
+
+.sakura-shadow-sm { box-shadow: var(--sk-shadow-sm); }
+.sakura-shadow-md { box-shadow: var(--sk-shadow-md); }
+.sakura-shadow-lg { box-shadow: var(--sk-shadow-lg); }
+
+/* ========== Screenshot Friendly Responsive ========== */
+
+@media (max-width: 900px) {
+  .sakura-page,
+  .sakura-theme {
+    padding: 24px;
+  }
+
+  .sakura-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .sakura-col-3,
+  .sakura-col-4,
+  .sakura-col-5,
+  .sakura-col-6,
+  .sakura-col-7,
+  .sakura-col-8,
+  .sakura-col-9 {
+    grid-column: span 6;
+  }
+
+  .sakura-hero {
+    padding: 30px;
+  }
+}
+
+@media (max-width: 560px) {
+  .sakura-page,
+  .sakura-theme {
+    padding: 16px;
+  }
+
+  .sakura-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sakura-col-3,
+  .sakura-col-4,
+  .sakura-col-5,
+  .sakura-col-6,
+  .sakura-col-7,
+  .sakura-col-8,
+  .sakura-col-9,
+  .sakura-col-12 {
+    grid-column: span 1;
+  }
+
+  .sakura-row,
+  .sakura-row-between,
+  .sakura-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sakura-card,
+  .sakura-hero {
+    border-radius: 22px;
+  }
+}
