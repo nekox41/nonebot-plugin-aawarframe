@@ -655,41 +655,88 @@
                     <code class="orders-command">{{ command }}</code>
                 </section>
                 {% endif %}
-
-                <section class="orders-stat-grid">
-                    <div class="sakura-stat orders-stat">
-                        <p class="sakura-stat-label">48 小时成交量</p>
-                        <p class="sakura-stat-value">
-                            {{ statistics["48hours"]["volume"] }}
-                        </p>
-                        <p class="sakura-stat-note">近 48 小时累计成交</p>
+                <section class="sakura-section">
+                    <div class="sakura-section-head">
+                    <div>
+                      <h2 class="sakura-section-title">0级统计数据</h2>
                     </div>
+                  </div>
+                    <section class="orders-stat-grid">
+                        <div class="sakura-stat orders-stat">
+                            <p class="sakura-stat-label">48 小时成交量</p>
+                            <p class="sakura-stat-value">
+                                {{ statistics["48hours"]["volume"] }}
+                            </p>
+                            <p class="sakura-stat-note">近 48 小时累计成交</p>
+                        </div>
 
-                    <div class="sakura-stat orders-stat">
-                        <p class="sakura-stat-label">48 小时成交均价</p>
-                        <p class="sakura-stat-value">
-                            {{ statistics["48hours"]["avg_price"] }}
-                        </p>
-                        <p class="sakura-stat-note">按成交量加权</p>
-                    </div>
+                        <div class="sakura-stat orders-stat">
+                            <p class="sakura-stat-label">48 小时成交均价</p>
+                            <p class="sakura-stat-value">
+                                {{ statistics["48hours"]["avg_price"] }}
+                            </p>
+                            <p class="sakura-stat-note">按成交量加权</p>
+                        </div>
 
-                    <div class="sakura-stat orders-stat">
-                        <p class="sakura-stat-label">90 天成交量</p>
-                        <p class="sakura-stat-value">
-                            {{ statistics["90days"]["volume"] }}
-                        </p>
-                        <p class="sakura-stat-note">近 90 天累计成交</p>
-                    </div>
+                        <div class="sakura-stat orders-stat">
+                            <p class="sakura-stat-label">90 天成交量</p>
+                            <p class="sakura-stat-value">
+                                {{ statistics["90days"]["volume"] }}
+                            </p>
+                            <p class="sakura-stat-note">近 90 天累计成交</p>
+                        </div>
 
-                    <div class="sakura-stat orders-stat">
-                        <p class="sakura-stat-label">90 天成交均价</p>
-                        <p class="sakura-stat-value">
-                            {{ statistics["90days"]["avg_price"] }}
-                        </p>
-                        <p class="sakura-stat-note">按成交量加权</p>
-                    </div>
+                        <div class="sakura-stat orders-stat">
+                            <p class="sakura-stat-label">90 天成交均价</p>
+                            <p class="sakura-stat-value">
+                                {{ statistics["90days"]["avg_price"] }}
+                            </p>
+                            <p class="sakura-stat-note">按成交量加权</p>
+                        </div>
+                    </section>
                 </section>
+                {% if max_statistics %}
+                <section class="sakura-section">
+                    <div class="sakura-section-head">
+                    <div>
+                      <h2 class="sakura-section-title">满级统计数据</h2>
+                    </div>
+                  </div>
+                    <section class="orders-stat-grid">
+                        <div class="sakura-stat orders-stat">
+                            <p class="sakura-stat-label">48 小时成交量</p>
+                            <p class="sakura-stat-value">
+                                {{ max_statistics["48hours"]["volume"] }}
+                            </p>
+                            <p class="sakura-stat-note">近 48 小时累计成交</p>
+                        </div>
 
+                        <div class="sakura-stat orders-stat">
+                            <p class="sakura-stat-label">48 小时成交均价</p>
+                            <p class="sakura-stat-value">
+                                {{ max_statistics["48hours"]["avg_price"] }}
+                            </p>
+                            <p class="sakura-stat-note">按成交量加权</p>
+                        </div>
+
+                        <div class="sakura-stat orders-stat">
+                            <p class="sakura-stat-label">90 天成交量</p>
+                            <p class="sakura-stat-value">
+                                {{ max_statistics["90days"]["volume"] }}
+                            </p>
+                            <p class="sakura-stat-note">近 90 天累计成交</p>
+                        </div>
+
+                        <div class="sakura-stat orders-stat">
+                            <p class="sakura-stat-label">90 天成交均价</p>
+                            <p class="sakura-stat-value">
+                                {{ max_statistics["90days"]["avg_price"] }}
+                            </p>
+                            <p class="sakura-stat-note">按成交量加权</p>
+                        </div>
+                    </section>
+                </section>
+                {% endif %}
 
                 <p class="orders-footer">
                     数据来源：Warframe Market · 统计时间：{{ updated_at }}

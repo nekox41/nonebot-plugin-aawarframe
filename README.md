@@ -107,6 +107,7 @@ playwright install --with-deps chromium
 |---|----------|-----|---|
 |RENDER__PROVIDER| playwright |是|指定`playwright`后端|
 |RENDER__PROVIDER_CONFIG__STORAGE_PATH|先前的安装目录|是|指定浏览器安装与探测路径|
+|RENDER__RESOURCES__LOCAL_ACCESS__ALLOWED_PATHS|`["path1", "path2"...]`|允许的资源目录，模板会自动下载到此路径内|
 
 ## 使用
 ### 指令表

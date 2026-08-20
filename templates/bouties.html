@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>赏金任务清单</title>
+<style>
+:root {
+  --sk-bg: #fff7fa;
+  --sk-surface: rgba(255, 255, 255, 0.82);
+  --sk-primary: #ff6f9f;
+  --sk-primary-deep: #d94675;
+  --sk-accent: #b76ef5;
+  --sk-text: #382832;
+  --sk-text-soft: #755765;
+  --sk-muted: #a88294;
+  --sk-border: rgba(255, 143, 180, 0.32);
+  --sk-radius-md: 18px;
+  --sk-shadow-sm: 0 6px 18px rgba(255, 111, 159, 0.12);
+  --sk-shadow-md: 0 14px 38px rgba(255, 111, 159, 0.18);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 32px;
+  color: var(--sk-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(255, 194, 214, 0.65) 0, transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(243, 228, 255, 0.85) 0, transparent 26%),
+    linear-gradient(135deg, #fff9fb 0%, #ffeef5 48%, #fff7fb 100%);
+}
+
+/* 容器改为双列网格，大幅降低图片高度 */
+.container {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* 任务卡片 */
+.card {
+  padding: 18px;
+  border: 1px solid var(--sk-border);
+  border-radius: var(--sk-radius-md);
+  background: var(--sk-surface);
+  box-shadow: var(--sk-shadow-md);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 如果任务只有一个，则占满整行 */
+.card:only-child {
+  grid-column: 1 / -1;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--sk-border);
+  padding-bottom: 10px;
+}
+
+.head-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--sk-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.desc {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--sk-text-soft);
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 限制描述最多两行 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.level-tag {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--sk-primary), var(--sk-primary-deep));
+  white-space: nowrap;
+}
+
+.stages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stage-group {
+  border: 1px solid rgba(255, 143, 180, 0.2);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 244, 248, 0.4);
+}
+
+.stage-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sk-accent);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-left: 3px solid var(--sk-accent);
+  padding-left: 6px;
+  line-height: 1;
+}
+
+/* 奖励物品同样采用双列网格，进一步压缩高度 */
+.rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.reward-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 143, 180, 0.15);
+}
+
+.reward-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.reward-name {
+  font-weight: 600;
+  color: var(--sk-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 65%;
+}
+
+.reward-count {
+  color: var(--sk-muted);
+  font-size: 11px;
+}
+
+.reward-prob {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.prob-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 194, 214, 0.4);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.prob-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sk-primary), var(--sk-accent));
+}
+
+.prob-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sk-text-soft);
+  min-width: 28px;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  {% for b in bounties %}
+  <div class="card">
+    <div class="card-head">
+      <div class="head-left">
+        <h2 class="title">{{ b.title }}</h2>
+        <p class="desc">{{ b.desc }}</p>
+      </div>
+      <span class="level-tag">Lv.{{ b.min_level }}-{{ b.max_level }}</span>
+    </div>
+
+    <div class="stages-container">
+      <!-- 使用 groupby 按 stage 字段对奖励物品进行分组 -->
+      {% for stage, rewards in b.rewards | groupby('stage') %}
+      <div class="stage-group">
+        <div class="stage-label">{{ stage }}</div>
+        <div class="rewards-grid">
+          {% for r in rewards %}
+          <div class="reward-item">
+            <div class="reward-info">
+              <span class="reward-name">{{ r.name }}</span>
+              <span class="reward-count">×{{ r.item_count }}</span>
+            </div>
+            <div class="reward-prob">
+              <div class="prob-bar">
+                <div class="prob-fill" style="width: {{ r.probability * 100 }}%;"></div>
+              </div>
+              <span class="prob-text">{{ '%.1f' | format(r.probability * 100) }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+</body>
+</html>
