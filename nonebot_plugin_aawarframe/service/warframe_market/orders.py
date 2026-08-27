@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 from typing import Any, Iterable, List, Dict, Optional
 
 from jinja2 import Environment, select_autoescape
-from nonebot.adapters.onebot.v11 import MessageSegment
 
 from nonebot_plugin_htmlrender import render_html, RenderedImage
 from ...integrations.warframe_market.client import fetch_orders, fetch_item, fetch_item_statistic
@@ -73,7 +72,7 @@ def _build_order_data(order: Any, item_name: str) -> Dict[str, Any]:
     if order.is_sell():
         command = (
             f'/w {username} Hi! I want to buy: '
-            f'x{trade_quantity} "{item_name}{'(rank '+order.rank+')' if order.rank is not None else ''}" '
+            f'x{trade_quantity} "{item_name}{'(rank '+str(order.rank)+')' if order.rank is not None else ''}" '
             f'for {total_price} platinum. (warframe.market)'
         )
 
@@ -153,15 +152,28 @@ async def render_orders_html(user_input: str) -> str:
     orders = await fetch_orders(matched)
     statistics = await fetch_item_statistic(matched)
     close_statistics = statistics.statistics_closed
+
+    # 注意顺序：必须先基于原始数据提取满级成交记录，再收窄 close_statistics。
+    # 否则一旦先把 close_statistics 改成「只剩 0 级」，满级记录就丢光了，
+    # 满级统计会因此算出全 0。
+    max_close_statistics = None
+    if item.maxRank:
+        max_close_statistics = close_statistics.model_copy()
+        max_close_statistics.forty_eight_hours = [
+            fe for fe in close_statistics.forty_eight_hours if fe.mod_rank == item.maxRank
+        ]
+        max_close_statistics.ninety_days = [
+            n for n in close_statistics.ninety_days if n.mod_rank == item.maxRank
+        ]
+
+    # 再把展示用的 0 级统计收窄出来
+    close_statistics.forty_eight_hours = [fe for fe in close_statistics.forty_eight_hours if fe.mod_rank == 0]
+    close_statistics.ninety_days = [n for n in close_statistics.ninety_days if n.mod_rank == 0]
+
     # 如果用户查找满级订单就筛选出等级等于满级的
     if is_max:
         orders = [o for o in orders if o.rank == item.maxRank]
-        close_statistics.forty_eight_hours = [fe for fe in close_statistics.forty_eight_hours if fe.mod_rank == item.maxRank]
-        close_statistics.ninety_days = [n for n in close_statistics.ninety_days if n.mod_rank == item.maxRank]
-    if item.maxRank and not is_max:
-        orders = [o for o in orders if o.rank == 0]
-        close_statistics.forty_eight_hours = [fe for fe in close_statistics.forty_eight_hours if fe.mod_rank == 0]
-        close_statistics.ninety_days = [n for n in close_statistics.ninety_days if n.mod_rank == 0]
+
     # 2. 提取物品信息
     item_name = item.i18n.get("zh-hans").name
     en_item_name = item.i18n.get("en").name
@@ -173,6 +185,8 @@ async def render_orders_html(user_input: str) -> str:
 
     # 4. 准备统计数据
     statistic_data = _prepare_statistics(close_statistics)
+    # 无等级物品没有满级统计，传 None 让模板隐藏满级区域
+    max_statistic_data = _prepare_statistics(max_close_statistics) if max_close_statistics else None
 
     # 5. 准备模板上下文
     template_data = {
@@ -189,6 +203,7 @@ async def render_orders_html(user_input: str) -> str:
         "highest_buy_price": buy_orders[0].get("platinum", "暂无"),
         "command": sell_orders[0].get("command", "暂无"),
         "statistics": statistic_data,
+        "max_statistics": max_statistic_data,
         "updated_at": datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M"),
     }
 

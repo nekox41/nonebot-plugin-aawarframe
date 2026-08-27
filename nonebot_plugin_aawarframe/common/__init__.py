@@ -8,7 +8,7 @@ from nonebot_plugin_htmlrender import RenderPluginConfig
 
 driver = get_driver()
 client = httpx.AsyncClient()
-_ASSETS_DIR = Path(__file__).parent.parent / "assets"
+ASSETS_DIR = Path(__file__).parent.parent / "assets"
 TEMPLATES_DIR = get_plugin_config(
     RenderPluginConfig
 ).render.resources.local_access.allowed_paths[0]
@@ -33,7 +33,7 @@ async def fetch_world_state() -> Dict[str, Any]:
 
 async def read_template(name: str) -> str:
     """根据模板名读取 assets/templates/ 下的 HTML 文件并返回文本内容"""
-    template_path = _ASSETS_DIR / "templates" / name
+    template_path = ASSETS_DIR / "templates" / name
     if not template_path.exists():
         raise FileNotFoundError(f"模板文件不存在: {template_path}")
     return template_path.read_text(encoding="utf-8")
@@ -64,7 +64,7 @@ async def download_file(name: str, save_path: str | Path):
     logger.info(f"{name} 已经下载到 {save_path}")
 
 
-@driver.on_startup()
+@driver.on_startup
 async def download_templates():
     logger.info(f"开始下载渲染模板到：{TEMPLATES_DIR}")
     tasks = []
