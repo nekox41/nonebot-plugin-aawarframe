@@ -1,0 +1,8 @@
+include AGENTS.md design.md
+recursive-include tests *.py *.json
+include tests/napcat/README.md tests/napcat/.env.example
+prune tests/napcat/.venv
+prune tests/napcat/runtime
+exclude tests/napcat/.env
+exclude tests/napcat/*.pid
+exclude WIKI.md

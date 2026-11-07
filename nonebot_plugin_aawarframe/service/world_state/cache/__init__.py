@@ -1,1 +1,0 @@
-from .clan_weekly_cache import cache as clan_weekly_cache

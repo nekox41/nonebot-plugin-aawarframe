@@ -1,1 +1,0 @@
-from .eidolon_clock import gen_eidolon_img

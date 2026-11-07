@@ -1,0 +1,111 @@
+{
+  "source": "https://api.warframe.com/cdn/worldState.php",
+  "fetched_at": "2026-11-06T07:01:34.522752Z",
+  "data": {
+    "Time": 1793948483,
+    "VoidStorms": [
+      {
+        "_id": {
+          "$oid": "6aed6833fb5d692dbb42f5fa"
+        },
+        "Node": "CrewBattleNode519",
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793946003351"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793951403351"
+          }
+        },
+        "ActiveMissionTier": "VoidT1"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6833fb5d692dbb42f5fb"
+        },
+        "Node": "CrewBattleNode503",
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793946003353"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793951403353"
+          }
+        },
+        "ActiveMissionTier": "VoidT1"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6833fb5d692dbb42f5fc"
+        },
+        "Node": "CrewBattleNode534",
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793946003355"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793951403355"
+          }
+        },
+        "ActiveMissionTier": "VoidT2"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6833fb5d692dbb42f5ff"
+        },
+        "Node": "CrewBattleNode553",
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793946003360"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793951403360"
+          }
+        },
+        "ActiveMissionTier": "VoidT4"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6833fb5d692dbb42f5fe"
+        },
+        "Node": "CrewBattleNode531",
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793946003358"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793951403358"
+          }
+        },
+        "ActiveMissionTier": "VoidT4"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6833fb5d692dbb42f5fd"
+        },
+        "Node": "CrewBattleNode516",
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793946003356"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793951403356"
+          }
+        },
+        "ActiveMissionTier": "VoidT3"
+      }
+    ]
+  }
+}

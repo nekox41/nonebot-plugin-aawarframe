@@ -174,3 +174,15 @@ pyrightconfig.json
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+
+# Runtime snapshots and catalogue cache
+data/aawarframe/
+
+# Manual NapCat integration runtime
+tests/napcat/runtime/
+tests/napcat/*.pid
+
+# Local browser credentials and integration configuration
+/WIKI.md
+.env.*
+!.env.example

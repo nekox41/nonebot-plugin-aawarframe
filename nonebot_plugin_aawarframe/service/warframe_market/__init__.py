@@ -1,1 +1,0 @@
-from .orders import render_orders_img

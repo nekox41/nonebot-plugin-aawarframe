@@ -1,0 +1,116 @@
+{
+  "Time": 1793923200,
+  "ActiveMissions": [
+    {
+      "Node": "SolNode94",
+      "Activation": {
+        "$date": {
+          "$numberLong": "1793923200000"
+        }
+      },
+      "Expiry": {
+        "$date": {
+          "$numberLong": "1793932200000"
+        }
+      },
+      "Modifier": "VoidT1"
+    },
+    {
+      "Node": "UnknownNode",
+      "Activation": {
+        "$date": {
+          "$numberLong": "1793923200000"
+        }
+      },
+      "Expiry": {
+        "$date": {
+          "$numberLong": "1793932200000"
+        }
+      },
+      "Modifier": "NewTier",
+      "Hard": true
+    }
+  ],
+  "Conquests": [
+    {
+      "Type": "CT_LAB",
+      "Missions": [
+        {
+          "faction": "FC_MITW",
+          "missionType": "MT_DEFENSE",
+          "difficulties": [
+            {
+              "type": "CD_HARD",
+              "deviation": "UnknownDeviation",
+              "risks": []
+            }
+          ]
+        }
+      ],
+      "Variables": [
+        "Powerless"
+      ]
+    },
+    {
+      "Type": "CT_HEX",
+      "Missions": [
+        {
+          "faction": "FC_SCALDRA",
+          "missionType": "MT_SURVIVAL",
+          "difficulties": [
+            {
+              "type": "CD_NORMAL",
+              "risks": []
+            }
+          ]
+        }
+      ],
+      "Variables": []
+    }
+  ],
+  "SyndicateMissions": [
+    {
+      "Tag": "CetusSyndicate",
+      "Activation": {
+        "$date": {
+          "$numberLong": "1793923200000"
+        }
+      },
+      "Expiry": {
+        "$date": {
+          "$numberLong": "1793932200000"
+        }
+      },
+      "Jobs": [
+        {
+          "jobType": "/Lotus/Jobs/AssassinateBountyAss",
+          "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierATableARewards",
+          "minEnemyLevel": 5,
+          "maxEnemyLevel": 15
+        }
+      ]
+    }
+  ],
+  "WeeklyVaultBonusRewards": [
+    {
+      "WeekCount": 10,
+      "BonusRegion": "UnknownRegion",
+      "Rewards": [
+        {
+          "Reward": "/Lotus/StoreItems/Upgrades/Mods/FusionBundles/UncommonFusionBundle",
+          "ItemCount": 2
+        }
+      ]
+    },
+    {
+      "WeekCount": 11,
+      "BonusRegion": "UnknownRegion",
+      "Rewards": [
+        {
+          "Reward": "/Lotus/StoreItems/Upgrades/Mods/FusionBundles/UncommonFusionBundle",
+          "ItemCount": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,850 @@
+{
+  "source": "https://api.warframe.com/cdn/worldState.php",
+  "fetched_at": "2026-11-06T06:57:56+00:00",
+  "data": {
+    "Time": 1793948276,
+    "ActiveMissions": [
+      {
+        "_id": {
+          "$oid": "6aed665326af9e110b6feea0"
+        },
+        "Region": 19,
+        "Seed": 80026,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793943122984"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793949780487"
+          }
+        },
+        "Node": "SolNode743",
+        "MissionType": "MT_MOBILE_DEFENSE",
+        "Modifier": "VoidT5",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed665326af9e110b6feea1"
+        },
+        "Region": 19,
+        "Seed": 87404,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793943122984"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793949544523"
+          }
+        },
+        "Node": "SolNode747",
+        "MissionType": "MT_INTEL",
+        "Modifier": "VoidT5",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed695e05b5ee049943dc37"
+        },
+        "Region": 6,
+        "Seed": 67078,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793943902400"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793948879547"
+          }
+        },
+        "Node": "SolNode20",
+        "MissionType": "MT_EXTERMINATION",
+        "Modifier": "VoidT2",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed695e05b5ee049943dc38"
+        },
+        "Region": 5,
+        "Seed": 61431,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793943902400"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793950297016"
+          }
+        },
+        "Node": "SolNode100",
+        "MissionType": "MT_SURVIVAL",
+        "Modifier": "VoidT2",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed6a12fdb1e0f6f1a73fb4"
+        },
+        "Region": 17,
+        "Seed": 27736,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944082873"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793950794839"
+          }
+        },
+        "Node": "SolNode717",
+        "MissionType": "MT_SURVIVAL",
+        "Modifier": "VoidT6"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6a4f56522d1e13550721"
+        },
+        "Region": 19,
+        "Seed": 88226,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944143120"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793949881477"
+          }
+        },
+        "Node": "SolNode741",
+        "MissionType": "MT_ASSAULT",
+        "Modifier": "VoidT5"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6a4f56522d1e13550722"
+        },
+        "Region": 19,
+        "Seed": 54786,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944143120"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793950314047"
+          }
+        },
+        "Node": "SolNode748",
+        "MissionType": "MT_RESCUE",
+        "Modifier": "VoidT5"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6ac67dfbadbc98389d9a"
+        },
+        "Region": 15,
+        "Seed": 47270,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944262751"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793950970996"
+          }
+        },
+        "Node": "SolNode400",
+        "MissionType": "MT_EXTERMINATION",
+        "Modifier": "VoidT4",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed6ac67dfbadbc98389d9b"
+        },
+        "Region": 9,
+        "Seed": 65867,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944262751"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793949453342"
+          }
+        },
+        "Node": "SolNode21",
+        "MissionType": "MT_EXTERMINATION",
+        "Modifier": "VoidT4",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed6b0208d201c86bb891ec"
+        },
+        "Region": 22,
+        "Seed": 11193,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944322930"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793948738659"
+          }
+        },
+        "Node": "SolNode232",
+        "MissionType": "MT_VOID_CASCADE",
+        "Modifier": "VoidT6",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed6b0208d201c86bb891ed"
+        },
+        "Region": 18,
+        "Seed": 25300,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944322930"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793950238785"
+          }
+        },
+        "Node": "SolNode310",
+        "MissionType": "MT_SURVIVAL",
+        "Modifier": "VoidT6",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed6b3e90ab67893bd26239"
+        },
+        "Region": 3,
+        "Seed": 93470,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944382146"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793950149127"
+          }
+        },
+        "Node": "SolNode39",
+        "MissionType": "MT_EXCAVATE",
+        "Modifier": "VoidT1",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed6b3e90ab67893bd2623a"
+        },
+        "Region": 2,
+        "Seed": 60627,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944382146"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793948740197"
+          }
+        },
+        "Node": "SolNode2",
+        "MissionType": "MT_MOBILE_DEFENSE",
+        "Modifier": "VoidT1",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed6c6a646f45353e9ff576"
+        },
+        "Region": 6,
+        "Seed": 81239,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944682457"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793949667566"
+          }
+        },
+        "Node": "SolNode50",
+        "MissionType": "MT_RESCUE",
+        "Modifier": "VoidT2"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6c6a646f45353e9ff575"
+        },
+        "Region": 16,
+        "Seed": 58079,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944682457"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793951573366"
+          }
+        },
+        "Node": "SettlementNode2",
+        "MissionType": "MT_CAPTURE",
+        "Modifier": "VoidT2"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6c6a646f45353e9ff577"
+        },
+        "Region": 5,
+        "Seed": 17568,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944682457"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793951510547"
+          }
+        },
+        "Node": "SolNode73",
+        "MissionType": "MT_CAPTURE",
+        "Modifier": "VoidT2"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6d96afeb5b024f5b22ff"
+        },
+        "Region": 8,
+        "Seed": 88998,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944982189"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793950369211"
+          }
+        },
+        "Node": "SolNode6",
+        "MissionType": "MT_EXCAVATE",
+        "Modifier": "VoidT3"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6d96afeb5b024f5b2300"
+        },
+        "Region": 13,
+        "Seed": 33522,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793944982189"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793951633016"
+          }
+        },
+        "Node": "SolNode204",
+        "MissionType": "MT_EXTERMINATION",
+        "Modifier": "VoidT3"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6f76ed2dcacc012124e0"
+        },
+        "Region": 9,
+        "Seed": 37448,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793945462490"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793949882287"
+          }
+        },
+        "Node": "SolNode81",
+        "MissionType": "MT_SURVIVAL",
+        "Modifier": "VoidT4"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6f76ed2dcacc012124e1"
+        },
+        "Region": 15,
+        "Seed": 9580,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793945462490"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793949172071"
+          }
+        },
+        "Node": "SolNode409",
+        "MissionType": "MT_SURVIVAL",
+        "Modifier": "VoidT4"
+      },
+      {
+        "_id": {
+          "$oid": "6aed6f76ed2dcacc012124e2"
+        },
+        "Region": 12,
+        "Seed": 89941,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793945462490"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793951582151"
+          }
+        },
+        "Node": "SolNode187",
+        "MissionType": "MT_SURVIVAL",
+        "Modifier": "VoidT4"
+      },
+      {
+        "_id": {
+          "$oid": "6aed73ebaf1f456f8745ea9d"
+        },
+        "Region": 7,
+        "Seed": 13470,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793946603069"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793953530948"
+          }
+        },
+        "Node": "SolNode64",
+        "MissionType": "MT_TERRITORY",
+        "Modifier": "VoidT3",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed73ebaf1f456f8745ea9e"
+        },
+        "Region": 13,
+        "Seed": 46507,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793946603069"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793953255846"
+          }
+        },
+        "Node": "SolNode212",
+        "MissionType": "MT_DEFENSE",
+        "Modifier": "VoidT3",
+        "Hard": true
+      },
+      {
+        "_id": {
+          "$oid": "6aed760707bf7361d161ae7f"
+        },
+        "Region": 2,
+        "Seed": 64910,
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793947143040"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793952866312"
+          }
+        },
+        "Node": "SolNode128",
+        "MissionType": "MT_EXTERMINATION",
+        "Modifier": "VoidT1"
+      }
+    ],
+    "Conquests": [
+      {
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793577600000"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794182400000"
+          }
+        },
+        "Type": "CT_LAB",
+        "Missions": [
+          {
+            "faction": "FC_MITW",
+            "missionType": "MT_EXTERMINATION",
+            "difficulties": [
+              {
+                "type": "CD_NORMAL",
+                "deviation": "FortifiedFoes",
+                "risks": [
+                  "VoidAberration"
+                ]
+              },
+              {
+                "type": "CD_HARD",
+                "deviation": "FortifiedFoes",
+                "risks": [
+                  "VoidAberration",
+                  "EMPBlackHole"
+                ]
+              }
+            ]
+          },
+          {
+            "faction": "FC_MITW",
+            "missionType": "MT_SURVIVAL",
+            "difficulties": [
+              {
+                "type": "CD_NORMAL",
+                "deviation": "NecramechActivation",
+                "risks": [
+                  "AcceleratedEnemies"
+                ]
+              },
+              {
+                "type": "CD_HARD",
+                "deviation": "NecramechActivation",
+                "risks": [
+                  "AcceleratedEnemies",
+                  "RegeneratingEnemies"
+                ]
+              }
+            ]
+          },
+          {
+            "faction": "FC_MITW",
+            "missionType": "MT_ALCHEMY",
+            "difficulties": [
+              {
+                "type": "CD_NORMAL",
+                "deviation": "AlchemicalShields",
+                "risks": [
+                  "AntiMaterialWeapons"
+                ]
+              },
+              {
+                "type": "CD_HARD",
+                "deviation": "AlchemicalShields",
+                "risks": [
+                  "AntiMaterialWeapons",
+                  "Quicksand"
+                ]
+              }
+            ]
+          }
+        ],
+        "Variables": [
+          "Exhaustion",
+          "AntiGuard",
+          "Undersupplied",
+          "VoidEnergyOverload"
+        ],
+        "RandomSeed": 369434
+      },
+      {
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793577600000"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794182400000"
+          }
+        },
+        "Type": "CT_HEX",
+        "Missions": [
+          {
+            "faction": "FC_SCALDRA",
+            "missionType": "MT_DEFENSE",
+            "difficulties": [
+              {
+                "type": "CD_NORMAL",
+                "deviation": "ChemicalNoise",
+                "risks": [
+                  "AcceleratedEnemies"
+                ]
+              },
+              {
+                "type": "CD_HARD",
+                "deviation": "ChemicalNoise",
+                "risks": [
+                  "AcceleratedEnemies",
+                  "RegeneratingEnemies"
+                ]
+              }
+            ]
+          },
+          {
+            "faction": "FC_SCALDRA",
+            "missionType": "MT_SURVIVAL",
+            "difficulties": [
+              {
+                "type": "CD_NORMAL",
+                "deviation": "GestatingTumors",
+                "risks": [
+                  "FactionSwarm_Scaldra"
+                ]
+              },
+              {
+                "type": "CD_HARD",
+                "deviation": "GestatingTumors",
+                "risks": [
+                  "FactionSwarm_Scaldra",
+                  "MurmurIncursion"
+                ]
+              }
+            ]
+          },
+          {
+            "faction": "FC_TECHROT",
+            "missionType": "MT_ENDLESS_CAPTURE",
+            "difficulties": [
+              {
+                "type": "CD_NORMAL",
+                "deviation": "DoubleTroubleLegacyte",
+                "risks": [
+                  "FactionSwarm_Techrot"
+                ]
+              },
+              {
+                "type": "CD_HARD",
+                "deviation": "DoubleTroubleLegacyte",
+                "risks": [
+                  "FactionSwarm_Techrot",
+                  "InfectedTechrot"
+                ]
+              }
+            ]
+          }
+        ],
+        "Variables": [
+          "InfectedWounds",
+          "Gearless",
+          "VoidEnergyOverload",
+          "DullBlades"
+        ],
+        "RandomSeed": 423391
+      }
+    ],
+    "WeeklyVaultBonusRewards": [
+      {
+        "WeekCount": 664,
+        "BonusRegion": "/Lotus/Language/Locations/Earth",
+        "Rewards": [
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 500,
+            "ItemCount": 12,
+            "Reward": "/Lotus/StoreItems/Types/Items/MiscItems/Neurode"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 1000,
+            "ItemCount": 1,
+            "Reward": "/Lotus/StoreItems/Types/PickUps/Credits/50000Credits"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 1500,
+            "ItemCount": 5,
+            "Reward": "/Lotus/StoreItems/Types/Items/MiscItems/SchismKey"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 2000,
+            "ItemCount": 1,
+            "Reward": "/Lotus/StoreItems/Types/Items/MiscItems/Forma"
+          }
+        ]
+      },
+      {
+        "WeekCount": 665,
+        "BonusRegion": "/Lotus/Language/Locations/Fortress",
+        "Rewards": [
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 500,
+            "ItemCount": 12,
+            "Reward": "/Lotus/StoreItems/Types/Items/MiscItems/OrokinCell"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 1000,
+            "ItemCount": 100,
+            "Reward": "/Lotus/StoreItems/Types/Items/MiscItems/DistillPoints"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 1500,
+            "ItemCount": 2,
+            "Reward": "/Lotus/StoreItems/Types/PickUps/Credits/50000Credits"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 2000,
+            "ItemCount": 1,
+            "Reward": "/Lotus/StoreItems/Types/Recipes/Lens/GenericLensOstronBlueprint"
+          }
+        ]
+      }
+    ],
+    "SyndicateMissions": [
+      {
+        "_id": {
+          "$oid": "6aed6f2e0000000000000010"
+        },
+        "Activation": {
+          "$date": {
+            "$numberLong": "1793945390553"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1793954389427"
+          }
+        },
+        "Tag": "CetusSyndicate",
+        "Seed": 21461,
+        "Nodes": [],
+        "Jobs": [
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/SabotageBountySab",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierATableCRewards",
+            "masteryReq": 0,
+            "minEnemyLevel": 5,
+            "maxEnemyLevel": 15,
+            "xpAmounts": [
+              360,
+              360,
+              360
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/AttritionBountyCap",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierBTableCRewards",
+            "masteryReq": 1,
+            "minEnemyLevel": 10,
+            "maxEnemyLevel": 30,
+            "xpAmounts": [
+              590,
+              590,
+              590
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/AssassinateBountyAss",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierCTableCRewards",
+            "masteryReq": 2,
+            "minEnemyLevel": 20,
+            "maxEnemyLevel": 40,
+            "xpAmounts": [
+              590,
+              590,
+              590,
+              870
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/AttritionBountyExt",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierDTableCRewards",
+            "masteryReq": 3,
+            "minEnemyLevel": 30,
+            "maxEnemyLevel": 50,
+            "xpAmounts": [
+              630,
+              630,
+              630,
+              630,
+              1240
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/AttritionBountySab",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierETableCRewards",
+            "masteryReq": 5,
+            "minEnemyLevel": 40,
+            "maxEnemyLevel": 60,
+            "xpAmounts": [
+              730,
+              730,
+              730,
+              730,
+              1430
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/AssassinateBountyCap",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierETableCRewards",
+            "masteryReq": 10,
+            "minEnemyLevel": 100,
+            "maxEnemyLevel": 100,
+            "xpAmounts": [
+              840,
+              840,
+              840,
+              840,
+              1660
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/Narmer/AssassinateBountyAss",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/NarmerTableCRewards",
+            "masteryReq": 0,
+            "minEnemyLevel": 50,
+            "maxEnemyLevel": 70,
+            "xpAmounts": [
+              790,
+              790,
+              790,
+              790,
+              1550
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

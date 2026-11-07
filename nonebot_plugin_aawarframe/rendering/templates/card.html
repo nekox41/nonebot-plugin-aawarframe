@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; font-src 'none'; img-src 'none'">
+  <title>{{ card.title }}</title>
+  <style>{{ css | safe }}</style>
+</head>
+<body>
+  <main>
+    <h1>{{ card.title }}</h1>
+    {% if card.stale %}<p><strong>注意：更新失败，以下使用过期缓存，请留意获取时间。</strong></p>{% endif %}
+    {% for note in card.notes %}<p>{{ note }}</p>{% endfor %}
+    {% for section in card.sections %}
+    <section>
+      <h2>{{ section.title }}</h2>
+      {% if section.rows %}
+      <table>
+        {% if section.columns %}<thead><tr>{% for column in section.columns %}<th scope="col">{{ column }}</th>{% endfor %}</tr></thead>{% endif %}
+        <tbody>{% for row in section.rows %}<tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+      </table>
+      {% endif %}
+      {% for note in section.notes %}<p>{{ note }}</p>{% endfor %}
+    </section>
+    {% endfor %}
+    <footer>
+      <p>来源：{{ card.source }}</p>
+      <p>获取时间：{{ card.fetched_at.strftime('%Y-%m-%d %H:%M:%S') }} UTC；第 {{ page }} / {{ total }} 页</p>
+    </footer>
+  </main>
+</body>
+</html>

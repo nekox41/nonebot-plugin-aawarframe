@@ -1,15 +1,22 @@
 from nonebot import require
-require("nonebot_plugin_htmlrender")
 from nonebot.plugin import PluginMetadata
-from . import commands
 
+from .config import Config
+
+require("nonebot_plugin_htmlrender")
 
 __plugin_meta__ = PluginMetadata(
-    name='nonebot-plugin-aawarframe',
-    description='aa 的 Warframe 插件',
-    usage="",
+    name="nonebot-plugin-aawarframe",
+    description="国际服 Warframe 世界状态与交易市场查询",
+    usage="发送 help 或 wf help 查看命令。",
     type="application",
-    extra={},
     homepage="https://github.com/nekox41/nonebot-plugin-aawarframe",
-    supported_adapters={"~onebot.v11"}
+    config=Config,
+    supported_adapters={"~onebot.v11"},
 )
+
+from .bootstrap import setup as setup_runtime  # noqa: E402
+from .commands.router import setup as setup_commands  # noqa: E402
+
+setup_runtime()
+setup_commands()
