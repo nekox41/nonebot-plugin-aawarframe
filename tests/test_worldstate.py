@@ -1,3 +1,7 @@
+# 作用：验证 worldstate 相关行为。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
@@ -28,13 +32,13 @@ def test_cetus_boundaries(worldstate, elapsed, phase):
     card = build_cetus(
         Snapshot(data=worldstate, source="fixture"), NOW + timedelta(seconds=elapsed)
     )
-    assert card.sections[0].rows[0][0] == phase
-    assert len(card.sections[1].rows) == 5
+    assert card.cycle_items[0].state == phase
+    assert len(card.sections[0].rows) == 5
 
 
 def test_fissures_empty_unknown_and_expired(worldstate):
     snapshot = Snapshot(data=worldstate, source="fixture")
-    assert len(build_fissures(snapshot, NOW).sections[0].rows) == 1
+    assert len(build_fissures(snapshot, NOW).fissure_items) == 1
     unknown = build_fissures(snapshot, NOW, hard=True).text()
     assert "UnknownNode" in unknown and "NewTier" in unknown
     assert build_fissures(snapshot, NOW + timedelta(days=1)).status == DataStatus.EMPTY
@@ -48,14 +52,14 @@ def test_fissures_empty_unknown_and_expired(worldstate):
 def test_invalid_record_does_not_discard_other_records(worldstate):
     worldstate["ActiveMissions"].append({"Node": "bad"})
     result = build_fissures(Snapshot(data=worldstate, source="fixture"), NOW)
-    assert result.notes and result.sections[0].rows
+    assert result.notes and result.fissure_items
 
 
 def test_clan_rewards_are_immutable(worldstate):
     original = deepcopy(worldstate)
     snapshot = Snapshot(data=worldstate, source="fixture")
-    assert build_clan(snapshot).sections[0].rows[0] == ["Endo", "100"]
-    assert build_clan(snapshot).sections[0].rows[0] == ["Endo", "100"]
+    assert build_clan(snapshot).sections[0].rows[0][:2] == ["Endo", "100"]
+    assert build_clan(snapshot).sections[0].rows[0][:2] == ["Endo", "100"]
     assert worldstate == original
 
 
@@ -63,8 +67,10 @@ def test_archimedea_and_bounties(worldstate):
     snapshot = Snapshot(data=worldstate, source="fixture")
     assert "UnknownDeviation" in build_archimedea(snapshot, "CT_LAB").text()
     assert "炽蛇军" in build_archimedea(snapshot, "CT_HEX").text()
-    bounties = build_bounties(snapshot, NOW)
-    assert {row[0] for row in bounties.sections[0].rows} == {"1", "2", "3"}
+    snapshot.data["SyndicateMissions"][0]["Jobs"][0]["xpAmounts"] = [100, 100, 100]
+    bounties = build_bounties(snapshot, NOW, 1)
+    assert bounties.bounty_items[0].stages == 3
+    assert bounties.bounty_items[0].rewards
 
 
 async def test_service_isolates_parser_failures(worldstate, monkeypatch):
@@ -118,5 +124,10 @@ async def test_recorded_official_worldstate(feature, monkeypatch):
     provider = SimpleNamespace(fetch=AsyncMock(return_value=snapshot))
     card = await WorldStateService(provider).query(feature)
     assert card.status == DataStatus.OK
-    assert sum(len(section.rows) for section in card.sections) > 0
+    assert (
+        card.bounty_items
+        or card.fissure_items
+        or card.cycle_items
+        or sum(len(section.rows) for section in card.sections) > 0
+    )
     assert not card.notes

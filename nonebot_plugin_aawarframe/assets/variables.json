@@ -24,5 +24,11 @@
     "Vampyric Syndrome": "Vampyri",
     "Concussive Drain": "VitalEnergy",
     "Ability Overload": "VoidEnergyOverload",
-    "Untreatable": "Withering"
+    "Untreatable": "Withering",
+    "Infected Wounds": "InfectedWounds",
+    "Anemic Shields": "AnemicShields",
+    "Shortened Reach": "ShortenedReach",
+    "No Pets Allowed": "NoPetsAllowed",
+    "Channeled Greed": "ChanneledGreed",
+    "Low Yield": "LowYield"
 }

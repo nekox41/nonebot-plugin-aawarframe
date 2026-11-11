@@ -1,3 +1,7 @@
+# 作用：实现 models 层的 wiki 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 from pydantic import BaseModel, Field, HttpUrl, RootModel, StrictStr, field_validator
 
 

@@ -1,3 +1,7 @@
+# 作用：实现 infrastructure 层的 storage 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import asyncio
 import json
 import logging

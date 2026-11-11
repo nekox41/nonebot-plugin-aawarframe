@@ -1,0 +1,105 @@
+{
+  "_source": "https://github.com/WFCD/warframe-worldstate-data/blob/master/data/zh/languages.json",
+  "/lotus/types/challenges/calendar1999/calendardestroypropseasy": {
+    "description": "摧毁 75 个容器"
+  },
+  "/lotus/types/challenges/calendar1999/calendardestroypropshard": {
+    "description": "摧毁 300 个容器"
+  },
+  "/lotus/types/challenges/calendar1999/calendardestroypropsmedium": {
+    "description": "摧毁 150 个容器"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillenemieseasy": {
+    "description": "击杀 250 名敌人"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillenemieshard": {
+    "description": "击杀 1000 名敌人"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillenemiesmedium": {
+    "description": "击杀 500 名敌人"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillenemieswithabilitieseasy": {
+    "description": "使用技能击杀 150 名敌人"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillenemieswithabilitieshard": {
+    "description": "使用技能击杀 500 名敌人"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillenemieswithabilitiesmedium": {
+    "description": "使用技能击杀 300 名敌人"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillenemieswithmeleeeasy": {
+    "description": "使用近战武器击杀 150 名敌人"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillenemieswithmeleehard": {
+    "description": "使用近战武器击杀 500 名敌人"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillenemieswithmeleemedium": {
+    "description": "使用近战武器击杀 300 名敌人"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilleximuseasy": {
+    "description": "击杀 10 名卓越者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilleximushard": {
+    "description": "击杀 30 名卓越者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilleximusmedium": {
+    "description": "击杀 20 名卓越者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillscaldraenemieseasy": {
+    "description": "击杀 150 名炽蛇军"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillscaldraenemieshard": {
+    "description": "击杀 500 名炽蛇军"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillscaldraenemiesmedium": {
+    "description": "击杀 350 名炽蛇军"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillscaldraenemieswithabilitieseasy": {
+    "description": "使用技能击杀 75 名炽蛇军"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillscaldraenemieswithabilitieshard": {
+    "description": "使用技能击杀 250 名炽蛇军"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillscaldraenemieswithabilitiesmedium": {
+    "description": "使用技能击杀 150 名炽蛇军"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillscaldraenemieswithmeleeeasy": {
+    "description": "使用近战武器击杀 75 名炽蛇军"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillscaldraenemieswithmeleehard": {
+    "description": "使用近战武器击杀 250 名炽蛇军"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkillscaldraenemieswithmeleemedium": {
+    "description": "使用近战武器击杀 150 名炽蛇军"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilltankhard": {
+    "description": "击败 1 辆 H-09 艾弗旺坦克"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilltechrotenemieseasy": {
+    "description": "击杀 250 名科腐者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilltechrotenemieshard": {
+    "description": "击杀 750 名科腐者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilltechrotenemiesmedium": {
+    "description": "击杀 500 名科腐者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilltechrotenemieswithabilitieseasy": {
+    "description": "使用技能击杀 100 名科腐者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilltechrotenemieswithabilitieshard": {
+    "description": "使用技能击杀 300 名科腐者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilltechrotenemieswithabilitiesmedium": {
+    "description": "使用技能击杀 200 名科腐者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilltechrotenemieswithmeleeeasy": {
+    "description": "使用近战武器击杀 100 名科腐者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilltechrotenemieswithmeleehard": {
+    "description": "使用近战武器击杀 300 名科腐者"
+  },
+  "/lotus/types/challenges/calendar1999/calendarkilltechrotenemieswithmeleemedium": {
+    "description": "使用近战武器击杀 200 名科腐者"
+  }
+}

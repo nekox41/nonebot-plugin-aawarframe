@@ -1,0 +1,2639 @@
+{
+  "source": "https://github.com/calamity-inc/wf.browse.oracle/blob/senpai/bounty-cycle.pluto",
+  "data_source": "https://github.com/calamity-inc/warframe-public-export-plus",
+  "manifests": {
+    "zariman": {
+      "ChallengeMissionNodes": [
+        "SolNode230",
+        "SolNode231",
+        "SolNode232",
+        "SolNode233",
+        "SolNode235"
+      ],
+      "ChallengeMissionDifficultyTiers": [
+        {
+          "enemyLevelModifier": 0,
+          "xpAmount": 1,
+          "chemistryAmount": 0,
+          "rewards": "/Lotus/Types/Game/MissionDecks/ZarimanJobMissionRewards/TierATableRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanFindMelicaCacheChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanUseVoidRiftsEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectLargeOrbsEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectOrbsEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionKeepMeterLowEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanFloodCompleteWavesEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode231",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanExterminateFastCompleteChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanSurvivalAbove50EasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCascadeCompleteWavesEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateCollectScrapCratesEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateUseAllTurretsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateKillAngelsEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode235",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanMobDefProtectShieldsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorEasyChallenge"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 10,
+          "xpAmount": 2,
+          "chemistryAmount": 0,
+          "rewards": "/Lotus/Types/Game/MissionDecks/ZarimanJobMissionRewards/TierBTableRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanFindMelicaCacheChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanUseVoidRiftsEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectLargeOrbsEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectOrbsEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionKeepMeterLowEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanFloodCompleteWavesEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode231",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanExterminateFastCompleteChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanSurvivalAbove50EasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCascadeCompleteWavesEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateCollectScrapCratesEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateUseAllTurretsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateKillAngelsEasyChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusEasyChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode235",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanMobDefProtectShieldsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorEasyChallenge"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 20,
+          "xpAmount": 3,
+          "chemistryAmount": 0,
+          "rewards": "/Lotus/Types/Game/MissionDecks/ZarimanJobMissionRewards/TierCTableARewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanFindMelicaCacheChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanUseVoidRiftsChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectLargeOrbsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectOrbsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionKeepMeterLowChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanFloodCompleteWavesChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode231",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanExterminateFastCompleteChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanSurvivalAbove50Challenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCascadeCompleteWavesChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKeepBarracksAliveChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateCollectScrapCratesChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateUseAllTurretsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateKillAngelsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode235",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanMobDefProtectShieldsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 40,
+          "xpAmount": 4,
+          "chemistryAmount": 0,
+          "rewards": "/Lotus/Types/Game/MissionDecks/ZarimanJobMissionRewards/TierDTableRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanFindMelicaCacheChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanUseVoidRiftsHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectLargeOrbsHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectOrbsHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionKeepMeterLowHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanFloodCompleteWavesHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode231",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanExterminateFastCompleteChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanExterminateNoPowersChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanSurvivalAbove50HardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCascadeCompleteWavesHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKeepBarracksAliveHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateCollectScrapCratesHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateUseAllTurretsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateKillAngelsHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode235",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanMobDefProtectShieldsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanExterminateNoPowersChallenge"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 60,
+          "xpAmount": 5,
+          "chemistryAmount": 0,
+          "rewards": "/Lotus/Types/Game/MissionDecks/ZarimanJobMissionRewards/TierETableRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanFindMelicaCacheChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanUseVoidRiftsHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectLargeOrbsVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectOrbsVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionKeepMeterLowVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanFloodCompleteWavesVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerVeryHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode230",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusVeryHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode231",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanExterminateFastCompleteChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanExterminateNoPowersChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanSurvivalAbove50VeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanCascadeCompleteWavesVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerVeryHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode232",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusVeryHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKeepBarracksAliveVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateCollectScrapCratesVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateUseAllTurretsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateKillAngelsVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorVeryHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_GRINEER",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerVeryHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode233",
+              "LevelKey": "",
+              "CheckFaction": 1,
+              "Faction": "FC_CORPUS",
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusVeryHardChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode235",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Zariman/ZarimanMobDefProtectShieldsChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorVeryHardChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge",
+                "/Lotus/Types/Challenges/Zariman/ZarimanExterminateNoPowersChallenge"
+              ]
+            }
+          ]
+        }
+      ],
+      "HardModeRewards": "/Lotus/Types/Game/MissionDecks/ZarimanMissionRewards/HardModeTableRewards",
+      "XpItemType": "/Lotus/Types/Gameplay/Zariman/Resources/ZarimanDogTagBounty"
+    },
+    "sanctum": {
+      "ChallengeMissionNodes": [
+        "SolNode715",
+        "SolNode716",
+        "SolNode717",
+        "SolNode718",
+        "SolNode719",
+        "SolNode721"
+      ],
+      "ChallengeMissionDifficultyTiers": [
+        {
+          "enemyLevelModifier": 0,
+          "xpAmount": 1000,
+          "rewards": "/Lotus/Types/Game/MissionDecks/EntratiLabJobMissionReward/TierATableRewards",
+          "challenges": [
+            {
+              "Node": "",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabRangedMechWeakpointEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDecorationChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode715",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabCollectTearsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode716",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSixMinuteChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode717",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode718",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeElectricEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeFireEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeIceEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeToxinEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode719",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefenseActivatePillarEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode721",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateConduitsQuickChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDemolystLimbsEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabNearConduitVulnerabilityChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabUnstableDocketsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 10,
+          "xpAmount": 2000,
+          "rewards": "/Lotus/Types/Game/MissionDecks/EntratiLabJobMissionReward/TierBTableRewards",
+          "challenges": [
+            {
+              "Node": "",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabRangedMechWeakpointEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDecorationChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode715",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabCollectTearsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode716",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSixMinuteChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode717",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode718",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeElectricEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeFireEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeIceEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeToxinEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode719",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefenseActivatePillarEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode721",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateConduitsQuickChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDemolystLimbsEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabNearConduitVulnerabilityChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabUnstableDocketsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 20,
+          "xpAmount": 3000,
+          "rewards": "/Lotus/Types/Game/MissionDecks/EntratiLabJobMissionReward/TierCTableRewards",
+          "challenges": [
+            {
+              "Node": "",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabRangedMechWeakpointChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDecorationChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode715",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabCollectTearsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode716",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSixMinuteChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode717",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode718",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeElectricChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeFireChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeIceChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeToxinChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode719",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefenseActivatePillarChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode721",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateConduitsQuickChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDemolystLimbsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabNearConduitVulnerabilityChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabUnstableDocketsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 40,
+          "xpAmount": 4000,
+          "rewards": "/Lotus/Types/Game/MissionDecks/EntratiLabJobMissionReward/TierDTableRewards",
+          "challenges": [
+            {
+              "Node": "",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabRangedMechWeakpointHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDecorationChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode715",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabCollectTearsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode716",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSixMinuteChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode717",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode718",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeElectricHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeFireHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeIceHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeToxinHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode719",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefenseActivatePillarHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode721",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateConduitsQuickChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDemolystLimbsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabNearConduitVulnerabilityChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabUnstableDocketsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 60,
+          "xpAmount": 5000,
+          "rewards": "/Lotus/Types/Game/MissionDecks/EntratiLabJobMissionReward/TierETableRewards",
+          "challenges": [
+            {
+              "Node": "",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabRangedMechWeakpointVeryHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDecorationChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode715",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabCollectTearsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurVeryHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode716",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSixMinuteChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode717",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurVeryHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode718",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeElectricHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeFireHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeIceHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeToxinHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurVeryHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode719",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefenseActivatePillarVeryHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurVeryHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge"
+              ]
+            },
+            {
+              "Node": "SolNode721",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurVeryHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateConduitsQuickChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDemolystLimbsHardChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabNearConduitVulnerabilityChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabUnstableDocketsChallenge",
+                "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge"
+              ]
+            }
+          ]
+        }
+      ],
+      "HardModeRewards": "/Lotus/Types/Game/MissionDecks/EntratiLabJobMissionReward/HardModeTableRewards"
+    },
+    "hex": {
+      "ChallengeMissionNodes": [
+        "SolNode850",
+        "SolNode851",
+        "SolNode852",
+        "SolNode853",
+        "SolNode854",
+        "SolNode856",
+        "SolNode858"
+      ],
+      "ChallengeMissionDifficultyTiers": [
+        {
+          "enemyLevelModifier": 0,
+          "xpAmount": 1000,
+          "chemistryAmount": 20,
+          "rewards": "/Lotus/Types/Game/MissionDecks/1999MissionRewards/TierABountyRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "SolNode856",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesEasy"
+              ]
+            },
+            {
+              "Node": "SolNode852",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersEasy"
+              ]
+            },
+            {
+              "Node": "SolNode851",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaMercyEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesEasy"
+              ]
+            },
+            {
+              "Node": "SolNode850",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaCaptureTargetsEasy"
+              ]
+            },
+            {
+              "Node": "SolNode853",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaInfestedCrossfire",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsEasy"
+              ]
+            },
+            {
+              "Node": "SolNode854",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaExplodingInfested"
+              ]
+            },
+            {
+              "Node": "SolNode858",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillEasy"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 10,
+          "xpAmount": 2000,
+          "chemistryAmount": 20,
+          "rewards": "/Lotus/Types/Game/MissionDecks/1999MissionRewards/TierBBountyRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "SolNode856",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesEasy"
+              ]
+            },
+            {
+              "Node": "SolNode852",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersEasy"
+              ]
+            },
+            {
+              "Node": "SolNode851",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaMercyEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesEasy"
+              ]
+            },
+            {
+              "Node": "SolNode850",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaCaptureTargetsEasy"
+              ]
+            },
+            {
+              "Node": "SolNode853",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaInfestedCrossfire",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsEasy"
+              ]
+            },
+            {
+              "Node": "SolNode854",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaExplodingInfested"
+              ]
+            },
+            {
+              "Node": "SolNode858",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksEasy",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillEasy"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 20,
+          "xpAmount": 3000,
+          "chemistryAmount": 20,
+          "rewards": "/Lotus/Types/Game/MissionDecks/1999MissionRewards/TierCBountyRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "SolNode856",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesNormal"
+              ]
+            },
+            {
+              "Node": "SolNode852",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersNormal"
+              ]
+            },
+            {
+              "Node": "SolNode851",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaMercyNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesNormal"
+              ]
+            },
+            {
+              "Node": "SolNode850",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaCaptureTargetsNormal"
+              ]
+            },
+            {
+              "Node": "SolNode853",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaInfestedCrossfire",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsNormal"
+              ]
+            },
+            {
+              "Node": "SolNode854",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaExplodingInfested"
+              ]
+            },
+            {
+              "Node": "SolNode858",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksNormal",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillNormal"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 30,
+          "xpAmount": 4000,
+          "chemistryAmount": 20,
+          "rewards": "/Lotus/Types/Game/MissionDecks/1999MissionRewards/TierDBountyRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "SolNode856",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesHard"
+              ]
+            },
+            {
+              "Node": "SolNode852",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsHard",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillHard",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersHard"
+              ]
+            },
+            {
+              "Node": "SolNode851",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsHard",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillHard",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksHard",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsHard",
+                "/Lotus/Types/Challenges/Vania/VaniaMercyHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesHard"
+              ]
+            },
+            {
+              "Node": "SolNode850",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsHard",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillHard",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersHard",
+                "/Lotus/Types/Challenges/Vania/VaniaCaptureTargetsHard"
+              ]
+            },
+            {
+              "Node": "SolNode853",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesHard",
+                "/Lotus/Types/Challenges/Vania/VaniaInfestedCrossfire",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsHard"
+              ]
+            },
+            {
+              "Node": "SolNode854",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsHard",
+                "/Lotus/Types/Challenges/Vania/VaniaExplodingInfested"
+              ]
+            },
+            {
+              "Node": "SolNode858",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksHard",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillHard"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 40,
+          "xpAmount": 5000,
+          "chemistryAmount": 20,
+          "rewards": "/Lotus/Types/Game/MissionDecks/1999MissionRewards/TierEBountyRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "SolNode856",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesVeryHard"
+              ]
+            },
+            {
+              "Node": "SolNode852",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersVeryHard"
+              ]
+            },
+            {
+              "Node": "SolNode851",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaMercyVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesVeryHard"
+              ]
+            },
+            {
+              "Node": "SolNode850",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaCaptureTargetsVeryHard"
+              ]
+            },
+            {
+              "Node": "SolNode853",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaInfestedCrossfire",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsVeryHard"
+              ]
+            },
+            {
+              "Node": "SolNode854",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaExplodingInfested"
+              ]
+            },
+            {
+              "Node": "SolNode858",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillVeryHard"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 50,
+          "xpAmount": 6000,
+          "chemistryAmount": 20,
+          "rewards": "/Lotus/Types/Game/MissionDecks/1999MissionRewards/TierFBountyRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "SolNode856",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesVeryHard"
+              ]
+            },
+            {
+              "Node": "SolNode852",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersVeryHard"
+              ]
+            },
+            {
+              "Node": "SolNode851",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaMercyVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesVeryHard"
+              ]
+            },
+            {
+              "Node": "SolNode850",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaMercyVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaCaptureTargetsVeryHard"
+              ]
+            },
+            {
+              "Node": "SolNode853",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaInfestedCrossfire",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsVeryHard"
+              ]
+            },
+            {
+              "Node": "SolNode854",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaExplodingInfested"
+              ]
+            },
+            {
+              "Node": "SolNode858",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/VaniaHighKillVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksVeryHard",
+                "/Lotus/Types/Challenges/Vania/VaniaAbilityKillVeryHard"
+              ]
+            }
+          ]
+        },
+        {
+          "enemyLevelModifier": 60,
+          "xpAmount": 7500,
+          "chemistryAmount": 0,
+          "rewards": "/Lotus/Types/Game/MissionDecks/1999MissionRewards/InfestedLichBountyRewards",
+          "endless": 0,
+          "challenges": [
+            {
+              "Node": "SolNode852",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaMercy",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaDestroyProps",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaHighKill",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaAbilityKill",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaDestroySpeakers"
+              ]
+            },
+            {
+              "Node": "SolNode850",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaMercy",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaDestroyProps",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaHighKill",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaSafeCracker",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaDestroySpeakers",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaCaptureTargets"
+              ]
+            },
+            {
+              "Node": "SolNode854",
+              "LevelKey": "",
+              "CheckFaction": 0,
+              "challenges": [
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaDestroyProps",
+                "/Lotus/Types/Challenges/Vania/Lich/LichVaniaExplodingInfested"
+              ]
+            }
+          ]
+        }
+      ],
+      "HardModeRewards": "/Lotus/Types/Game/MissionDecks/1999MissionRewards/HardModeTableRewards"
+    }
+  },
+  "challenges": {
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateConduitsQuickChallenge": {
+      "name": "紧张启动",
+      "description": "在 30 秒内启动 2 个导管",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeChallenge": {
+      "name": "虚空狂潮",
+      "description": "激活 |COUNT| 个虚空泉脉",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeEasyChallenge": {
+      "name": "虚空狂潮",
+      "description": "激活 |COUNT| 个虚空泉脉",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabActivateLohkSurgeHardChallenge": {
+      "name": "虚空狂潮",
+      "description": "激活 |COUNT| 个虚空泉脉",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeElectricChallenge": {
+      "name": "电疗",
+      "description": "使用电击元素瓶击中 |COUNT| 名敌人",
+      "count": 12
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeElectricEasyChallenge": {
+      "name": "电疗",
+      "description": "使用电击元素瓶击中 |COUNT| 名敌人",
+      "count": 6
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeElectricHardChallenge": {
+      "name": "电疗",
+      "description": "使用电击元素瓶击中 |COUNT| 名敌人",
+      "count": 18
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeFireChallenge": {
+      "name": "火海风暴",
+      "description": "使用火焰元素瓶击中 |COUNT| 名敌人",
+      "count": 12
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeFireEasyChallenge": {
+      "name": "火海风暴",
+      "description": "使用火焰元素瓶击中 |COUNT| 名敌人",
+      "count": 6
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeFireHardChallenge": {
+      "name": "火海风暴",
+      "description": "使用火焰元素瓶击中 |COUNT| 名敌人",
+      "count": 18
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeIceChallenge": {
+      "name": "活活冻死",
+      "description": "使用冰冻元素瓶击中 |COUNT| 名敌人",
+      "count": 12
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeIceEasyChallenge": {
+      "name": "活活冻死",
+      "description": "使用冰冻元素瓶击中 |COUNT| 名敌人",
+      "count": 6
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeIceHardChallenge": {
+      "name": "活活冻死",
+      "description": "使用冰冻元素瓶击中 |COUNT| 名敌人",
+      "count": 18
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeToxinChallenge": {
+      "name": "剧毒圣杯",
+      "description": "使用毒素元素瓶击中 |COUNT| 名敌人",
+      "count": 12
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeToxinEasyChallenge": {
+      "name": "剧毒圣杯",
+      "description": "使用毒素元素瓶击中 |COUNT| 名敌人",
+      "count": 6
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeToxinHardChallenge": {
+      "name": "剧毒圣杯",
+      "description": "使用毒素元素瓶击中 |COUNT| 名敌人",
+      "count": 18
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabCollectTearsChallenge": {
+      "name": "凝视",
+      "description": "收集 |COUNT| 个低语者之眼",
+      "count": 45
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefeatDoppelgangerChallenge": {
+      "name": "致命低语",
+      "description": "击败嘲讽低语或尖刻低语",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefenseActivatePillarChallenge": {
+      "name": "非礼勿视",
+      "description": "收集荧音浮印以激活 |COUNT| 次防御力量",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefenseActivatePillarEasyChallenge": {
+      "name": "非礼勿视",
+      "description": "收集荧音浮印以激活 |COUNT| 次防御力量",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefenseActivatePillarHardChallenge": {
+      "name": "非礼勿视",
+      "description": "收集荧音浮印以激活 |COUNT| 次防御力量",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefenseActivatePillarVeryHardChallenge": {
+      "name": "非礼勿视",
+      "description": "收集荧音浮印以激活 |COUNT| 次防御力量",
+      "count": 4
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDecorationChallenge": {
+      "name": "破坏能手",
+      "description": "摧毁 |COUNT| 个装饰物",
+      "count": 60
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDemolystLimbsChallenge": {
+      "name": "拆解爆破者",
+      "description": "摧毁 |COUNT| 个爆破型殁世机甲的四肢",
+      "count": 5
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDemolystLimbsEasyChallenge": {
+      "name": "拆解爆破者",
+      "description": "摧毁 |COUNT| 个爆破型殁世机甲的四肢",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDemolystLimbsHardChallenge": {
+      "name": "拆解爆破者",
+      "description": "摧毁 |COUNT| 个爆破型殁世机甲的四肢",
+      "count": 8
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillFlyingMurmurChallenge": {
+      "name": "对空防御",
+      "description": "杀死 |COUNT| 个飞行的低语者敌人",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurChallenge": {
+      "name": "寂静无声",
+      "description": "消灭 |COUNT| 名低语者敌人",
+      "count": 150
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurEasyChallenge": {
+      "name": "寂静无声",
+      "description": "消灭 |COUNT| 名低语者敌人",
+      "count": 100
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurHardChallenge": {
+      "name": "寂静无声",
+      "description": "消灭 |COUNT| 名低语者敌人",
+      "count": 200
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillMurmurVeryHardChallenge": {
+      "name": "寂静无声",
+      "description": "消灭 |COUNT| 名低语者敌人",
+      "count": 250
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVialedEnemyChallenge": {
+      "name": "化学课",
+      "description": "用硫酸泼向 |COUNT| 名敌人",
+      "count": 30
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigChallenge": {
+      "name": "大人物",
+      "description": "消灭 |COUNT| 名暴戾虚空锐将",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabKillVoidRigEasyChallenge": {
+      "name": "大人物",
+      "description": "消灭 |COUNT| 名暴戾虚空锐将",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge": {
+      "name": "清理房间",
+      "description": "找到 |COUNT| 个低语者石棺",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabNearConduitVulnerabilityChallenge": {
+      "name": "坚毅爆破者",
+      "description": "爆破型殁世机甲在距离导管 40 米以外处于无敌状态",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabRangedMechWeakpointChallenge": {
+      "name": "剔除重型炮兵",
+      "description": "摧毁 |COUNT| 个重型炮兵的弱点",
+      "count": 24
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabRangedMechWeakpointEasyChallenge": {
+      "name": "剔除重型炮兵",
+      "description": "摧毁 |COUNT| 个重型炮兵的弱点",
+      "count": 16
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabRangedMechWeakpointHardChallenge": {
+      "name": "剔除重型炮兵",
+      "description": "摧毁 |COUNT| 个重型炮兵的弱点",
+      "count": 32
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabRangedMechWeakpointVeryHardChallenge": {
+      "name": "剔除重型炮兵",
+      "description": "摧毁 |COUNT| 个重型炮兵的弱点",
+      "count": 42
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabSixMinuteChallenge": {
+      "name": "争分夺秒",
+      "description": "在 6 分钟内完成赏金任务",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabSummonNecramechChallenge": {
+      "name": "忠诚的殁世机甲",
+      "description": "召唤一台殁世机甲",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/EntratiLab/EntratiLabUnstableDocketsChallenge": {
+      "name": "疑虑协议",
+      "description": "文卷将于 20 秒后消失",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Vania/Lich/LichVaniaAbilityKill": {
+      "name": "能量超载",
+      "description": "|OPEN_COLOR|杀毒赏金任务|CLOSE_COLOR|\r\n使用战甲技能击杀 |COUNT| 名敌人。增加能量恢复速率",
+      "count": 40
+    },
+    "/Lotus/Types/Challenges/Vania/Lich/LichVaniaCaptureTargets": {
+      "name": "满载而归",
+      "description": "|OPEN_COLOR|杀毒赏金任务|CLOSE_COLOR|\r\n捕获 |COUNT| 个传承种。在达到目标之前无法撤离",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/Vania/Lich/LichVaniaDestroyProps": {
+      "name": "摧毁掩护",
+      "description": "|OPEN_COLOR|杀毒赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个固定物品",
+      "count": 75
+    },
+    "/Lotus/Types/Challenges/Vania/Lich/LichVaniaDestroySpeakers": {
+      "name": "噪音污染",
+      "description": "|OPEN_COLOR|杀毒赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个科腐不洁者上的音响",
+      "count": 20
+    },
+    "/Lotus/Types/Challenges/Vania/Lich/LichVaniaExplodingInfested": {
+      "name": "爆炸性科腐者",
+      "description": "|OPEN_COLOR|杀毒赏金任务|CLOSE_COLOR|\r\n科腐者敌人死亡时会爆炸",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Vania/Lich/LichVaniaHighKill": {
+      "name": "天降正义",
+      "description": "|OPEN_COLOR|杀毒赏金任务|CLOSE_COLOR|\r\n从高处击杀 |COUNT| 名敌人",
+      "count": 50
+    },
+    "/Lotus/Types/Challenges/Vania/Lich/LichVaniaMercy": {
+      "name": "终结好戏",
+      "description": "|OPEN_COLOR|杀毒赏金任务|CLOSE_COLOR|\r\n使用处决击杀 |COUNT| 名敌人",
+      "count": 8
+    },
+    "/Lotus/Types/Challenges/Vania/Lich/LichVaniaSafeCracker": {
+      "name": "破壳专家",
+      "description": "|OPEN_COLOR|杀毒赏金任务|CLOSE_COLOR|\r\n在完成任务之前找到并打开科腐者补给箱",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaAbilityKillEasy": {
+      "name": "能量超载",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n使用战甲技能击杀 |COUNT| 名敌人。增加能量恢复速率",
+      "count": 10
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaAbilityKillHard": {
+      "name": "能量超载",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n使用战甲技能击杀 |COUNT| 名敌人。增加能量恢复速率",
+      "count": 30
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaAbilityKillNormal": {
+      "name": "能量超载",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n使用战甲技能击杀 |COUNT| 名敌人。增加能量恢复速率",
+      "count": 20
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaAbilityKillVeryHard": {
+      "name": "能量超载",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n使用战甲技能击杀 |COUNT| 名敌人。增加能量恢复速率",
+      "count": 40
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaCaptureTargetsEasy": {
+      "name": "满载而归",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n捕获 |COUNT| 个传承种。在达到目标之前无法撤离",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaCaptureTargetsHard": {
+      "name": "满载而归",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n捕获 |COUNT| 个传承种。在达到目标之前无法撤离",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaCaptureTargetsNormal": {
+      "name": "满载而归",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n捕获 |COUNT| 个传承种。在达到目标之前无法撤离",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaCaptureTargetsVeryHard": {
+      "name": "满载而归",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n捕获 |COUNT| 个传承种。在达到目标之前无法撤离",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksEasy": {
+      "name": "背包破坏者",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个炽蛇军单位的背包",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksHard": {
+      "name": "背包破坏者",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个炽蛇军单位的背包",
+      "count": 9
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksNormal": {
+      "name": "背包破坏者",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个炽蛇军单位的背包",
+      "count": 6
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksVeryHard": {
+      "name": "背包破坏者",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个炽蛇军单位的背包",
+      "count": 12
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsEasy": {
+      "name": "高危物品",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个炽蛇军艾弗旺容器",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsHard": {
+      "name": "高危物品",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个炽蛇军艾弗旺容器",
+      "count": 7
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsNormal": {
+      "name": "高危物品",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个炽蛇军艾弗旺容器",
+      "count": 5
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsVeryHard": {
+      "name": "高危物品",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个炽蛇军艾弗旺容器",
+      "count": 10
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy": {
+      "name": "摧毁掩护",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个固定物品",
+      "count": 20
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsHard": {
+      "name": "摧毁掩护",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个固定物品",
+      "count": 50
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsNormal": {
+      "name": "摧毁掩护",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个固定物品",
+      "count": 30
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsVeryHard": {
+      "name": "摧毁掩护",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个固定物品",
+      "count": 75
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersEasy": {
+      "name": "噪音污染",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个科腐不洁者上的音响",
+      "count": 5
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersHard": {
+      "name": "噪音污染",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个科腐不洁者上的音响",
+      "count": 15
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersNormal": {
+      "name": "噪音污染",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个科腐不洁者上的音响",
+      "count": 10
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroySpeakersVeryHard": {
+      "name": "噪音污染",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个科腐不洁者上的音响",
+      "count": 20
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesEasy": {
+      "name": "爆破残骸",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个自动交通工具",
+      "count": 5
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesHard": {
+      "name": "爆破残骸",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个自动交通工具",
+      "count": 12
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesNormal": {
+      "name": "爆破残骸",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个自动交通工具",
+      "count": 8
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesVeryHard": {
+      "name": "爆破残骸",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n摧毁 |COUNT| 个自动交通工具",
+      "count": 16
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaExplodingInfested": {
+      "name": "爆炸性科腐者",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n科腐者敌人死亡时会爆炸",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaHighKillEasy": {
+      "name": "天降正义",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n从上方击杀 |COUNT| 名敌人",
+      "count": 10
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaHighKillHard": {
+      "name": "天降正义",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n从上方击杀 |COUNT| 名敌人",
+      "count": 35
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaHighKillNormal": {
+      "name": "天降正义",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n从上方击杀 |COUNT| 名敌人",
+      "count": 20
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaHighKillVeryHard": {
+      "name": "天降正义",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n从上方击杀 |COUNT| 名敌人",
+      "count": 50
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaInfestedCrossfire": {
+      "name": "科腐者狂潮",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n科腐者从地下钻出，成为额外的威胁",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaMercyEasy": {
+      "name": "终结好戏",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n使用处决击杀 |COUNT| 名敌人",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaMercyHard": {
+      "name": "终结好戏",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n使用处决击杀 |COUNT| 名敌人",
+      "count": 6
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaMercyNormal": {
+      "name": "终结好戏",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n使用处决击杀 |COUNT| 名敌人",
+      "count": 4
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaMercyVeryHard": {
+      "name": "终结好戏",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n使用处决击杀 |COUNT| 名敌人",
+      "count": 8
+    },
+    "/Lotus/Types/Challenges/Vania/VaniaSafeCracker": {
+      "name": "破壳专家",
+      "description": "|OPEN_COLOR||ALLY|的赏金任务|CLOSE_COLOR|\r\n在完成任务之前找到并打开科腐者补给箱",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateCollectScrapCratesChallenge": {
+      "name": "积累氩烯",
+      "description": "收集 |COUNT| 个氩烯罐",
+      "count": 5
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateCollectScrapCratesEasyChallenge": {
+      "name": "积累氩烯",
+      "description": "收集 |COUNT| 个氩烯罐",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateCollectScrapCratesHardChallenge": {
+      "name": "积累氩烯",
+      "description": "收集 |COUNT| 个氩烯罐",
+      "count": 7
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateCollectScrapCratesVeryHardChallenge": {
+      "name": "积累氩烯",
+      "description": "收集 |COUNT| 个氩烯罐",
+      "count": 9
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateKillAngelsChallenge": {
+      "name": "摧毁天使",
+      "description": "击杀 |COUNT| 名虚空天使",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateKillAngelsEasyChallenge": {
+      "name": "摧毁天使",
+      "description": "击杀 |COUNT| 名虚空天使",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateKillAngelsHardChallenge": {
+      "name": "摧毁天使",
+      "description": "击杀 |COUNT| 名虚空天使",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateKillAngelsVeryHardChallenge": {
+      "name": "摧毁天使",
+      "description": "击杀 |COUNT| 名虚空天使",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateUseAllTurretsChallenge": {
+      "name": "多元军备",
+      "description": "同时启用所有军备类型",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCascadeCompleteWavesChallenge": {
+      "name": "驾驭覆涌",
+      "description": "使用 |COUNT| 个无垢装置",
+      "count": 8
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCascadeCompleteWavesEasyChallenge": {
+      "name": "驾驭覆涌",
+      "description": "使用 |COUNT| 个无垢装置",
+      "count": 6
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCascadeCompleteWavesHardChallenge": {
+      "name": "驾驭覆涌",
+      "description": "使用 |COUNT| 个无垢装置",
+      "count": 10
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCascadeCompleteWavesVeryHardChallenge": {
+      "name": "驾驭覆涌",
+      "description": "使用 |COUNT| 个无垢装置",
+      "count": 12
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectLargeOrbsChallenge": {
+      "name": "收集修复凝剂滴球",
+      "description": "收集 |COUNT| 颗大型修复凝剂滴球",
+      "count": 6
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectLargeOrbsEasyChallenge": {
+      "name": "收集修复凝剂滴球",
+      "description": "收集 |COUNT| 颗大型修复凝剂滴球",
+      "count": 4
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectLargeOrbsHardChallenge": {
+      "name": "收集修复凝剂滴球",
+      "description": "收集 |COUNT| 颗大型修复凝剂滴球",
+      "count": 8
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectLargeOrbsVeryHardChallenge": {
+      "name": "收集修复凝剂滴球",
+      "description": "收集 |COUNT| 颗大型修复凝剂滴球",
+      "count": 10
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectOrbsChallenge": {
+      "name": "收集修复凝剂液滴",
+      "description": "收集 |COUNT| 个修复凝剂",
+      "count": 100
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectOrbsEasyChallenge": {
+      "name": "收集修复凝剂液滴",
+      "description": "收集 |COUNT| 个修复凝剂",
+      "count": 75
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectOrbsHardChallenge": {
+      "name": "收集修复凝剂液滴",
+      "description": "收集 |COUNT| 个修复凝剂",
+      "count": 200
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectOrbsVeryHardChallenge": {
+      "name": "收集修复凝剂液滴",
+      "description": "收集 |COUNT| 个修复凝剂",
+      "count": 300
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionKeepMeterLowChallenge": {
+      "name": "有效对抗虚空洪流",
+      "description": "封闭 |COUNT| 个裂口并将计量表保持在 70% 以下",
+      "count": 6
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionKeepMeterLowEasyChallenge": {
+      "name": "有效对抗虚空洪流",
+      "description": "封闭 |COUNT| 个裂口并将计量表保持在 70% 以下",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionKeepMeterLowHardChallenge": {
+      "name": "有效对抗虚空洪流",
+      "description": "封闭 |COUNT| 个裂口并将计量表保持在 70% 以下",
+      "count": 9
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionKeepMeterLowVeryHardChallenge": {
+      "name": "有效对抗虚空洪流",
+      "description": "封闭 |COUNT| 个裂口并将计量表保持在 70% 以下",
+      "count": 12
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanDefeatVoidAngelChallenge": {
+      "name": "唤醒与驱逐",
+      "description": "唤醒一个休眠的天使并击败它",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanExterminateFastCompleteChallenge": {
+      "name": "高效歼灭",
+      "description": "在 6 分钟内完成任务",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanExterminateNoPowersChallenge": {
+      "name": "歼灭——仅限武器",
+      "description": "在没有技能的情况下完成任务",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanFindMelicaCacheChallenge": {
+      "name": "给梅利卡加油打气",
+      "description": "找到一块耀金奖章并交给梅利卡",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanFloodCompleteWavesChallenge": {
+      "name": "修复裂口",
+      "description": "封闭 |COUNT| 个裂口",
+      "count": 9
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanFloodCompleteWavesEasyChallenge": {
+      "name": "修复裂口",
+      "description": "封闭 |COUNT| 个裂口",
+      "count": 6
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanFloodCompleteWavesHardChallenge": {
+      "name": "修复裂口",
+      "description": "封闭 |COUNT| 个裂口",
+      "count": 12
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanFloodCompleteWavesVeryHardChallenge": {
+      "name": "修复裂口",
+      "description": "封闭 |COUNT| 个裂口",
+      "count": 15
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKeepBarracksAliveChallenge": {
+      "name": "保护我们的抑制装置",
+      "description": "摧毁 |COUNT| 个虚空天使，并保持抑制装置完整",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKeepBarracksAliveHardChallenge": {
+      "name": "保护我们的抑制装置",
+      "description": "摧毁 |COUNT| 个虚空天使，并保持抑制装置完整",
+      "count": 2
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKeepBarracksAliveVeryHardChallenge": {
+      "name": "保护我们的抑制装置",
+      "description": "摧毁 |COUNT| 个虚空天使，并保持抑制装置完整",
+      "count": 3
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorChallenge": {
+      "name": "脱离战甲",
+      "description": "作为指挥官击杀 |COUNT| 名敌人",
+      "count": 20
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorEasyChallenge": {
+      "name": "脱离战甲",
+      "description": "作为指挥官击杀 |COUNT| 名敌人",
+      "count": 10
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorHardChallenge": {
+      "name": "脱离战甲",
+      "description": "作为指挥官击杀 |COUNT| 名敌人",
+      "count": 30
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillAsOperatorVeryHardChallenge": {
+      "name": "脱离战甲",
+      "description": "作为指挥官击杀 |COUNT| 名敌人",
+      "count": 40
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusChallenge": {
+      "name": "击退 Corpus",
+      "description": "击杀 |COUNT| 名敌人",
+      "count": 150
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusEasyChallenge": {
+      "name": "击退 Corpus",
+      "description": "击杀 |COUNT| 名敌人",
+      "count": 100
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusHardChallenge": {
+      "name": "击退 Corpus",
+      "description": "击杀 |COUNT| 名敌人",
+      "count": 200
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillCorpusVeryHardChallenge": {
+      "name": "击退 Corpus",
+      "description": "击杀 |COUNT| 名敌人",
+      "count": 250
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerChallenge": {
+      "name": "突袭 Grineer",
+      "description": "击杀 |COUNT| 名敌人",
+      "count": 150
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerEasyChallenge": {
+      "name": "突袭 Grineer",
+      "description": "击杀 |COUNT| 名敌人",
+      "count": 100
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerHardChallenge": {
+      "name": "突袭 Grineer",
+      "description": "击杀 |COUNT| 名敌人",
+      "count": 200
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanKillGrineerVeryHardChallenge": {
+      "name": "突袭 Grineer",
+      "description": "击杀 |COUNT| 名敌人",
+      "count": 250
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanMobDefProtectShieldsChallenge": {
+      "name": "保护控制台护盾",
+      "description": "保持防御目标的护盾完整",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanSurvivalAbove50Challenge": {
+      "name": "减少虚空污染",
+      "description": "使用 |COUNT| 个无垢装置来使计量表维持在 50% 以下",
+      "count": 5
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanSurvivalAbove50EasyChallenge": {
+      "name": "减少虚空污染",
+      "description": "使用 |COUNT| 个无垢装置来使计量表维持在 50% 以下",
+      "count": 4
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanSurvivalAbove50HardChallenge": {
+      "name": "减少虚空污染",
+      "description": "使用 |COUNT| 个无垢装置来使计量表维持在 50% 以下",
+      "count": 7
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanSurvivalAbove50VeryHardChallenge": {
+      "name": "减少虚空污染",
+      "description": "使用 |COUNT| 个无垢装置来使计量表维持在 50% 以下",
+      "count": 9
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanUseVoidRiftsChallenge": {
+      "name": "窃取新力量",
+      "description": "找到并激活 |COUNT| 个虚空泉脉",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanUseVoidRiftsEasyChallenge": {
+      "name": "窃取新力量",
+      "description": "找到并激活 |COUNT| 个虚空泉脉",
+      "count": 1
+    },
+    "/Lotus/Types/Challenges/Zariman/ZarimanUseVoidRiftsHardChallenge": {
+      "name": "窃取新力量",
+      "description": "找到并激活 |COUNT| 个虚空泉脉",
+      "count": 2
+    }
+  },
+  "nodes": {
+    "SolNode230": {
+      "name": "永视弧域",
+      "missionName": "虚空洪流",
+      "faction": "Grineer",
+      "minEnemyLevel": 50,
+      "maxEnemyLevel": 55
+    },
+    "SolNode231": {
+      "name": "哈拉科防线",
+      "missionName": "歼灭",
+      "faction": "Grineer",
+      "minEnemyLevel": 50,
+      "maxEnemyLevel": 55
+    },
+    "SolNode232": {
+      "name": "涂沃主厅",
+      "missionName": "虚空覆涌",
+      "faction": "Grineer",
+      "minEnemyLevel": 50,
+      "maxEnemyLevel": 55
+    },
+    "SolNode233": {
+      "name": "奥金工场",
+      "missionName": "虚空决战",
+      "faction": "Grineer",
+      "minEnemyLevel": 50,
+      "maxEnemyLevel": 55
+    },
+    "SolNode235": {
+      "name": "翠径",
+      "missionName": "移动防御",
+      "faction": "Grineer",
+      "minEnemyLevel": 50,
+      "maxEnemyLevel": 55
+    },
+    "SolNode715": {
+      "name": "恶涌",
+      "missionName": "刺杀",
+      "faction": "低语者",
+      "minEnemyLevel": 55,
+      "maxEnemyLevel": 60
+    },
+    "SolNode716": {
+      "name": "孽杀",
+      "missionName": "歼灭",
+      "faction": "低语者",
+      "minEnemyLevel": 55,
+      "maxEnemyLevel": 60
+    },
+    "SolNode717": {
+      "name": "不灭之地",
+      "missionName": "生存",
+      "faction": "低语者",
+      "minEnemyLevel": 55,
+      "maxEnemyLevel": 60
+    },
+    "SolNode718": {
+      "name": "异化区",
+      "missionName": "元素转换",
+      "faction": "低语者",
+      "minEnemyLevel": 55,
+      "maxEnemyLevel": 60
+    },
+    "SolNode719": {
+      "name": "墓垒",
+      "missionName": "镜像防御",
+      "faction": "低语者",
+      "minEnemyLevel": 55,
+      "maxEnemyLevel": 60
+    },
+    "SolNode721": {
+      "name": "卫城区",
+      "missionName": "中断",
+      "faction": "低语者",
+      "minEnemyLevel": 55,
+      "maxEnemyLevel": 60
+    },
+    "SolNode850": {
+      "name": "传承种收割",
+      "missionName": "传承种收割",
+      "faction": "科腐者",
+      "minEnemyLevel": 65,
+      "maxEnemyLevel": 70
+    },
+    "SolNode851": {
+      "name": "地狱净化：炽蛇军",
+      "missionName": "生存",
+      "faction": "炽蛇军",
+      "minEnemyLevel": 65,
+      "maxEnemyLevel": 70
+    },
+    "SolNode852": {
+      "name": "地狱净化：科腐者",
+      "missionName": "生存",
+      "faction": "科腐者",
+      "minEnemyLevel": 65,
+      "maxEnemyLevel": 70
+    },
+    "SolNode853": {
+      "name": "歼灭：炽蛇军",
+      "missionName": "歼灭",
+      "faction": "炽蛇军",
+      "minEnemyLevel": 65,
+      "maxEnemyLevel": 70
+    },
+    "SolNode854": {
+      "name": "歼灭：科腐者",
+      "missionName": "歼灭",
+      "faction": "科腐者",
+      "minEnemyLevel": 65,
+      "maxEnemyLevel": 70
+    },
+    "SolNode856": {
+      "name": "刺杀：H-09 坦克",
+      "missionName": "刺杀",
+      "faction": "炽蛇军",
+      "minEnemyLevel": 65,
+      "maxEnemyLevel": 70
+    },
+    "SolNode858": {
+      "name": "至日广场",
+      "missionName": "防御",
+      "faction": "炽蛇军",
+      "minEnemyLevel": 65,
+      "maxEnemyLevel": 70
+    }
+  },
+  "allies": {
+    "Amir": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/AmirAllyAgent",
+    "Aoi": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/AoiAllyAgent",
+    "Arthur": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/ArthurAllyAgent",
+    "Eleanor": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/EleanorAllyAgent",
+    "Lettie": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/LettieAllyAgent",
+    "Quincy": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/QuincyAllyAgent"
+  },
+  "ally_names": {
+    "Amir": "阿米尔",
+    "Aoi": "碧",
+    "Arthur": "亚瑟",
+    "Eleanor": "埃莉诺",
+    "Lettie": "莱蒂",
+    "Quincy": "昆西"
+  }
+}

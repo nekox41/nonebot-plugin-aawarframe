@@ -1,7 +1,11 @@
+# 作用：实现 models 层的 worldstate 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 from datetime import datetime, timezone
 from typing import Annotated, Any
 
-from pydantic import BaseModel, BeforeValidator, Field
+from pydantic import BaseModel, BeforeValidator, Field, model_validator
 
 
 def parse_date(value: Any) -> datetime:
@@ -39,10 +43,21 @@ class VoidStorm(TimedMission):
 
 
 class SyndicateJob(BaseModel):
-    job_type: str = Field(alias="jobType")
+    job_type: str = Field(default="", alias="jobType")
+    is_vault: bool = Field(default=False, alias="isVault")
+    endless: bool = False
+    location_tag: str = Field(default="", alias="locationTag")
     rewards: str
+    xp_amounts: list[Annotated[int, Field(ge=0)]] = Field(default_factory=list, alias="xpAmounts")
+    mastery_req: int | None = Field(default=None, alias="masteryReq", ge=0)
     min_level: int = Field(alias="minEnemyLevel")
     max_level: int = Field(alias="maxEnemyLevel")
+
+    @model_validator(mode="after")
+    def require_job_type(self):
+        if not self.job_type and not self.is_vault:
+            raise ValueError("非隔离库赏金缺少任务类型")
+        return self
 
 
 class SyndicateMission(BaseModel):
@@ -50,9 +65,12 @@ class SyndicateMission(BaseModel):
     activation: WorldDate = Field(alias="Activation")
     expiry: WorldDate = Field(alias="Expiry")
     jobs: list[dict] = Field(default_factory=list, alias="Jobs")
+    seed: int | None = Field(default=None, alias="Seed", strict=True)
 
 
 class Conquest(BaseModel):
+    activation: WorldDate | None = Field(default=None, alias="Activation")
+    expiry: WorldDate | None = Field(default=None, alias="Expiry")
     type: str = Field(alias="Type")
     missions: list[dict] = Field(alias="Missions")
     variables: list[str] = Field(default_factory=list, alias="Variables")
@@ -71,6 +89,7 @@ class ConquestMission(BaseModel):
 
 
 class VaultReward(BaseModel):
+    threshold: int | None = Field(default=None, alias="PointThreshold", ge=0)
     reward: str = Field(alias="Reward")
     count: int = Field(alias="ItemCount", ge=0)
 
@@ -87,3 +106,45 @@ class CycleState(BaseModel):
     next_state: str
     expiry: datetime
     basis: str
+
+
+class NightwaveChallenge(BaseModel):
+    activation: WorldDate = Field(alias="Activation")
+    expiry: WorldDate = Field(alias="Expiry")
+    challenge: str = Field(alias="Challenge", min_length=1)
+    daily: bool = Field(default=False, alias="Daily")
+
+
+class NightwaveSeason(BaseModel):
+    activation: WorldDate | None = Field(default=None, alias="Activation")
+    expiry: WorldDate | None = Field(default=None, alias="Expiry")
+    challenges: list[dict] = Field(alias="ActiveChallenges")
+
+
+class CircuitCategory(BaseModel):
+    category: str = Field(alias="Category")
+    choices: list[str] = Field(alias="Choices", min_length=1)
+
+
+class CircuitWeek(BaseModel):
+    activation: WorldDate = Field(alias="Activation")
+    expiry: WorldDate = Field(alias="Expiry")
+    categories: list[CircuitCategory] = Field(alias="CategoryChoices")
+
+
+class CalendarEvent(BaseModel):
+    type: str
+    challenge: str | None = None
+    reward: str | None = None
+
+
+class CalendarDay(BaseModel):
+    day: int = Field(ge=1, le=365)
+    events: list[CalendarEvent]
+
+
+class CalendarSeason(BaseModel):
+    activation: WorldDate = Field(alias="Activation")
+    expiry: WorldDate = Field(alias="Expiry")
+    days: list[CalendarDay] = Field(alias="Days")
+    season: str = Field(alias="Season")

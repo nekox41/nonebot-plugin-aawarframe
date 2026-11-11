@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+{% for section in card.sections %}
+<section class="nightwave-group nightwave-group--{{ loop.index }}">
+  <h2>{{ section.title }}<span>{{ section.rows | length }} 项</span></h2>
+  {% for row in section.rows %}
+  <article class="nightwave-task">
+    <div class="nightwave-task__body">
+      <div class="nightwave-task__name"><strong>{{ row[0] }}</strong>{% if row[4] %}<span class="nightwave-task__tag">{{ row[4] }}</span>{% endif %}</div>
+      <p>{{ row[1] }}</p>
+    </div>
+    <div class="nightwave-task__meta"><strong>{{ row[2] }} <small>声望</small></strong><span>剩余 {{ row[3] }}</span></div>
+  </article>
+  {% endfor %}
+  {% for note in section.notes %}<p class="note">{{ note }}</p>{% endfor %}
+</section>
+{% endfor %}
+{% endblock %}

@@ -1,3 +1,7 @@
+# 作用：实现 localization 层的 resolver 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import json
 import re
 from functools import lru_cache

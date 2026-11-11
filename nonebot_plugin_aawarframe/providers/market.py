@@ -1,3 +1,7 @@
+# 作用：实现 providers 层的 market 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import logging
 from datetime import timedelta
 from pathlib import Path

@@ -1,3 +1,7 @@
+# 作用：提供 conftest 测试与联调支持。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import json
 from pathlib import Path
 

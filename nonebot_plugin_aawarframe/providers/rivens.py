@@ -1,3 +1,7 @@
+# 作用：实现 providers 层的 rivens 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
@@ -31,12 +35,18 @@ class RivenProvider:
                 if persisted is not None:
                     try:
                         cached = RivenSnapshot.model_validate(persisted)
-                        if (cached.source == RIVEN_URL and cached.fetched_at.tzinfo is not None
-                                and cached.fetched_at <= now):
+                        if (
+                            cached.source == RIVEN_URL
+                            and cached.fetched_at.tzinfo is not None
+                            and cached.fetched_at <= now
+                        ):
                             self.snapshot = cached
                     except (TypeError, ValueError):
                         logger.warning("紫卡持久化缓存无效，将重新获取")
-            if self.snapshot and self.snapshot.fetched_at.astimezone(timezone.utc).date() == now.date():
+            if (
+                self.snapshot
+                and self.snapshot.fetched_at.astimezone(timezone.utc).date() == now.date()
+            ):
                 return self.snapshot.model_copy(deep=True)
             if self.last_attempt and now - self.last_attempt < timedelta(minutes=15):
                 return self._fallback(now)
@@ -51,9 +61,13 @@ class RivenProvider:
                         updated_at = parsedate_to_datetime(modified).astimezone(timezone.utc)
                     except (TypeError, ValueError, OverflowError):
                         logger.warning("官方紫卡文件更新时间格式变化")
-                snapshot = RivenSnapshot(data=records, source=RIVEN_URL,
-                                         fetched_at=utcnow(), source_updated_at=updated_at,
-                                         skipped_records=skipped)
+                snapshot = RivenSnapshot(
+                    data=records,
+                    source=RIVEN_URL,
+                    fetched_at=utcnow(),
+                    source_updated_at=updated_at,
+                    skipped_records=skipped,
+                )
                 await write_json(self.cache_path, snapshot.model_dump(mode="json"))
                 self.snapshot = snapshot
                 logger.info("官方紫卡周数据同步完成：%s 条记录", len(records))
@@ -75,7 +89,9 @@ class RivenProvider:
                 if snapshot.stale:
                     delay = 900
                 else:
-                    midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+                    midnight = (now + timedelta(days=1)).replace(
+                        hour=0, minute=0, second=0, microsecond=0
+                    )
                     delay = max(1, (midnight - now).total_seconds())
             except Exception:
                 logger.warning("紫卡日更新稍后重试", exc_info=True)

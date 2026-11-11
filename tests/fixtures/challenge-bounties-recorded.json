@@ -1,0 +1,63 @@
+{
+  "source": "https://api.warframe.com/cdn/worldState.php",
+  "fetched_at": "2026-11-10T06:36:15+00:00",
+  "data": {
+    "Time": 1794292575,
+    "SyndicateMissions": [
+      {
+        "_id": {
+          "$oid": "6af2a6f30000000000000004"
+        },
+        "Activation": {
+          "$date": {
+            "$numberLong": "1794287347796"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794296346670"
+          }
+        },
+        "Tag": "EntratiLabSyndicate",
+        "Seed": 51369,
+        "Nodes": []
+      },
+      {
+        "_id": {
+          "$oid": "6af2a6f30000000000000006"
+        },
+        "Activation": {
+          "$date": {
+            "$numberLong": "1794287347796"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794296346670"
+          }
+        },
+        "Tag": "HexSyndicate",
+        "Seed": 51369,
+        "Nodes": []
+      },
+      {
+        "_id": {
+          "$oid": "6af2a6f30000000000000037"
+        },
+        "Activation": {
+          "$date": {
+            "$numberLong": "1794287347796"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794296346670"
+          }
+        },
+        "Tag": "ZarimanSyndicate",
+        "Seed": 51369,
+        "Nodes": []
+      }
+    ]
+  }
+}

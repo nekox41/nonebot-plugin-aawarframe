@@ -1,3 +1,7 @@
+# 作用：实现 nonebot_plugin_aawarframe 层的 bootstrap 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import asyncio
 
 from nonebot import get_driver, get_plugin_config

@@ -1,3 +1,7 @@
+# 作用：实现 services 层的 market 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 from ..localization.resolver import ItemResolver
 from ..models.common import Card, DataStatus, Section
 from ..models.errors import UserInputError

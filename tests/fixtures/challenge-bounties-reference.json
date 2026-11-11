@@ -1,0 +1,92 @@
+{
+  "source": "https://oracle.browse.wf/bounty-cycle",
+  "seed": 51369,
+  "response": {
+    "expiry": 1794296346670,
+    "rot": "A",
+    "vaultRot": "C",
+    "zarimanFaction": "FC_CORPUS",
+    "bounties": {
+      "ZarimanSyndicate": [
+        {
+          "node": "SolNode231",
+          "challenge": "/Lotus/Types/Challenges/Zariman/ZarimanUseVoidRiftsEasyChallenge"
+        },
+        {
+          "node": "SolNode235",
+          "challenge": "/Lotus/Types/Challenges/Zariman/ZarimanFindMelicaCacheChallenge"
+        },
+        {
+          "node": "SolNode232",
+          "challenge": "/Lotus/Types/Challenges/Zariman/ZarimanSurvivalAbove50Challenge"
+        },
+        {
+          "node": "SolNode230",
+          "challenge": "/Lotus/Types/Challenges/Zariman/ZarimanCorruptionCollectLargeOrbsHardChallenge"
+        },
+        {
+          "node": "SolNode233",
+          "challenge": "/Lotus/Types/Challenges/Zariman/ZarimanAssassinateUseAllTurretsChallenge"
+        }
+      ],
+      "EntratiLabSyndicate": [
+        {
+          "node": "SolNode719",
+          "challenge": "/Lotus/Types/Challenges/EntratiLab/EntratiLabDefenseActivatePillarEasyChallenge"
+        },
+        {
+          "node": "SolNode717",
+          "challenge": "/Lotus/Types/Challenges/EntratiLab/EntratiLabLootCratesChallenge"
+        },
+        {
+          "node": "SolNode715",
+          "challenge": "/Lotus/Types/Challenges/EntratiLab/EntratiLabRangedMechWeakpointChallenge"
+        },
+        {
+          "node": "SolNode721",
+          "challenge": "/Lotus/Types/Challenges/EntratiLab/EntratiLabDestroyDecorationChallenge"
+        },
+        {
+          "node": "SolNode718",
+          "challenge": "/Lotus/Types/Challenges/EntratiLab/EntratiLabAlchemyGrenadeIceHardChallenge"
+        }
+      ],
+      "HexSyndicate": [
+        {
+          "node": "SolNode853",
+          "challenge": "/Lotus/Types/Challenges/Vania/VaniaDestroyHazardsEasy",
+          "ally": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/LettieAllyAgent"
+        },
+        {
+          "node": "SolNode854",
+          "challenge": "/Lotus/Types/Challenges/Vania/VaniaDestroyPropsEasy",
+          "ally": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/ArthurAllyAgent"
+        },
+        {
+          "node": "SolNode851",
+          "challenge": "/Lotus/Types/Challenges/Vania/VaniaMercyNormal",
+          "ally": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/QuincyAllyAgent"
+        },
+        {
+          "node": "SolNode858",
+          "challenge": "/Lotus/Types/Challenges/Vania/VaniaDestroyBackpacksHard",
+          "ally": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/AoiAllyAgent"
+        },
+        {
+          "node": "SolNode850",
+          "challenge": "/Lotus/Types/Challenges/Vania/VaniaSafeCracker",
+          "ally": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/AmirAllyAgent"
+        },
+        {
+          "node": "SolNode856",
+          "challenge": "/Lotus/Types/Challenges/Vania/VaniaDestroyVehiclesVeryHard",
+          "ally": "/Lotus/Types/Gameplay/1999Wf/ProtoframeAllies/EleanorAllyAgent"
+        },
+        {
+          "node": "SolNode850",
+          "challenge": "/Lotus/Types/Challenges/Vania/Lich/LichVaniaCaptureTargets"
+        }
+      ]
+    }
+  }
+}

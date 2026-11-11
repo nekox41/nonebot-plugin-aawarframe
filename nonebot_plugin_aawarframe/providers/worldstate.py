@@ -1,3 +1,7 @@
+# 作用：实现 providers 层的 worldstate 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 from pathlib import Path
 
 from ..infrastructure.cache import AsyncTTLCache

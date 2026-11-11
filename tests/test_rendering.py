@@ -1,3 +1,7 @@
+# 作用：验证 rendering 相关行为。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -36,7 +40,7 @@ async def test_render_concurrency_cache_and_singleflight(monkeypatch):
 
     async def render(html, **kwargs):
         nonlocal running, maximum, calls
-        assert kwargs["width"] == 900
+        assert kwargs["width"] == 800
         calls += 1
         running += 1
         maximum = max(maximum, running)
@@ -45,6 +49,7 @@ async def test_render_concurrency_cache_and_singleflight(monkeypatch):
         return b"png"
 
     monkeypatch.setattr(nonebot_plugin_htmlrender, "render_html", render)
+    monkeypatch.setattr(CardRenderer, "_encode_webp", AsyncMock(return_value=b"webp"))
     renderer = CardRenderer()
     first = Card(title="one", source="fixture")
     await asyncio.gather(*(renderer.render(first) for _ in range(5)))

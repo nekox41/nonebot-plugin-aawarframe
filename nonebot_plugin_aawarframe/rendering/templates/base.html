@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; font-src 'none'; img-src 'none'">
+  <title>{{ card.title }}</title>
+  <style>{{ css | safe }}</style>
+</head>
+<body class="{% if card.fissure_mode or card.cycle_items or card.bounty_mode or card.archimedea_mode or card.nightwave_mode or card.weekly_mode %}compact-page {% endif %}{% if card.weekly_mode %}weekly-page{% elif card.nightwave_mode %}nightwave-page{% elif card.archimedea_mode %}archimedea-page{% elif card.fissure_mode %}fissure-page{% elif card.cycle_items %}cycle-page{% elif card.bounty_mode %}bounty-page{% endif %}">
+<main class="card{% if card.fissure_mode %} card--fissures{% endif %}">
+  <header class="card__header">
+    <div><div class="eyebrow">WARFRAME · 国际服</div><h1>{{ card.title }}</h1></div>
+    <span class="header-label">{% if card.nightwave_mode %}午夜电波{% elif card.archimedea_mode %}科研轮换{% elif card.cycle_items %}环境周期{% elif card.fissure_mode %}虚空裂缝{% else %}游戏查询{% endif %}</span>
+  </header>
+  <div class="card__content">
+  {% if card.stale %}<p class="notice notice--warning">暂未更新，当前显示上次记录。</p>{% endif %}
+  {% block content %}{% endblock %}
+  {% if card.notes %}<aside class="notes">{% for note in card.notes %}<p class="note">{{ note }}</p>{% endfor %}</aside>{% endif %}
+  </div>
+  <footer class="card__footer">
+    <div class="footer-meta">{% if not card.bounty_mode %}<span>更新于 {{ (card.fetched_at | beijing).strftime('%m-%d %H:%M:%S') }}</span>{% endif %}<span>北京时间{% if total > 1 %} · {{ page }} / {{ total }} 页{% endif %}</span></div>
+    <strong class="signature">By. Aameow</strong>
+  </footer>
+</main>
+</body>
+</html>

@@ -1,3 +1,7 @@
+# 作用：实现 infrastructure 层的 http 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import asyncio
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime

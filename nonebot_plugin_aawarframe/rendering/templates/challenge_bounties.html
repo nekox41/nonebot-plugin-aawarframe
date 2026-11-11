@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+{% if not card.bounty_items %}
+<div class="fissure-empty"><h2>当前暂无{{ card.title }}</h2><p>请稍后再试。</p></div>
+{% else %}
+<div class="bounty-refresh"><span>{{ card.bounty_region }}</span><span>本期剩余 {{ card.bounty_remaining }} · {{ (card.bounty_expiry | beijing).strftime('%H:%M:%S') }} 刷新</span></div>
+{% for job in card.bounty_items %}
+<section class="hub-bounty">
+  <div class="hub-bounty-top"><h2>{{ job.index }}. {% if job.node.startswith(job.mission) %}{{ job.node }}{% else %}{{ job.mission }} · {{ job.node }}{% endif %}{% if job.kind != '常规' %}（{{ job.kind }}）{% endif %}</h2><span>{{ job.min_level }}–{{ job.max_level }} 级</span></div>
+  <div class="hub-bounty-meta"><span>{{ card.bounty_currency }} {{ job.standing }}</span><span>{{ job.faction }}</span>{% if job.ally %}<span>同行 {{ job.ally }} · 好感度 +{{ job.chemistry }}</span>{% endif %}</div>
+  {% for objective in job.objectives %}<p class="hub-bounty-objective">{{ objective }}</p>{% endfor %}
+</section>
+{% if card.bounty_detail %}{% include 'bounty_rewards.html' %}{% endif %}
+{% endfor %}
+{% endif %}
+{% endblock %}

@@ -1,3 +1,7 @@
+# 作用：实现 infrastructure 层的 cache 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import asyncio
 from collections import OrderedDict
 from collections.abc import Awaitable, Callable, Hashable

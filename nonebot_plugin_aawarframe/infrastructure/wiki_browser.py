@@ -1,3 +1,7 @@
+# 作用：实现 infrastructure 层的 wiki_browser 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import asyncio
 import json
 import logging
@@ -85,14 +89,18 @@ class WikiBrowserClient:
                             const element = document.querySelector('body pre') || document.body;
                             if (!element) return false;
                             try {
-                                JSON.parse(element.innerText.replace(/^\uFEFF/, '').trim());
+                                JSON.parse(element.innerText.replace(/^\ufeff/, '').trim());
                                 return true;
                             } catch { return false; }
                         }""",
                         timeout=self.timeout * 1000,
                     )
                     pre = page.locator("body pre").first
-                    text = await pre.inner_text() if await pre.count() else await page.locator("body").inner_text()
+                    text = (
+                        await pre.inner_text()
+                        if await pre.count()
+                        else await page.locator("body").inner_text()
+                    )
                     result = json.loads(text.lstrip("\ufeff").strip())
                     if last_status is not None and last_status >= 400:
                         raise RuntimeError(f"Wiki 页面访问失败，HTTP {last_status}")
@@ -100,7 +108,11 @@ class WikiBrowserClient:
                     return result
             except (TimeoutError, PlaywrightTimeoutError) as exc:
                 if challenged:
-                    logger.warning("Wiki 等待 %.0f 秒后仍未返回 JSON：HTTP %s，曾出现验证页", self.timeout, last_status)
+                    logger.warning(
+                        "Wiki 等待 %.0f 秒后仍未返回 JSON：HTTP %s，曾出现验证页",
+                        self.timeout,
+                        last_status,
+                    )
                     raise WikiChallengeError("Wiki 浏览器验证未在等待时限内完成") from exc
                 raise RuntimeError("Wiki 页面未在等待时限内展示 JSON") from exc
             finally:

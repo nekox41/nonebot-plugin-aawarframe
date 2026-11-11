@@ -1,3 +1,7 @@
+# 作用：实现 nonebot_plugin_aawarframe 层的 config 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 from pathlib import Path
 
 from pydantic import AnyHttpUrl, BaseModel, Field

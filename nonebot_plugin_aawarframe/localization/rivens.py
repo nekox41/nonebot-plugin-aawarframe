@@ -1,3 +1,7 @@
+# 作用：实现 localization 层的 rivens 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import re
 from functools import lru_cache
 
@@ -32,8 +36,12 @@ def _weapon_names() -> dict[str, str]:
         if name.isascii() and slug in chinese
     }
     # 专门的紫卡武器目录优先，避免普通交易目录缺失基础武器或选中不规范别名。
-    names.update({normalize(english): chinese
-                  for english, chinese in load_mapping("riven_weapons.json").items()})
+    names.update(
+        {
+            normalize(english): chinese
+            for english, chinese in load_mapping("riven_weapons.json").items()
+        }
+    )
     return names
 
 
@@ -63,10 +71,17 @@ def resolve_riven_names(query: str, available: set[str]) -> list[str]:
     if key in aliases:
         return sorted(aliases[key])
     cutoff = min(2, len(key) // 3)
-    matches = process.extract(key, sorted(aliases), scorer=Levenshtein.distance,
-                              score_cutoff=cutoff, limit=None)
+    matches = process.extract(
+        key, sorted(aliases), scorer=Levenshtein.distance, score_cutoff=cutoff, limit=None
+    )
     if not matches:
         return []
     closest = min(match[1] for match in matches)
-    return sorted({weapon for alias, distance, _ in matches if distance == closest
-                   for weapon in aliases[alias]})
+    return sorted(
+        {
+            weapon
+            for alias, distance, _ in matches
+            if distance == closest
+            for weapon in aliases[alias]
+        }
+    )

@@ -1,0 +1,165 @@
+{
+  "_source": {
+    "circuit": "https://www.warframe.com/en/patch-notes/psn/43-0-0",
+    "normal": "https://www.warframe.com/en/patch-notes/xbox/33-0-0",
+    "steel": "https://github.com/WFCD/warframe-worldstate-parser/blob/master/lib/models/SteelPathOffering.ts",
+    "reviewed_at": "2026-11-11"
+  },
+  "normal": [
+    [
+      "Excalibur",
+      "Trinity",
+      "Ember"
+    ],
+    [
+      "Loki",
+      "Mag",
+      "Rhino"
+    ],
+    [
+      "Ash",
+      "Frost",
+      "Nyx"
+    ],
+    [
+      "Saryn",
+      "Vauban",
+      "Nova"
+    ],
+    [
+      "Nekros",
+      "Valkyr",
+      "Oberon"
+    ],
+    [
+      "Hydroid",
+      "Mirage",
+      "Limbo"
+    ],
+    [
+      "Mesa",
+      "Chroma",
+      "Atlas"
+    ],
+    [
+      "Ivara",
+      "Inaros",
+      "Titania"
+    ],
+    [
+      "Nidus",
+      "Octavia",
+      "Harrow"
+    ],
+    [
+      "Gara",
+      "Khora",
+      "Revenant"
+    ],
+    [
+      "Garuda",
+      "Baruuk",
+      "Hildryn"
+    ]
+  ],
+  "hard": [
+    [
+      "Braton",
+      "Lato",
+      "Skana",
+      "Paris",
+      "Kunai"
+    ],
+    [
+      "Boar",
+      "Gammacor",
+      "Angstrum",
+      "Gorgon",
+      "Anku"
+    ],
+    [
+      "Bo",
+      "Latron",
+      "Furis",
+      "Furax",
+      "Strun"
+    ],
+    [
+      "Lex",
+      "Magistar",
+      "Boltor",
+      "Bronco",
+      "Ceramic Dagger"
+    ],
+    [
+      "Torid",
+      "Dual Toxocyst",
+      "Dual Ichor",
+      "Miter",
+      "Atomos"
+    ],
+    [
+      "Ack & Brunt",
+      "Soma",
+      "Vasto",
+      "Nami Solo",
+      "Burston"
+    ],
+    [
+      "Zylok",
+      "Sibear",
+      "Dread",
+      "Despair",
+      "Hate"
+    ],
+    [
+      "Dera",
+      "Sybaris",
+      "Cestra",
+      "Sicarus",
+      "Okina"
+    ],
+    [
+      "Vectis",
+      "Stug",
+      "Ballistica",
+      "Destreza",
+      "Obex"
+    ]
+  ],
+  "steel_epoch": "2020-11-16T00:00:00+00:00",
+  "steel": [
+    {
+      "name": "Umbra Forma 蓝图",
+      "cost": 150
+    },
+    {
+      "name": "50,000 赤毒",
+      "cost": 55
+    },
+    {
+      "name": "组合枪裂罅 Mod",
+      "cost": 75
+    },
+    {
+      "name": "3x Forma",
+      "cost": 75
+    },
+    {
+      "name": "Zaw 裂罅 Mod",
+      "cost": 75
+    },
+    {
+      "name": "30,000 内融核心",
+      "cost": 150
+    },
+    {
+      "name": "步枪裂罅 Mod",
+      "cost": 75
+    },
+    {
+      "name": "霰弹枪裂罅 Mod",
+      "cost": 75
+    }
+  ]
+}

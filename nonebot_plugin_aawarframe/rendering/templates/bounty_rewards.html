@@ -1,0 +1,7 @@
+  {% if job.rewards %}
+  <table class="bounty-rewards">
+    <thead><tr><th>奖励</th><th>数量</th>{% for label in job.reward_labels %}<th>{{ label }}</th>{% endfor %}</tr></thead>
+    <tbody>{% for reward in job.rewards %}<tr><td>{{ reward.name }}</td><td>{{ reward.quantity }}</td>{% for chance in reward.chances %}<td>{{ '%.2f%%' | format(chance * 100) if chance is not none else '—' }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+  </table>
+  <p class="bounty-caption">{{ job.reward_caption }}</p>
+  {% else %}<p class="bounty-missing">{{ job.message }}</p>{% endif %}

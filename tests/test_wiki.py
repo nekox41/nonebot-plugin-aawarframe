@@ -1,3 +1,7 @@
+# 作用：验证 wiki 相关行为。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import asyncio
 import json
 from pathlib import Path

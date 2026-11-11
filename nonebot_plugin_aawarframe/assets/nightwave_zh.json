@@ -1,0 +1,1364 @@
+{
+  "_source": {
+    "url": "https://github.com/calamity-inc/warframe-public-export/blob/senpai/ExportSortieRewards_zh.json",
+    "upstream": "Warframe Public Export · ExportNightwave",
+    "retrieved_at": "2026-11-11",
+    "affiliation_tag": "RadioLegionIntermission16Syndicate"
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailyaimglide": {
+    "name": "滑翔者",
+    "description": "飞身瞄准时击杀 |COUNT| 名敌人",
+    "standing": 1000,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailyartist": {
+    "name": "艺术家",
+    "description": "自定义一件装备的颜色。",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailybulletjump": {
+    "name": "蹦弹",
+    "description": "旋身飞跃 |COUNT| 次。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailycodexscan": {
+    "name": "研究者",
+    "description": "扫描 |COUNT| 次物件或敌人。",
+    "standing": 1000,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailycollectcredits": {
+    "name": "储蓄者",
+    "description": "拾取 |COUNT| 现金。",
+    "standing": 1000,
+    "required": 15000
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailycompletemission": {
+    "name": "特务",
+    "description": "完成一场任务。",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailydeployglyph": {
+    "name": "涂鸦",
+    "description": "在任务中设置一枚浮印。",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemies": {
+    "name": "开枪警告",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 200
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithabilities": {
+    "name": "力量展现",
+    "description": "使用技能击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithblast": {
+    "name": "引爆者",
+    "description": "使用<DT_EXPLOSION>爆炸伤害击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithcorrosive": {
+    "name": "熔毁",
+    "description": "使用<DT_CORROSIVE>腐蚀伤害击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithelectricity": {
+    "name": "短路",
+    "description": "使用<DT_ELECTRICITY>电击伤害击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithfinishers": {
+    "name": "处刑者",
+    "description": "处决击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 10
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithfire": {
+    "name": "纵火犯",
+    "description": "使用<DT_FIRE>火焰伤害击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithfreeze": {
+    "name": "极度冷冻",
+    "description": "使用<DT_FREEZE>冰冻伤害击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithgas": {
+    "name": "生化危害",
+    "description": "使用<DT_GAS>毒气伤害击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithheadshots": {
+    "name": "老练射手",
+    "description": "爆头击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 40
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithmagnetic": {
+    "name": "吸引力",
+    "description": "使用<DT_MAGNETIC>磁力伤害击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithmelee": {
+    "name": "剑舞",
+    "description": "使用近战武器击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithpoison": {
+    "name": "投毒者",
+    "description": "使用<DT_POISON>毒素伤害击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithprimary": {
+    "name": "撂倒他们",
+    "description": "使用主要武器击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithradiation": {
+    "name": "核反应器",
+    "description": "使用<DT_RADIATION>辐射伤害击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithsecondary": {
+    "name": "小兵大功",
+    "description": "使用次要武器击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswithviral": {
+    "name": "疯狂散毒",
+    "description": "使用<DT_VIRAL>病毒伤害击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailypickupenergy": {
+    "name": "激励",
+    "description": "拾取 |COUNT| 个能量球。",
+    "standing": 1000,
+    "required": 20
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailypickupmods": {
+    "name": "闪闪发亮",
+    "description": "拾取 |COUNT| 个 Mod。",
+    "standing": 1000,
+    "required": 8
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailyplacemarker": {
+    "name": "交流者",
+    "description": "标记 |COUNT| 个 Mod 或资源。",
+    "standing": 1000,
+    "required": 5
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailyplayemote": {
+    "name": "善于表达之人",
+    "description": "使用 |COUNT| 个表情动作。",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailyslidekills": {
+    "name": "加速者",
+    "description": "滑行时击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 10
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailykillenemieswhileonkdrive": {
+    "name": "惊险骑手",
+    "description": "骑乘 K 式悬浮板、绝灵骥、迅敏节虫或原子摩托车时击杀 |COUNT| 名敌人。",
+    "standing": 1000,
+    "required": 20
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailyliquidation": {
+    "name": "清算",
+    "description": "出售仓库中的任意物品以获取现金。",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailytwoforone": {
+    "name": "一石二鸟",
+    "description": "在单次弓箭射击中射穿并杀死 2 名以上的敌人。",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailyswatter": {
+    "name": "拍打者",
+    "description": "使用近战武器击杀 |COUNT| 架无人机或鱼鹰。",
+    "standing": 1000,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailytoppingoffthetank": {
+    "name": "源源不断",
+    "description": "成功防御挖掘机并且不让挖掘机耗尽能量。",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailythepersonaltouch": {
+    "name": "自得其乐",
+    "description": "在你的轨道飞行器中放置 1 个装饰物。",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailybuilderstouch": {
+    "name": "制造者之触",
+    "description": "从铸造厂中领取一件物品。",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailycompletemissionmelee": {
+    "name": "剑客",
+    "description": "仅装备近战武器来完成一场任务",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailycompletemissionprimary": {
+    "name": "枪不释手",
+    "description": "仅装备主要武器来完成一场任务",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailycompletemissionsecondary": {
+    "name": "随身火力",
+    "description": "仅装备次要武器来完成一场任务",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailydeployairsupport": {
+    "name": "天降神兵",
+    "description": "在任务中部署一个空中支援呼叫器",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailydeployspecter": {
+    "name": "二重身",
+    "description": "部署一个魅影",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailydonateleverian": {
+    "name": "赞助者",
+    "description": "为莱弗博物馆进行捐赠",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailyinteractwithpet": {
+    "name": "忠心不二",
+    "description": "与你的库狛或库娃互动",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailymercykill": {
+    "name": "不施怜悯",
+    "description": "对一名敌人施展怜悯之击",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailysuspendfiveenemies": {
+    "name": "深度冲击",
+    "description": "使用一次重击震地近战攻击让 5 个或以上敌人同时浮空",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailytransmutemods": {
+    "name": "以旧换新",
+    "description": "完成 |COUNT| 次 Mod 转换",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailyvisitfeatureddojo": {
+    "name": "随便看看",
+    "description": "参观一处特色道场",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/daily/seasondailywholearsenal": {
+    "name": "整个军械库",
+    "description": "在 10 秒内使用你的主要、次要，和近战武器各击杀一名敌人。",
+    "standing": 1000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklybowoffense": {
+    "name": "弓箭进攻",
+    "description": "使用主要弓箭击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycatchrareplainsfish": {
+    "name": "地球渔者",
+    "description": "在夜灵平野捕捉 |COUNT| 条稀有鱼。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycatchrarevenusfish": {
+    "name": "金星渔者",
+    "description": "在奥布山谷捕捉 |COUNT| 条稀有伺服鱼。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompleteassassination": {
+    "name": "刺客",
+    "description": "完成 |COUNT| 项刺杀任务。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletecapture": {
+    "name": "狱吏",
+    "description": "完成 |COUNT| 项捕获任务。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompleteclemmission": {
+    "name": "好朋友",
+    "description": "帮助 Clem 完成他的周常任务。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompleteexterminate": {
+    "name": "排除者",
+    "description": "完成 |COUNT| 项歼灭任务。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompleteinvasionmissions": {
+    "name": "入侵者",
+    "description": "完成 |COUNT| 项任何类型的入侵任务。",
+    "standing": 4500,
+    "required": 6
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletemobiledefense": {
+    "name": "保护者",
+    "description": "完成 |COUNT| 项移动防御任务。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletenightmaremissions": {
+    "name": "声之眠者",
+    "description": "完成 |COUNT| 项任何类型的噩梦任务。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompleterescue": {
+    "name": "救援者",
+    "description": "完成 |COUNT| 项救援任务。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletesabotage": {
+    "name": "破坏者",
+    "description": "完成 |COUNT| 项破坏任务。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletesortie": {
+    "name": "突击专家",
+    "description": "完成 |COUNT| 次突击。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletespy": {
+    "name": "特工",
+    "description": "完成 |COUNT| 项间谍任务。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletesyndicatemissions": {
+    "name": "支持者",
+    "description": "完成 |COUNT| 项集团任务。",
+    "standing": 4500,
+    "required": 5
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletetreasures": {
+    "name": "动像者",
+    "description": "在 Maroo 的市集寻找 Maroo 的阿耶檀识宝物。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklykillenemieswithheadshots": {
+    "name": "这不是警告射击",
+    "description": "爆头击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 100
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyminerareplainsresources": {
+    "name": "地球矿工",
+    "description": "在夜灵平野中开采到 |COUNT| 次稀有宝石或矿石。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyminerarevenusresources": {
+    "name": "金星矿工",
+    "description": "在奥布山谷中开采到 |COUNT| 次稀有宝石或矿石。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyperfectanimalcapture": {
+    "name": "保育者",
+    "description": "在奥布山谷完成 |COUNT| 个不同动物的完美捕获。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyperplexed": {
+    "name": "谜惑不解",
+    "description": "在双衍王境中完成 1 个谜题",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypickupmedallion": {
+    "name": "狩猎开始",
+    "description": "找到 |COUNT| 集团奖章。可以自己搜索，也可以组队搜索。",
+    "standing": 4500,
+    "required": 10
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyplainsbounties": {
+    "name": "地球赏金猎人",
+    "description": "在夜灵平野完成 |COUNT| 个赏金任务。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklysabotagecaches": {
+    "name": "箱子猎人",
+    "description": "在任意任务中找到 |COUNT| 个储藏箱。",
+    "standing": 4500,
+    "required": 6
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyrifleoffense": {
+    "name": "步枪进攻",
+    "description": "使用主要步枪击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklysanctuaryonslaught": {
+    "name": "测试对象",
+    "description": "完成 |COUNT| 个圣殿突袭的区域。",
+    "standing": 4500,
+    "required": 8
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyshotgunoffense": {
+    "name": "霰弹枪进攻",
+    "description": "使用主要霰弹枪击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklysimarisscan": {
+    "name": "圣殿研究者",
+    "description": "完成 |COUNT| 个中枢 Simaris 的扫描。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklysniperoffense": {
+    "name": "狙击枪进攻",
+    "description": "使用主要狙击步枪击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 150
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklytoashes": {
+    "name": "化为灰烬",
+    "description": "为荧尘分解一个赋能。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyunlockdragonvaults": {
+    "name": "宝库劫者",
+    "description": "解锁 |COUNT| 个火卫二龙钥宝库。",
+    "standing": 4500,
+    "required": 4
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyunlockrelics": {
+    "name": "解开遗物",
+    "description": "解开 |COUNT| 个遗物",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyuseforma": {
+    "name": "已极化",
+    "description": "极化一个武器、同伴或战甲（不在幻影装置中）。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyvenusbounties": {
+    "name": "金星赏金猎人",
+    "description": "在奥布山谷完成 |COUNT| 个赏金任务。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyvoidnet": {
+    "name": "虚空之网",
+    "description": "收集 |COUNT| 个虚空光体。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklynightandday": {
+    "name": "日日夜夜",
+    "description": "在魔胎之境中收集 |COUNT| 个\"秩序\"或\"混乱\"的残留物。",
+    "standing": 4500,
+    "required": 10
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyloyalty": {
+    "name": "忠心耿耿",
+    "description": "获得 |COUNT| 任意集团的声望。",
+    "standing": 4500,
+    "required": 5000
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklytheoldways": {
+    "name": "老路子",
+    "description": "仅装备一把手枪和战刃来完成 1 次任务。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklybloodthirsty": {
+    "name": "大杀特杀",
+    "description": "在 5 秒内击杀 20 名敌人。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyisolationbounties": {
+    "name": "宝库强袭者",
+    "description": "在火卫二的魔胎之境中完成一个隔离库赏金任务。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyfeedhelminth": {
+    "name": "喂饱野兽",
+    "description": "向 Helminth 饲喂任意资源。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklykillenemiesinmech": {
+    "name": "殁世者",
+    "description": "使用殁世机甲击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 100
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletedisruptionconduits": {
+    "name": "别搞砸了",
+    "description": "在中断任务中完成 |COUNT| 个导管",
+    "standing": 4500,
+    "required": 12
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletekuva": {
+    "name": "无需惧怕死神",
+    "description": "完成 |COUNT| 个赤毒虹吸器任务",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompletevenusrace": {
+    "name": "上板时刻",
+    "description": "在金星的奥布山谷或是火卫二的魔胎之境完成一场 K 式悬浮板比赛。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklydestroycrewshipartillery": {
+    "name": "前瞻思想",
+    "description": "使用前装光能炮来摧毁一艘战舰",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklykillarchgunenemies": {
+    "name": "重型火炮",
+    "description": "使用曲翼枪械击杀 |COUNT| 名敌人",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklykillthumper": {
+    "name": "巨牙重击",
+    "description": "在夜灵平野上击杀一个巨牙重击者",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyrailjackmissions": {
+    "name": "探险家",
+    "description": "完成 |COUNT| 项航道星舰任务",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklybeastslayer": {
+    "name": "野兽杀手",
+    "description": "击败奥金魇龙",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyboardingpartynodamage": {
+    "name": "完美无瑕",
+    "description": "在战甲没有受到伤害的情况下清除一批登上航道星舰的敌人。",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycollector": {
+    "name": "收集者",
+    "description": "从双衍王境收集 |COUNT| 个资源",
+    "standing": 4500,
+    "required": 100
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyfinelytuned": {
+    "name": "精准调音",
+    "description": "在双衍王境进行一次演奏三线琴歌曲的活动",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyhorsingaround": {
+    "name": "马上漫游",
+    "description": "驾驭绝灵骥飞行 |COUNT| 米",
+    "standing": 4500,
+    "required": 1500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyidecree": {
+    "name": "我的王令",
+    "description": "在单次双衍王境进程或无尽回廊中收集 |COUNT| 个王令。",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyskeletonsinthecloset": {
+    "name": "不为人知的事",
+    "description": "在双衍王境击杀 |COUNT| 名禁卫敌人",
+    "standing": 4500,
+    "required": 50
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycompleterace": {
+    "name": "哎哟喂！",
+    "description": "游玩《奥利的极速赛道》并完成一场比赛",
+    "standing": 4500,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyrequiemtotem": {
+    "name": "远古方尖碑",
+    "description": "在火卫二激活 3 座安魂方尖碑。",
+    "standing": 4500,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklycollecthundredresources": {
+    "name": "收集者",
+    "description": "收集 |COUNT| 个资源",
+    "standing": 4500,
+    "required": 4000
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklysolveciphers": {
+    "name": "黑客",
+    "description": "入侵 |COUNT| 个控制台。",
+    "standing": 4500,
+    "required": 10
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklyopenlockers": {
+    "name": "盗窃癖",
+    "description": "打开 |COUNT| 个储物柜。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions": {
+    "name": "任务完成",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus": {
+    "name": "卓越歼灭者",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies": {
+    "name": "这不是警告射击",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions2": {
+    "name": "任务完成 II",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus2": {
+    "name": "卓越歼灭者 II",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies2": {
+    "name": "这不是警告射击 II",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions3": {
+    "name": "任务完成 III",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus3": {
+    "name": "卓越歼灭者 III",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies3": {
+    "name": "这不是警告射击 III",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions4": {
+    "name": "任务完成 IV",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus4": {
+    "name": "卓越歼灭者 IV",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies4": {
+    "name": "这不是警告射击 IV",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions5": {
+    "name": "任务完成 V",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus5": {
+    "name": "卓越歼灭者 V",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies5": {
+    "name": "这不是警告射击 V",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions6": {
+    "name": "任务完成 VI",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus6": {
+    "name": "卓越歼灭者 VI",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies6": {
+    "name": "这不是警告射击 VI",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions7": {
+    "name": "任务完成 VII",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus7": {
+    "name": "卓越歼灭者 VII",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies7": {
+    "name": "这不是警告射击 VII",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions8": {
+    "name": "任务完成 VIII",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus8": {
+    "name": "卓越歼灭者 VIII",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies8": {
+    "name": "这不是警告射击 VIII",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions9": {
+    "name": "任务完成 IX",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus9": {
+    "name": "卓越歼灭者 IX",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies9": {
+    "name": "这不是警告射击 IX",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions10": {
+    "name": "任务完成 X",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus10": {
+    "name": "卓越歼灭者 X",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies10": {
+    "name": "这不是警告射击 X",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions11": {
+    "name": "任务完成 XI",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus11": {
+    "name": "卓越歼灭者 XI",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies11": {
+    "name": "这不是警告射击 XI",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions12": {
+    "name": "任务完成 XII",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus12": {
+    "name": "卓越歼灭者 XII",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies12": {
+    "name": "这不是警告射击 XII",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions13": {
+    "name": "任务完成 XIII",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus13": {
+    "name": "卓越歼灭者 XIII",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies13": {
+    "name": "这不是警告射击 XIII",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions14": {
+    "name": "任务完成 XIV",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus14": {
+    "name": "卓越歼灭者 XIV",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies14": {
+    "name": "这不是警告射击 XIV",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions15": {
+    "name": "任务完成 XV",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus15": {
+    "name": "卓越歼灭者 XV",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies15": {
+    "name": "这不是警告射击 XV",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions16": {
+    "name": "任务完成 XVI",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus16": {
+    "name": "卓越歼灭者 XVI",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies16": {
+    "name": "这不是警告射击 XVI",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions17": {
+    "name": "任务完成 XVII",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus17": {
+    "name": "卓越歼灭者 XVII",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies17": {
+    "name": "这不是警告射击 XVII",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions18": {
+    "name": "任务完成 XVIII",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus18": {
+    "name": "卓越歼灭者 XVIII",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies18": {
+    "name": "这不是警告射击 XVIII",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions19": {
+    "name": "任务完成 XIX",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus19": {
+    "name": "卓越歼灭者 XIX",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies19": {
+    "name": "这不是警告射击 XIX",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions20": {
+    "name": "任务完成 XX",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus20": {
+    "name": "卓越歼灭者 XX",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies20": {
+    "name": "这不是警告射击 XX",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions21": {
+    "name": "任务完成 XXI",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus21": {
+    "name": "卓越歼灭者 XXI",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies21": {
+    "name": "这不是警告射击 XXI",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions22": {
+    "name": "任务完成 XXII",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus22": {
+    "name": "卓越歼灭者 XXII",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies22": {
+    "name": "这不是警告射击 XXII",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions23": {
+    "name": "任务完成 XXIII",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus23": {
+    "name": "卓越歼灭者 XXIII",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies23": {
+    "name": "这不是警告射击 XXIII",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions24": {
+    "name": "任务完成 XXIV",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus24": {
+    "name": "卓越歼灭者 XXIV",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies24": {
+    "name": "这不是警告射击 XXIV",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentcompletemissions25": {
+    "name": "任务完成 XXV",
+    "description": "完成 |COUNT| 项任务",
+    "standing": 4500,
+    "required": 15
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkilleximus25": {
+    "name": "卓越歼灭者 XXV",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 4500,
+    "required": 30
+  },
+  "/lotus/types/challenges/seasons/weekly/seasonweeklypermanentkillenemies25": {
+    "name": "这不是警告射击 XXV",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 4500,
+    "required": 500
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardluapuzzles": {
+    "name": "上行",
+    "description": "完成 |COUNT| 间月球上的晋升大厅。",
+    "standing": 7000,
+    "required": 4
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardbattlehardened": {
+    "name": "身经百战",
+    "description": "完成佩里塔叛乱，并且完成至少 |COUNT| 个命令。",
+    "standing": 7000,
+    "required": 6
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardcompletenightmaremissions": {
+    "name": "暗夜之恐",
+    "description": "完成 |COUNT| 项任何类型的噩梦任务。",
+    "standing": 7000,
+    "required": 5
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardcompletesortie": {
+    "name": "突击行家",
+    "description": "完成 |COUNT| 次突击。",
+    "standing": 7000,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardelementarymydear": {
+    "name": "小菜一碟，亲爱的",
+    "description": "在元素转换游戏模式中完成 |COUNT| 次成功转换。",
+    "standing": 7000,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardelitesanctuaryonslaught": {
+    "name": "精英测试对象",
+    "description": "完成 |COUNT| 个精英级圣殿突袭区域。",
+    "standing": 7000,
+    "required": 8
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardeternalguardian": {
+    "name": "永恒守卫",
+    "description": "完成 |COUNT| 场虚空决战回合。",
+    "standing": 7000,
+    "required": 2
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardfriendsdefense": {
+    "name": "防御",
+    "description": "完成一场至少 12 波的防御任务。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardfriendsprofittaker": {
+    "name": "利润收割者",
+    "description": "击杀利润收割者。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardfriendssurvival": {
+    "name": "生存",
+    "description": "完成一场至少 20 分钟的生存任务。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardgoingdown": {
+    "name": "勇往直下",
+    "description": "在沉沦之地中击败罗瑟。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardhighground": {
+    "name": "制高点",
+    "description": "在虚空洪流中封闭 |COUNT| 个裂口",
+    "standing": 7000,
+    "required": 12
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardholdthemushrooms": {
+    "name": "满载而归",
+    "description": "从深矿中收集 |COUNT| 个蘑菇。",
+    "standing": 7000,
+    "required": 6
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardindexwinstreak": {
+    "name": "日间商人",
+    "description": "在《指数之场》的一场比赛中连续赢得 3 场投注。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardkillenemies": {
+    "name": "杀戮",
+    "description": "击杀 |COUNT| 名敌人。",
+    "standing": 7000,
+    "required": 1500
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardkilleximus": {
+    "name": "卓越处刑者",
+    "description": "击杀 |COUNT| 名卓越者。",
+    "standing": 7000,
+    "required": 100
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardkillorcapturerainalyst": {
+    "name": "水力使猎人",
+    "description": "击杀或捕获一个夜灵水力使。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardkuvasurvivalnocapsules": {
+    "name": "屏住你的呼吸",
+    "description": "在赤毒生存任务中生存超过 20 分钟。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardunlockrelics": {
+    "name": "解开遗物",
+    "description": "解开 |COUNT| 个遗物",
+    "standing": 7000,
+    "required": 10
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardkillenemiessteelpath": {
+    "name": "寒冰玄铁",
+    "description": "在钢铁之路击杀 |COUNT| 名敌人。",
+    "standing": 7000,
+    "required": 1000
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardspiderhunt": {
+    "name": "蜘蛛狩猎",
+    "description": "完成一场织屿人双衍王境任务。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardtreasurefromthepast": {
+    "name": "来自过去的宝藏",
+    "description": "完成一次衰退室。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardcollectuniqueresources": {
+    "name": "资源清道夫",
+    "description": "收集 |COUNT| 种不同类型的资源。",
+    "standing": 7000,
+    "required": 20
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardcompletesteelpathmissions": {
+    "name": "罕迹之路",
+    "description": "完成 |COUNT| 场不同的钢铁之路任务。",
+    "standing": 7000,
+    "required": 5
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardantiquarian": {
+    "name": "收藏家",
+    "description": "开启每个类型 |COUNT| 的遗物（古纪、前纪、中纪、后纪）。",
+    "standing": 7000,
+    "required": 4
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardthepriceoffreedom": {
+    "name": "自由的代价",
+    "description": "使用一枚格拉努硬币来解救一名索拉里斯人质。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardthemanymadewhole": {
+    "name": "聚沙成卡",
+    "description": "用 10 个裂罅碎块换取一张裂罅 Mod",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardterminated": {
+    "name": "终结者",
+    "description": "消灭 |COUNT| 名隔离库殁世机甲守卫。",
+    "standing": 7000,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardriseofthemachine": {
+    "name": "机甲崛起",
+    "description": "使用殁世机甲击杀 |COUNT| 名敌人并且不被摧毁。",
+    "standing": 7000,
+    "required": 300
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardfallenangel": {
+    "name": "堕落天使",
+    "description": "在扎里曼号上击杀 |COUNT| 个虚空天使。 ",
+    "standing": 7000,
+    "required": 3
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardfastcapture": {
+    "name": "极速战士",
+    "description": "在 90 秒内完成一个捕获任务",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardkillexploiterorb": {
+    "name": "唯利是图",
+    "description": "击杀剥削者圆蛛",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardkillthumper": {
+    "name": "无律之行",
+    "description": "在夜灵平野上击杀一个巨牙重击者朵玛",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardrailjackmissions": {
+    "name": "精英探险家",
+    "description": "完成 |COUNT| 项航道星舰任务",
+    "standing": 7000,
+    "required": 6
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardcompletearchonhunt": {
+    "name": "执刑官猎杀者",
+    "description": "完成一次执刑官猎杀。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardfriendsmirrordefense": {
+    "name": "魔镜，魔镜",
+    "description": "在单次任务中防御两个镜像防御目标各 3 次。",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardceremonialevolution": {
+    "name": "仪式的进化",
+    "description": "在任务中激活任意灵化武器的灵化形态 |COUNT| 次",
+    "standing": 7000,
+    "required": 5
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardelitebeastslayer": {
+    "name": "精英野兽杀手",
+    "description": "在钢铁之路中击败奥金魇龙",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardvitalarbiter": {
+    "name": "关键仲裁者",
+    "description": "完成一场仲裁任务",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardzarimanbountyhunter": {
+    "name": "扎里曼赏金猎人",
+    "description": "在扎里曼号完成 |COUNT| 次赏金任务。",
+    "standing": 7000,
+    "required": 4
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardkilltank": {
+    "name": "坦克破灭",
+    "description": "击败一辆 H-09 艾弗旺坦克",
+    "standing": 7000,
+    "required": 1
+  },
+  "/lotus/types/challenges/seasons/weeklyhard/seasonweeklyhardcompleteconquest": {
+    "name": "自愿受试者",
+    "description": "完成一次深层科研或时光科研",
+    "standing": 7000,
+    "required": 1
+  }
+}

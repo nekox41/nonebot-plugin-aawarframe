@@ -1,0 +1,566 @@
+{
+  "source": "https://api.warframe.com/cdn/worldState.php",
+  "fetched_at": "2026-11-11T08:15:46.603268+00:00",
+  "data": {
+    "Time": 1794384942,
+    "EndlessXpSchedule": [
+      {
+        "Activation": {
+          "$date": {
+            "$numberLong": "1794182400000"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794787200000"
+          }
+        },
+        "CategoryChoices": [
+          {
+            "Category": "EXC_NORMAL",
+            "Choices": [
+              "Nidus",
+              "Octavia",
+              "Harrow"
+            ]
+          },
+          {
+            "Category": "EXC_HARD",
+            "Choices": [
+              "Boar",
+              "Gammacor",
+              "Anku",
+              "Gorgon",
+              "Angstrum"
+            ]
+          }
+        ]
+      }
+    ],
+    "KnownCalendarSeasons": [
+      {
+        "Activation": {
+          "$date": {
+            "$numberLong": "1794182400000"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794787200000"
+          }
+        },
+        "Days": [
+          {
+            "day": 281,
+            "events": [
+              {
+                "type": "CET_CHALLENGE",
+                "challenge": "/Lotus/Types/Challenges/Calendar1999/CalendarKillTechrotEnemiesWithAbilitiesEasy"
+              }
+            ]
+          },
+          {
+            "day": 287,
+            "events": [
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/Types/StoreItems/Boosters/ResourceDropChance3DayStoreItem"
+              },
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/Types/StoreItems/Packages/Calendar/CalendarVosforPack"
+              }
+            ]
+          },
+          {
+            "day": 289,
+            "events": [
+              {
+                "type": "CET_CHALLENGE",
+                "challenge": "/Lotus/Types/Challenges/Calendar1999/CalendarKillTechrotEnemiesEasy"
+              }
+            ]
+          },
+          {
+            "day": 293,
+            "events": [
+              {
+                "type": "CET_UPGRADE",
+                "upgrade": "/Lotus/Upgrades/Calendar/MeleeCritChance"
+              },
+              {
+                "type": "CET_UPGRADE",
+                "upgrade": "/Lotus/Upgrades/Calendar/OvershieldCap"
+              },
+              {
+                "type": "CET_UPGRADE",
+                "upgrade": "/Lotus/Upgrades/Calendar/GasChanceToPrimaryAndSecondary"
+              }
+            ]
+          },
+          {
+            "day": 302,
+            "events": [
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/StoreItems/Types/Items/MiscItems/WeaponMeleeArcaneUnlocker"
+              },
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/StoreItems/Types/BoosterPacks/CalendarArtifactPack"
+              }
+            ]
+          },
+          {
+            "day": 305,
+            "events": [
+              {
+                "type": "CET_CHALLENGE",
+                "challenge": "/Lotus/Types/Challenges/Calendar1999/CalendarKillEnemiesWithMeleeMedium"
+              }
+            ]
+          },
+          {
+            "day": 306,
+            "events": []
+          },
+          {
+            "day": 307,
+            "events": []
+          },
+          {
+            "day": 308,
+            "events": [
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/StoreItems/Types/Gameplay/NarmerSorties/ArchonCrystalViolet"
+              },
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/StoreItems/Types/Items/MiscItems/WeaponUtilityUnlocker"
+              }
+            ]
+          },
+          {
+            "day": 316,
+            "events": [
+              {
+                "type": "CET_UPGRADE",
+                "upgrade": "/Lotus/Upgrades/Calendar/GuidingMissilesChance"
+              },
+              {
+                "type": "CET_UPGRADE",
+                "upgrade": "/Lotus/Upgrades/Calendar/EnergyWavesOnCombo"
+              },
+              {
+                "type": "CET_UPGRADE",
+                "upgrade": "/Lotus/Upgrades/Calendar/EnergyOrbsGrantShield"
+              }
+            ]
+          },
+          {
+            "day": 320,
+            "events": [
+              {
+                "type": "CET_CHALLENGE",
+                "challenge": "/Lotus/Types/Challenges/Calendar1999/CalendarKillScaldraEnemiesMedium"
+              }
+            ]
+          },
+          {
+            "day": 323,
+            "events": [
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/StoreItems/Types/BoosterPacks/CalendarArtifactPack"
+              },
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/StoreItems/Types/Items/MiscItems/UtilityUnlocker"
+              }
+            ]
+          },
+          {
+            "day": 335,
+            "events": [
+              {
+                "type": "CET_CHALLENGE",
+                "challenge": "/Lotus/Types/Challenges/Calendar1999/CalendarDestroyPropsHard"
+              }
+            ]
+          },
+          {
+            "day": 338,
+            "events": []
+          },
+          {
+            "day": 341,
+            "events": [
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/StoreItems/Types/Items/MiscItems/WeaponMeleeArcaneUnlocker"
+              },
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/StoreItems/Types/Items/MiscItems/UtilityUnlocker"
+              }
+            ]
+          },
+          {
+            "day": 350,
+            "events": [
+              {
+                "type": "CET_UPGRADE",
+                "upgrade": "/Lotus/Upgrades/Calendar/MeleeCritChance"
+              },
+              {
+                "type": "CET_UPGRADE",
+                "upgrade": "/Lotus/Upgrades/Calendar/MagazineCapacity"
+              },
+              {
+                "type": "CET_UPGRADE",
+                "upgrade": "/Lotus/Upgrades/Calendar/EnergyRestoration"
+              }
+            ]
+          },
+          {
+            "day": 353,
+            "events": [
+              {
+                "type": "CET_CHALLENGE",
+                "challenge": "/Lotus/Types/Challenges/Calendar1999/CalendarKillEximusHard"
+              }
+            ]
+          },
+          {
+            "day": 355,
+            "events": []
+          },
+          {
+            "day": 356,
+            "events": [
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/StoreItems/Types/Recipes/Components/FormaAuraBlueprint"
+              },
+              {
+                "type": "CET_REWARD",
+                "reward": "/Lotus/Types/StoreItems/Boosters/AffinityBooster3DayStoreItem"
+              }
+            ]
+          }
+        ],
+        "Season": "CST_FALL",
+        "YearIteration": 24,
+        "Version": 19,
+        "UpgradeAvaliabilityRequirements": [
+          "/Lotus/Upgrades/Calendar/1999UpgradeApplicationRequirement"
+        ]
+      }
+    ],
+    "WeeklyVaultBonusRewards": [
+      {
+        "WeekCount": 665,
+        "BonusRegion": "/Lotus/Language/Locations/Fortress",
+        "Rewards": [
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 500,
+            "ItemCount": 12,
+            "Reward": "/Lotus/StoreItems/Types/Items/MiscItems/OrokinCell"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 1000,
+            "ItemCount": 100,
+            "Reward": "/Lotus/StoreItems/Types/Items/MiscItems/DistillPoints"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 1500,
+            "ItemCount": 2,
+            "Reward": "/Lotus/StoreItems/Types/PickUps/Credits/50000Credits"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 2000,
+            "ItemCount": 1,
+            "Reward": "/Lotus/StoreItems/Types/Recipes/Lens/GenericLensOstronBlueprint"
+          }
+        ]
+      },
+      {
+        "WeekCount": 666,
+        "BonusRegion": "/Lotus/Language/Locations/Jupiter",
+        "Rewards": [
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 500,
+            "ItemCount": 12,
+            "Reward": "/Lotus/StoreItems/Types/Items/MiscItems/NeuralSensor"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 1000,
+            "ItemCount": 10,
+            "Reward": "/Lotus/StoreItems/Types/Restoratives/Consumable/PlatinumSpectre"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 1500,
+            "ItemCount": 5,
+            "Reward": "/Lotus/StoreItems/Types/Items/MiscItems/SchismKey"
+          },
+          {
+            "RewardClaimed": false,
+            "PointThreshold": 2000,
+            "ItemCount": 100,
+            "Reward": "/Lotus/StoreItems/Upgrades/Mods/FusionBundles/UncommonFusionBundle"
+          }
+        ]
+      }
+    ],
+    "Descents": [
+      {
+        "Activation": {
+          "$date": {
+            "$numberLong": "1794182400000"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794787200000"
+          }
+        },
+        "RandSeed": 1075564534,
+        "Challenges": [
+          {
+            "Index": 1,
+            "Type": "DT_RACE",
+            "Challenge": "BasicRace",
+            "Level": "/Lotus/Levels/DevilTower/ArenaCoconut.level",
+            "Specs": [],
+            "Auras": []
+          },
+          {
+            "Index": 2,
+            "Type": "DT_INFESTED_SALVAGE",
+            "Challenge": "NarmerPhobia",
+            "Level": "/Lotus/Levels/DevilTower/ArenaGrape.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Tau/CoHEntratiExterminateSpec"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/CoHNarmerPhobiaAura"
+            ]
+          },
+          {
+            "Index": 3,
+            "Type": "DT_PRESURE_GAUGE",
+            "Challenge": "HeavyWeaponsOnly",
+            "Level": "/Lotus/Levels/DevilTower/ArenaAvocado.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Tau/CoHInfestedExterminateMixed"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/HeavyWeaponSpawnAura",
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/HeavyWeaponsOnlyAura"
+            ]
+          },
+          {
+            "Index": 4,
+            "Type": "DT_CAPTURE",
+            "Challenge": "SecuritySpin",
+            "Level": "/Lotus/Levels/DevilTower/ArenaGrape.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Tau/CoHForestGrineerFairy"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/CoHSecuritySpinAura"
+            ]
+          },
+          {
+            "Index": 5,
+            "Type": "DT_LOOT_CREATURES",
+            "Challenge": "BasicLootCreatures",
+            "Level": "/Lotus/Levels/DevilTower/ArenaMelon.level",
+            "Specs": [],
+            "Auras": []
+          },
+          {
+            "Index": 6,
+            "Type": "DT_EXTERMINATE",
+            "Challenge": "JadeGuardian",
+            "Level": "/Lotus/Levels/DevilTower/ArenaEggplant.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Tau/CoHEntratiAlchemySpec"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/JadeGuardianEnhancementAura"
+            ]
+          },
+          {
+            "Index": 7,
+            "Type": "DT_PROTOFRAME",
+            "Challenge": "Wisp",
+            "Level": "/Lotus/Levels/DevilTower/ProtoframeRoomWisp.level",
+            "Specs": [],
+            "Auras": []
+          },
+          {
+            "Index": 8,
+            "Type": "DT_BOSS",
+            "Challenge": "CorruptedVor",
+            "Level": "/Lotus/Levels/DevilTower/ArenaGrape.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/CorpusGrineerMix"
+            ],
+            "Auras": []
+          },
+          {
+            "Index": 9,
+            "Type": "DT_EXCAVATION",
+            "Challenge": "SlipAndSlide",
+            "Level": "/Lotus/Levels/DevilTower/ArenaAvocado.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/CorpusInfestedMix"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/CoHSlipAndSlideAura"
+            ]
+          },
+          {
+            "Index": 10,
+            "Type": "DT_SABOTAGE_HIVE",
+            "Challenge": "PoisonGas",
+            "Level": "/Lotus/Levels/DevilTower/ArenaMelon.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Duviri/Arena/DuviriSurvivalSpecA"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/PoisonGasAura"
+            ]
+          },
+          {
+            "Index": 11,
+            "Type": "DT_NETRACELLS",
+            "Challenge": "ToxicFire",
+            "Level": "/Lotus/Levels/DevilTower/ArenaGrape.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Tau/CoHCorpusGasExterminateMixed"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/ToxicFireEnhancementAura"
+            ]
+          },
+          {
+            "Index": 12,
+            "Type": "DT_SHRINE_DEFENSE",
+            "Challenge": "FieryTrail",
+            "Level": "/Lotus/Levels/DevilTower/ArenaMango.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Tau/CoHCorpusZarimanExterminateSpec"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/FieryTrailAura"
+            ]
+          },
+          {
+            "Index": 13,
+            "Type": "DT_PRESURE_GAUGE",
+            "Challenge": "GiantRealm",
+            "Level": "/Lotus/Levels/DevilTower/ArenaCherry.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Narmer/PNWNarmerForestGrineerExterminate"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/GiantRealmAura"
+            ]
+          },
+          {
+            "Index": 14,
+            "Type": "DT_PROTOFRAME",
+            "Challenge": "Harrow",
+            "Level": "/Lotus/Levels/DevilTower/ProtoframeRoomHarrow.level",
+            "Specs": [],
+            "Auras": []
+          },
+          {
+            "Index": 15,
+            "Type": "DT_DEFENSE",
+            "Challenge": "Darkness",
+            "Level": "/Lotus/Levels/DevilTower/ArenaGrape.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Narmer/PNWNarmerDesertGrineerExterminate"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/DarknessAura"
+            ]
+          },
+          {
+            "Index": 16,
+            "Type": "DT_EXTERMINATE",
+            "Challenge": "JumpSmash",
+            "Level": "/Lotus/Levels/DevilTower/ArenaPeach.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Tau/CoHGrineerSealabExterminate"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/JumpSmashAura"
+            ]
+          },
+          {
+            "Index": 17,
+            "Type": "DT_INFESTED_SALVAGE",
+            "Challenge": "ShockingLeech",
+            "Level": "/Lotus/Levels/DevilTower/ArenaBagel.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Duviri/Arena/DuviriExterminateHardmodeA"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/ShockingLeechEnhancementAura"
+            ]
+          },
+          {
+            "Index": 18,
+            "Type": "DT_BREAK_TARGETS",
+            "Challenge": "NC_SecuritySpin",
+            "Level": "/Lotus/Levels/DevilTower/ArenaBagel.level",
+            "Specs": [],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/CoHSecuritySpinAura"
+            ]
+          },
+          {
+            "Index": 19,
+            "Type": "DT_MIMICS",
+            "Challenge": "BasicMimics",
+            "Level": "/Lotus/Levels/DevilTower/ArenaAvocado.level",
+            "Specs": [],
+            "Auras": []
+          },
+          {
+            "Index": 20,
+            "Type": "DT_SABOTAGE_HIVE",
+            "Challenge": "Escapist",
+            "Level": "/Lotus/Levels/DevilTower/ArenaWaffle.level",
+            "Specs": [
+              "/Lotus/Types/Game/EnemySpecs/Tau/CoHGrineerExterminateFire"
+            ],
+            "Auras": [
+              "/Lotus/Types/Scripts/Tau/CoH/Complications/CoHEscapistAura"
+            ]
+          },
+          {
+            "Index": 21,
+            "Type": "DT_PROTOFRAME",
+            "Challenge": "Devil",
+            "Level": "/Lotus/Levels/DevilTower/BossArenaUriel.level",
+            "Specs": [],
+            "Auras": []
+          }
+        ]
+      }
+    ]
+  }
+}

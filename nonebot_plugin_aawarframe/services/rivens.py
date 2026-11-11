@@ -1,3 +1,7 @@
+# 作用：实现 services 层的 rivens 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 from math import ceil
 from typing import Literal
 
@@ -18,9 +22,11 @@ def price(value: float | None) -> str:
 
 
 def data_notes(snapshot: RivenSnapshot) -> list[str]:
-    notes = ["PC 官方周成交统计，价格单位：白金。",
-             "热度为相对值（最高 100），不是成交笔数。",
-             "每日同步一次，源数据按周更新；历史统计不代表某张紫卡的当前报价。"]
+    notes = [
+        "PC 官方周成交统计，价格单位：白金。",
+        "热度为相对值（最高 100），不是成交笔数。",
+        "每日同步一次，源数据按周更新；历史统计不代表某张紫卡的当前报价。",
+    ]
     if snapshot.source_updated_at:
         notes.append(f"官方文件更新：{snapshot.source_updated_at:%Y-%m-%d %H:%M} UTC")
     if snapshot.skipped_records:
@@ -49,39 +55,59 @@ class RivenService:
 
         def sort_key(record):
             median = record.median if record.median is not None else -1
-            first, second = ((median, record.popularity) if sort_by == "median"
-                             else (record.popularity, median))
+            first, second = (
+                (median, record.popularity) if sort_by == "median" else (record.popularity, median)
+            )
             return (-first, -second, record.compatibility or "", record.item_type)
 
         records = sorted(
-            [record for record in snapshot.data if record.rerolled == rerolled and record.popularity >= MIN_POPULARITY],
+            [
+                record
+                for record in snapshot.data
+                if record.rerolled == rerolled and record.popularity >= MIN_POPULARITY
+            ],
             key=sort_key,
         )
         total = max(1, ceil(len(records) / PAGE_SIZE))
         if page > total:
-            raise UserInputError(f"{command}共有 {total} 页，请输入 1–{total}，例如：{command}3 热度。")
+            raise UserInputError(
+                f"{command}共有 {total} 页，请输入 1–{total}，例如：{command}3 热度。"
+            )
         start = (page - 1) * PAGE_SIZE
         section = Section(
             title=f"{state}紫卡：第 {page} / {total} 页，共 {len(records)} 条，每页 10 条",
             columns=["排名", "武器", "中位价", "均价", "热度"],
         )
-        for rank, record in enumerate(records[start:start + PAGE_SIZE], start + 1):
-            section.rows.append([
-                str(rank), f"{riven_name(record.compatibility, record.item_type)}（{state}）",
-                price(record.median), price(record.average), f"{record.popularity:g}",
-            ])
+        for rank, record in enumerate(records[start : start + PAGE_SIZE], start + 1):
+            section.rows.append(
+                [
+                    str(rank),
+                    f"{riven_name(record.compatibility, record.item_type)}（{state}）",
+                    price(record.median),
+                    price(record.average),
+                    f"{record.popularity:g}",
+                ]
+            )
         notes = data_notes(snapshot)
         notes.append("仅展示热度 ≥ 5 的记录。")
-        notes.insert(0, "按中位价降序排列。" if sort_by == "median"
-                     else "按热度降序排列，同热度按中位价降序。")
+        notes.insert(
+            0,
+            "按中位价降序排列。" if sort_by == "median" else "按热度降序排列，同热度按中位价降序。",
+        )
         notes.append(f"本榜只包含{state}记录；中位价缺失时不以均价代替，排在同排序组末尾。")
         if not records:
             notes.append(f"本周暂无可用的{state}紫卡交易记录。")
         title = f"{state}紫卡中位价排行" if sort_by == "median" else f"{state}紫卡热度排行"
         return Card(
-            title=title, source=snapshot.source, fetched_at=snapshot.fetched_at,
-            stale=snapshot.stale, status=DataStatus.OK if records else DataStatus.EMPTY,
-            sections=[section], notes=notes, page_number=page, total_pages=total,
+            title=title,
+            source=snapshot.source,
+            fetched_at=snapshot.fetched_at,
+            stale=snapshot.stale,
+            status=DataStatus.OK if records else DataStatus.EMPTY,
+            sections=[section],
+            notes=notes,
+            page_number=page,
+            total_pages=total,
         )
 
     async def statistics(self, query: str) -> Card:
@@ -91,30 +117,47 @@ class RivenService:
         notes = data_notes(snapshot)
         if not matches:
             notes.insert(0, f"未找到“{query}”的本周紫卡统计，请检查武器名称或使用英文名称。")
-            return Card(title="紫卡周统计", source=snapshot.source,
-                        fetched_at=snapshot.fetched_at, stale=snapshot.stale,
-                        status=DataStatus.EMPTY, notes=notes)
+            return Card(
+                title="紫卡周统计",
+                source=snapshot.source,
+                fetched_at=snapshot.fetched_at,
+                stale=snapshot.stale,
+                status=DataStatus.EMPTY,
+                notes=notes,
+            )
         if len(matches) > 1:
             options = "、".join(riven_name(name, "") for name in matches[:10])
             raise UserInputError(f"匹配到多个武器：{options}。请使用完整名称查询。")
         weapon = matches[0]
-        records = sorted([record for record in snapshot.data
-                          if record.compatibility == weapon],
-                         key=lambda record: (record.rerolled, record.item_type))
-        section = Section(title="已洗 / 未洗周统计",
-                          columns=["武器", "中位价", "均价", "标准差", "热度"])
+        records = sorted(
+            [record for record in snapshot.data if record.compatibility == weapon],
+            key=lambda record: (record.rerolled, record.item_type),
+        )
+        section = Section(
+            title="已洗 / 未洗周统计", columns=["武器", "中位价", "均价", "标准差", "热度"]
+        )
         for record in records:
-            section.rows.append([
-                riven_name(weapon, record.item_type) + ("（已洗）" if record.rerolled else "（未洗）"),
-                price(record.median), price(record.average),
-                price(record.standard_deviation), f"{record.popularity:g}",
-            ])
+            section.rows.append(
+                [
+                    riven_name(weapon, record.item_type)
+                    + ("（已洗）" if record.rerolled else "（未洗）"),
+                    price(record.median),
+                    price(record.average),
+                    price(record.standard_deviation),
+                    f"{record.popularity:g}",
+                ]
+            )
         for rerolled, label in [(False, "未洗"), (True, "已洗")]:
             if not any(record.rerolled == rerolled for record in records):
                 section.notes.append(f"本周没有该武器的{label}统计记录。")
         name = riven_name(weapon, "")
         notes.insert(0, f"查询：{query}；匹配武器：{name}（{weapon}）。")
-        return Card(title=f"紫卡周统计：{name}", source=snapshot.source,
-                    fetched_at=snapshot.fetched_at, stale=snapshot.stale,
-                    status=DataStatus.OK if records else DataStatus.EMPTY,
-                    sections=[section], notes=notes)
+        return Card(
+            title=f"紫卡周统计：{name}",
+            source=snapshot.source,
+            fetched_at=snapshot.fetched_at,
+            stale=snapshot.stale,
+            status=DataStatus.OK if records else DataStatus.EMPTY,
+            sections=[section],
+            notes=notes,
+        )

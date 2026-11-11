@@ -1,8 +1,21 @@
+# 作用：实现 rendering 层的 viewmodels 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 from ..models.common import Card, Section
 from ..models.wiki import WikiSearchResult
 
 
 def paginate(card: Card, *, max_rows: int = 12, max_characters: int = 1000) -> list[Card]:
+    if (
+        card.fissure_mode
+        or card.bounty_mode
+        or card.archimedea_mode
+        or card.nightwave_mode
+        or card.weekly_mode
+    ):
+        # 专用卡片使用紧凑排版，在一张自适应高度的图片中保留所有任务。
+        return [card.model_copy(deep=True)]
     pages = []
     current = card.model_copy(update={"sections": []}, deep=True)
     count = size = 0

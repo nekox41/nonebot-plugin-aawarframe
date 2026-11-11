@@ -1,3 +1,7 @@
+# 作用：实现 parsers 层的 common 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import logging
 from typing import TypeVar
 

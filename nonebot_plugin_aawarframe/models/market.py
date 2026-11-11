@@ -1,3 +1,7 @@
+# 作用：实现 models 层的 market 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 from datetime import datetime
 from typing import Literal
 

@@ -1,3 +1,7 @@
+# 作用：实现 commands 层的 parsing 功能。
+# 编写日期：2026-11-07
+# 作者：Aameow
+
 import shlex
 
 from ..models.errors import UserInputError
@@ -78,3 +82,12 @@ def parse_riven_statistics_query(text: str) -> str:
     if len(query) > 200:
         raise UserInputError("武器名称过长（最多 200 字符）。")
     return query
+
+
+def parse_bounty_index(text: str, command: str = "地球赏金") -> int | None:
+    value = text.strip()
+    if not value:
+        return None
+    if not value.isascii() or not value.isdigit() or len(value) > 2 or int(value) < 1:
+        raise UserInputError(f"用法：{command} 查看概览，{command}1 查看指定任务；编号须为正整数。")
+    return int(value)
