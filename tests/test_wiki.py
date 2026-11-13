@@ -76,17 +76,17 @@ async def test_provider_encoding_and_shared_cache(wiki_response):
         requests.append(request)
         assert request.url.host == "warframe.huijiwiki.com"
         assert request.url.params["search"] == query
-        assert request.url.params["limit"] == "10"
+        assert request.url.params["limit"] == "3"
         assert request.url.params["action"] == "opensearch"
         assert request.url.params["formatversion"] == "2"
         assert request.url.params["suggest"] == "true"
         assert request.url.params["_referrer"] == "warframe.huijiwiki.com"
-        assert request.headers["Accept-Language"] == "zh-CN,zh;q=0.9"
+        assert request.headers["Accept-Language"] == "zh-CN"
         assert "Cookie" not in request.headers and "Authorization" not in request.headers
         return wiki_response
 
-    browser = SimpleNamespace(get_json=AsyncMock(side_effect=load))
-    provider = WikiProvider(browser)
+    http = SimpleNamespace(get_json=AsyncMock(side_effect=load))
+    provider = WikiProvider(http)
     service = WikiService(provider)
     results = await asyncio.gather(*(service.search(query) for _ in range(10)))
     assert len(requests) == 1 and len(results[0].entries) == 3
@@ -127,4 +127,12 @@ def test_command_and_alias_registration(monkeypatch):
     monkeypatch.setattr(router, "register", lambda *args: registrations.append(args))
     router.setup()
     assert ("wk", {"wiki"}, "wiki") in registrations
-    assert "wk 关键词 / wiki 关键词" in help_card().text()
+    assert "wk 关键词 / wiki 关键词" in help_card("3").text()
+
+
+def test_response_is_limited_to_three_even_if_upstream_returns_more(wiki_response):
+    for values in wiki_response[1:]:
+        values.extend(list(values))
+    result = OpenSearchResponse.model_validate(wiki_response).to_result()
+    assert len(result.entries) == 3
+    assert [entry.title for entry in result.entries] == wiki_response[1][:3]

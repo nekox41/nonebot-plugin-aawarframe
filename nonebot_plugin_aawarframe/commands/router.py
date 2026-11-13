@@ -11,8 +11,8 @@ from nonebot.params import CommandArg
 
 from ..bootstrap import get_runtime
 from ..models.common import Card
-from ..models.errors import UserInputError
-from ..rendering.viewmodels import fallback_text
+from ..models.errors import UserInputError, WikiChallengeError
+from ..rendering.viewmodels import fallback_text, wiki_text
 from ..services.bounties import BOUNTY_FEATURES, BOUNTY_REGIONS
 from ..services.help import help_card
 from .parsing import (
@@ -20,6 +20,7 @@ from .parsing import (
     parse_market_query,
     parse_riven_ranking,
     parse_riven_statistics_query,
+    parse_wiki_query,
 )
 
 logger = logging.getLogger(__name__)
@@ -59,12 +60,17 @@ async def dispatch(feature: str, arguments: str = "") -> Message:
                 )
             except UserInputError as exc:
                 card = Card(title=title, source="命令提示", notes=[str(exc)])
+        elif feature == "wiki":
+            result = await runtime.wiki.search(parse_wiki_query(arguments))
+            return Message(MessageSegment.text(wiki_text(result)))
         elif feature == "market":
             card = await runtime.market.query(parse_market_query(arguments))
         else:
             if arguments.strip():
                 raise UserInputError("此命令不接受参数，请发送 help 查看用法。")
             card = await runtime.world.query(feature)
+    except WikiChallengeError:
+        return Message(MessageSegment.text("Wiki 暂时要求浏览器验证，请稍后重试。"))
     except UserInputError as exc:
         return Message(MessageSegment.text(str(exc)))
     except Exception:
@@ -109,6 +115,7 @@ def setup() -> None:
         ("今日仲裁", set(), "today_arbitration"),
         ("高效仲裁", set(), "efficient_arbitration"),
         ("wm", set(), "market"),
+        ("wk", {"wiki"}, "wiki"),
         ("紫卡排行", set(), "riven_ranking"),
         ("已洗紫卡排行", set(), "rolled_riven_ranking"),
         ("紫卡统计", set(), "riven_statistics"),

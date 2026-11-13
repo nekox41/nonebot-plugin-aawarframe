@@ -8,12 +8,15 @@ from nonebot import get_driver, get_plugin_config
 
 from .config import Config
 from .infrastructure.http import HttpClient
+from .infrastructure.wiki_http import WikiHttpClient
 from .providers.market import MarketProvider
 from .providers.rivens import RivenProvider
+from .providers.wiki import WikiProvider
 from .providers.worldstate import WorldStateProvider
 from .rendering.renderer import CardRenderer
 from .services.market import MarketService
 from .services.rivens import RivenService
+from .services.wiki import WikiService
 from .services.worldstate import WorldStateService
 
 
@@ -38,6 +41,9 @@ class Runtime:
         self.riven_task: asyncio.Task[None] | None = None
         self.world = WorldStateService(self.world_provider)
         self.market = MarketService(self.market_provider)
+        self.wiki_http = WikiHttpClient(config.aawarframe_http_timeout)
+        self.wiki_provider = WikiProvider(self.wiki_http)
+        self.wiki = WikiService(self.wiki_provider)
         self.renderer = CardRenderer(config.aawarframe_render_concurrency)
 
     def start(self) -> None:
@@ -49,6 +55,8 @@ class Runtime:
             self.riven_task.cancel()
             await asyncio.gather(self.riven_task, return_exceptions=True)
             self.riven_task = None
+        await self.wiki_provider.close()
+        await self.wiki_http.close()
         await self.renderer.close()
         await self.world_provider.close()
         await self.market_provider.close()

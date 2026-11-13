@@ -4,6 +4,8 @@
 
 from pydantic import BaseModel, Field, HttpUrl, RootModel, StrictStr, field_validator
 
+WIKI_RESULT_LIMIT = 3
+
 
 class WikiEntry(BaseModel):
     title: str = Field(min_length=1)
@@ -20,7 +22,7 @@ class WikiEntry(BaseModel):
 
 class WikiSearchResult(BaseModel):
     query: str
-    entries: list[WikiEntry] = Field(max_length=10)
+    entries: list[WikiEntry] = Field(max_length=WIKI_RESULT_LIMIT)
 
 
 class OpenSearchResponse(
@@ -35,5 +37,5 @@ class OpenSearchResponse(
             entries=[
                 WikiEntry(title=title, description=description, url=url)
                 for title, description, url in zip(titles, descriptions, urls, strict=True)
-            ],
+            ][:WIKI_RESULT_LIMIT],
         )
