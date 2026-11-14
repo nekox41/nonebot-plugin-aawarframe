@@ -1,6 +1,6 @@
-# 作用：验证 void_storms 相关行为。
-# 编写日期：2026-11-07
-# 作者：Aameow
+# Desc: 记录九重天裂缝的预期行为。
+# Date: 2026-11-14
+# Author: Aameow
 
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
@@ -11,7 +11,6 @@ import pytest
 from nonebot_plugin_aawarframe.commands import router
 from nonebot_plugin_aawarframe.models.common import DataStatus, Snapshot
 from nonebot_plugin_aawarframe.services.fissures import build_fissures, build_void_storms
-from nonebot_plugin_aawarframe.services.help import help_card
 from nonebot_plugin_aawarframe.services.worldstate import WorldStateService
 
 NOW = datetime(2026, 11, 6, tzinfo=timezone.utc)
@@ -85,12 +84,11 @@ async def test_missing_storm_field_is_not_reported_as_empty(worldstate):
     ).status == DataStatus.PARSE_ERROR
 
 
-def test_railjack_command_alias_and_help(monkeypatch):
+def test_railjack_command_alias(monkeypatch):
     registered = []
     monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
     router.setup()
     assert ("九重天", {"九重天裂缝"}, "railjack_fissures") in registered
-    assert "九重天" in help_card().text()
 
 
 async def test_recorded_official_void_storms(monkeypatch):

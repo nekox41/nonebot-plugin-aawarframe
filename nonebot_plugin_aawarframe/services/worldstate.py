@@ -17,12 +17,10 @@ from .clan import build_clan
 from .cycles import build_cycle, build_plains
 from .fissures import build_fissures, build_void_storms
 from .nightwave import build_nightwave
+from .operations import build_invasions, build_sortie
 from .steel_path import build_steel_path
 
 logger = logging.getLogger(__name__)
-ARBITRATION_NOTICE = (
-    "官方原始世界状态尚未验证可独立提供仲裁排期；当前仲裁、今日仲裁和高效仲裁暂不可用。"
-)
 
 
 class WorldStateService:
@@ -30,18 +28,15 @@ class WorldStateService:
         self.provider = provider
 
     async def query(self, feature: str, *, bounty_index: int | None = None) -> Card:
-        if feature in {"arbitration", "today_arbitration", "efficient_arbitration"}:
-            return Card(
-                title="仲裁",
-                source="官方 WorldState",
-                status=DataStatus.UNAVAILABLE,
-                notes=[ARBITRATION_NOTICE],
-            )
         if feature == "steel_path":
             return build_steel_path(Snapshot(data={}, source="钢铁精华固定周轮换"), utcnow())
         snapshot = await self.provider.fetch()
         now = utcnow()
         try:
+            if feature in {"sortie", "archon"}:
+                return build_sortie(snapshot, now, archon=feature == "archon")
+            if feature == "invasions":
+                return build_invasions(snapshot, now)
             if feature == "calendar":
                 return build_calendar(snapshot, now)
             if feature in {"circuit", "incarnons"}:

@@ -1,6 +1,6 @@
-# 作用：通过 htmlrender 渲染并缓存 WebP 查询卡片。
-# 编写日期：2026-11-07
-# 作者：Aameow
+# Desc: 通过 htmlrender 渲染并缓存 WebP 查询卡片。
+# Date: 2026-11-14
+# Author: Aameow
 
 import asyncio
 import base64
@@ -18,7 +18,7 @@ ROOT = Path(__file__).parent
 
 
 class CardRenderer:
-    def __init__(self, concurrency: int = 2):
+    def __init__(self, concurrency: int = 2, theme: str = "default"):
         self.environment = Environment(
             loader=FileSystemLoader(ROOT / "templates"),
             autoescape=select_autoescape(default=True),
@@ -27,13 +27,27 @@ class CardRenderer:
         self.environment.filters["beijing"] = lambda value: value.astimezone(
             timezone(timedelta(hours=8))
         )
-        self.css = (ROOT / "assets/css/base.css").read_text(encoding="utf-8")
+        styles = ROOT / "assets/css"
+        selected = styles / "themes" / (theme + ".css")
+        if selected.resolve().parent != (styles / "themes").resolve() or not selected.is_file():
+            raise ValueError("未知卡片主题：" + theme)
+        self.css = "\n".join(path.read_text(encoding="utf-8") for path in [styles / "base.css", styles / "trader.css", styles / "riven_values.css", selected])
         self.semaphore = asyncio.Semaphore(concurrency)
         self.cache = AsyncTTLCache[Snapshot](30, 0, max_entries=16)
         self.page_cache = AsyncTTLCache[Snapshot](86400, 0, max_entries=64)
 
     def html(self, card: Card, page: int | None = None, total: int | None = None) -> str:
-        if card.weekly_mode:
+        if card.riven_values_board:
+            template = "riven_values.html"
+        elif card.trader_board:
+            template = "void_trader.html"
+        elif card.arbitration_board:
+            template = "arbitration.html"
+        elif card.market_board:
+            template = "market.html"
+        elif card.operation_board:
+            template = "operations.html"
+        elif card.weekly_mode:
             template = "weekly.html"
         elif card.nightwave_mode:
             template = "nightwave.html"
@@ -47,12 +61,12 @@ class CardRenderer:
             template = "fissures.html"
         else:
             template = "card.html"
-        return self.environment.get_template(template).render(
+        document = self.environment.get_template(template).render(
             card=card,
-            css=self.css,
             page=page or card.page_number or 1,
             total=total or card.total_pages or 1,
         )
+        return document.replace("</head>", "<style>" + self.css + "</style></head>", 1)
 
     async def render(self, card: Card) -> list[bytes]:
         # 显式分页和专用卡片各渲染一张图片，保留任务顺序与完整信息。
@@ -63,6 +77,9 @@ class CardRenderer:
             or card.archimedea_mode
             or card.nightwave_mode
             or card.weekly_mode
+            or card.market_board
+            or card.arbitration_board
+            or card.trader_board
         )
         pages = [card] if single_page else paginate(card)
         images = []
@@ -71,12 +88,17 @@ class CardRenderer:
             key = sha256(html.encode()).hexdigest()
 
             compact = bool(
-                page.fissure_mode
+                page.riven_values_board
+                or page.operation_board
+                or page.fissure_mode
                 or page.cycle_items
                 or page.bounty_mode
                 or page.archimedea_mode
                 or page.nightwave_mode
                 or page.weekly_mode
+                or page.market_board
+                or page.arbitration_board
+                or page.trader_board
             )
 
             async def load(document=html, fixed=compact):
@@ -110,6 +132,7 @@ class CardRenderer:
             await page.set_viewport_size({"width": 2000, "height": 2000})
             await page.set_content(document, wait_until="domcontentloaded")
             await page.evaluate("document.fonts.ready")
+            await page.evaluate("Promise.all([...document.images].map(image => image.decode().catch(() => {})))")
             dimensions = await page.evaluate("""() => {
                 const root = document.documentElement;
                 const body = document.body;
@@ -119,18 +142,77 @@ class CardRenderer:
                 const research = body.classList.contains('archimedea-page');
                 const nightwave = body.classList.contains('nightwave-page');
                 const weekly = body.classList.contains('weekly-page');
+                const operation = body.classList.contains('operation-page');
+                const market = body.classList.contains('market-page');
+                const arbitration = body.classList.contains('arbitration-page');
+                const trader = body.classList.contains('trader-page');
+                const riven = body.classList.contains('riven-values-page');
                 const singleCycle = document.querySelectorAll('.cycle').length === 1;
-                const maximum = weekly || nightwave ? 30 : research ? 28 : fissure ? 28 : (bounty ? 28 : (singleCycle ? 44 : 36));
+                const maximum = riven ? 26 : trader ? 24 : arbitration ? 30 : market ? 32 : operation ? 30 : weekly || nightwave ? 30 : research ? 28 : fissure ? 28 : (bounty ? 28 : (singleCycle ? 44 : 36));
                 const textWidth = element => {
                     if (!element) return 0;
                     const range = document.createRange();
                     range.selectNodeContents(element);
                     return range.getBoundingClientRect().width;
                 };
-                for (let font = maximum; font >= 12; font--) {
+                for (let font = maximum; font >= (trader ? 8 : 12); font--) {
                     root.style.setProperty('--data-font', font + 'px');
                     let needed = 600;
-                    if (weekly) {
+                    if (trader) {
+                        for (const width of [1320, 1560, 1800, 1980]) {
+                            root.style.setProperty('--trader-columns', String(Math.floor(width / 230)));
+                            body.style.width = width + 'px';
+                            const height = Math.ceil(body.getBoundingClientRect().height);
+                            const fits = [...document.querySelectorAll('.trader-item')].every(item => item.scrollWidth <= item.clientWidth + 1);
+                            if (height <= 2000 && fits) return {width, height};
+                        }
+                        continue;
+                    } else if (riven) {
+                        const panels = [...document.querySelectorAll('.riven-variant')];
+                        let panelWidth = 650;
+                        for (const table of document.querySelectorAll('.riven-values-table')) {
+                            let width = 24;
+                            for (let column = 0; column < table.rows[0].cells.length; column++) {
+                                width += Math.max(...[...table.rows].filter(row => !row.classList.contains('riven-section')).map(row => textWidth(row.cells[column]))) + 18;
+                            }
+                            panelWidth = Math.max(panelWidth, width);
+                        }
+                        panelWidth = Math.max(panelWidth, ...panels.map(panel => textWidth(panel.querySelector('h2')) + textWidth(panel.querySelector('.riven-layout')) + 46));
+                        needed = panelWidth * panels.length + 76;
+                    } else if (arbitration) {
+                        const rows = [...document.querySelectorAll('.arbitration-row')];
+                        needed = Math.max(800, ...rows.map(row => textWidth(row.querySelector('.arbitration-time')) + Math.max(textWidth(row.querySelector('.arbitration-node>strong')), textWidth(row.querySelector('.arbitration-details'))) + 100));
+                    } else if (market) {
+                        needed = 800;
+                        for (const table of document.querySelectorAll('.market-orders')) {
+                            const rows = [...table.rows];
+                            let width = 80;
+                            for (let column = 0; column < 5; column++) {
+                                width += Math.max(...rows.map(row => textWidth(row.cells[column]))) + 28;
+                            }
+                            needed = Math.max(needed, width);
+                        }
+                    } else if (operation) {
+                        needed = 720;
+                        const invCards = [...document.querySelectorAll('.invasion-card')];
+                        const invWidth = card => {
+                            const head = [...card.querySelector('.invasion-head').children].reduce((sum, e) => sum + textWidth(e), 0);
+                            const sides = [...card.querySelectorAll('.invasion-side')].map(side =>
+                                Math.max(0, ...[...side.querySelectorAll('strong, .invasion-reward')].map(textWidth)));
+                            return Math.max(head + 42, Math.max(0, ...sides) * 2 + 48);
+                        };
+                        if (invCards.length) {
+                            const columns = document.querySelector('.invasion-columns--two') ? 2 : 1;
+                            needed = Math.max(needed, Math.max(...invCards.map(invWidth)) * columns + 60 + (columns - 1) * 24);
+                        }
+                        for (const row of document.querySelectorAll('.operation-period, .operation-banner, .operation-task-head')) {
+                            const width = [...row.children].reduce((sum, e) => sum + textWidth(e), 0);
+                            needed = Math.max(needed, width + 100);
+                        }
+                        for (const row of document.querySelectorAll('.operation-condition')) {
+                            needed = Math.max(needed, textWidth(row) + 84);
+                        }
+                    } else if (weekly) {
                         needed = document.querySelector('th:nth-child(6)') ? 1500 : 1000;
                     } else if (nightwave || research) {
                         needed = 1000;
@@ -201,7 +283,7 @@ class CardRenderer:
                     body.style.width = width + 'px';
                     const height = Math.ceil(body.getBoundingClientRect().height);
                     const bounds = content.getBoundingClientRect();
-                    const fields = [...content.querySelectorAll('strong, h2, td, th, time, .cycle__next, .fissure span, .task-chip, .stage-pool-label, .bounty-meta, .bounty-location span, .hub-bounty-objective, .hub-bounty-top span, .hub-bounty-meta span, .research-modifier p, .research-modifier-name, .research-period, .nightwave-task__body p, .nightwave-task__meta > span')];
+                    const fields = [...content.querySelectorAll('strong, h2, td, th, time, .cycle__next, .fissure span, .task-chip, .stage-pool-label, .bounty-meta, .bounty-location span, .hub-bounty-objective, .hub-bounty-top span, .hub-bounty-meta span, .research-modifier p, .research-modifier-name, .research-period, .nightwave-task__body p, .nightwave-task__meta > span, .operation-period span, .operation-condition, .operation-task-head span, .invasion-head span, .invasion-reward')];
                     const fits = fields.every(element => {
                         const r = element.getBoundingClientRect();
                         return r.right <= bounds.right + 1 && r.left >= bounds.left - 1 &&

@@ -1,6 +1,6 @@
-# 作用：提供 bot 测试与联调支持。
-# 编写日期：2026-11-07
-# 作者：Aameow
+# Desc: 提供手动 QQ 联调入口。
+# Date: 2026-11-14
+# Author: Aameow
 
 """仅供指定私聊和测试群使用的真实 NapCat 联调入口。"""
 
@@ -32,7 +32,7 @@ def record(event: str, **details) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--send-smoke", action="store_true", help="连接后向测试 QQ 发送帮助和市场卡片一次"
+        "--send-smoke", action="store_true", help="连接后向测试 QQ 发送市场卡片一次"
     )
     parser.add_argument(
         "--send-worldstate", action="store_true", help="连接后向测试 QQ 发送真实平原卡片一次"
@@ -105,7 +105,7 @@ def main() -> None:
         if not (args.send_smoke or args.send_worldstate) or sent_smoke:
             return
         sent_smoke = True
-        queries = [("help", ""), ("market", "满级 膛线")] if args.send_smoke else []
+        queries = [("market", "满级 膛线")] if args.send_smoke else []
         if args.send_worldstate:
             queries.append(("cetus", ""))
         for feature, arguments in queries:

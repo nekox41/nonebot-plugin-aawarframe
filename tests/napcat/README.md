@@ -24,6 +24,6 @@ tests/napcat/.venv/bin/python tests/napcat/bot.py --send-smoke
 tests/napcat/.venv/bin/python tests/napcat/bot.py --send-worldstate
 ```
 
-只响应 `TEST_QQ` 的私聊和 `TEST_GROUP` 的群消息，支持 `/help`、`help`、`wm 满级膛线`、`裂缝` 等已有命令。其他会话会被忽略。按 Ctrl+C 关闭连接和共享资源。
+只响应 `TEST_QQ` 的私聊和 `TEST_GROUP` 的群消息，支持 `wm 满级膛线`、`裂缝` 等已有命令。其他会话会被忽略。按 Ctrl+C 关闭连接和共享资源。
 
 运行事件写入 `runtime/events.jsonl`，只记录连接状态、消息 ID 和发送结果，不记录聊天正文、Token 或图片内容。数据快照和缓存也位于被忽略的 `runtime/`。自动化测试不会启动此入口或连接 NapCat。

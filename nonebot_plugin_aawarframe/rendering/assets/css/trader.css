@@ -1,0 +1,12 @@
+body.trader-page { width: 1320px; }
+.trader-period { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-bottom: 12px; font-size: 20px; }
+.trader-period span { color: var(--muted); font-size: 18px; white-space: nowrap; }
+.trader-group { margin-top: 12px; }
+.trader-group h2 { margin: 0 0 8px; font-size: 25px; color: var(--accent); }
+.trader-grid { display: grid; grid-template-columns: repeat(var(--trader-columns, 5), minmax(0, 1fr)); gap: 8px; }
+.trader-item { min-width: 0; padding: 7px 9px; background: var(--soft); border: 1px solid var(--line); border-radius: 8px; }
+.trader-item h3 { margin: 0 0 5px; min-height: 2.4em; font-size: var(--data-font, 24px); line-height: 1.2; font-weight: 600; overflow-wrap: anywhere; }
+.trader-price { display: flex; justify-content: space-between; gap: 6px; font-size: calc(var(--data-font, 24px) * .75); line-height: 1.25; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.trader-price span, .trader-location { color: var(--muted); }
+.trader-location { font-size: 14px; margin-bottom: 4px; }
+.trader-empty { padding: 32px 0; font-size: 26px; text-align: center; color: var(--muted); }

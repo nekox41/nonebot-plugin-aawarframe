@@ -1,11 +1,15 @@
-# 作用：实现 services 层的 market 功能。
+# 作用：匹配可交易物品与等级，整理 Top 买卖订单和物品展示信息。
 # 编写日期：2026-11-07
 # 作者：Aameow
 
+import asyncio
+import re
+from html import unescape
+
 from ..localization.resolver import ItemResolver
-from ..models.common import Card, DataStatus, Section
+from ..models.common import Card, DataStatus
 from ..models.errors import UserInputError
-from ..models.market import MarketQuery, Order
+from ..models.market import MarketBoard, MarketQuery, Order
 from ..providers.market import MarketProvider
 
 
@@ -15,7 +19,17 @@ class MarketService:
 
     async def query(self, query: MarketQuery) -> Card:
         catalog = await self.provider.catalog()
-        slug = ItemResolver(catalog.data).resolve(query.name)
+        resolver = await asyncio.to_thread(ItemResolver, catalog.data)
+        result = resolver.resolve_result(query.name)
+        if result.status == "ambiguous":
+            raise UserInputError(
+                "名称不够明确，请使用完整名称："
+                + "、".join(
+                    f"{e.name()}（{e.identifiers.get('market.slug', e.id)}）"
+                    for e in result.candidates
+                )
+            )
+        slug = result.resource.identifiers.get("market.slug") if result.resource else None
         if slug is None:
             raise UserInputError("未找到匹配物品，请使用更完整的中文或英文名称。")
         details = await self.provider.item(slug)
@@ -33,68 +47,31 @@ class MarketService:
             raise UserInputError("不支持此子类型，可用值：" + "、".join(item.subtypes))
         effective = query.model_copy(update={"rank": rank})
         snapshot = await self.provider.orders(slug, effective)
-        orders = [o for o in snapshot.data if self.visible(o, effective)]
-        card = Card(
+        board = MarketBoard(
+            name=item.name(),
+            rank=rank,
+            max_rank=item.max_rank,
+            subtype=query.subtype,
+        )
+        localized = item.i18n.get("zh-hans") or item.i18n.get("en")
+        board.description = plain_description(localized.description if localized else "")
+        board.image = await self.provider.icon(item)
+        # Top 接口已按交易规则排序；本地只校验条件和截取条数。
+        for side, limit in [("sell", 5), ("buy", 3)]:
+            orders = [
+                o
+                for o in getattr(snapshot.data, side)
+                if o.type == side and self.visible(o, effective)
+            ]
+            setattr(board, side, orders[:limit])
+        return Card(
             title=item.name(),
+            market_board=board,
             source=snapshot.source,
             fetched_at=snapshot.fetched_at,
-            stale=snapshot.stale or details.stale,
-            notes=[
-                f"匹配物品：{item.slug} · PC / Crossplay · 等级：{rank if rank is not None else '不适用'}",
-                "仅展示在线/游戏中的可见订单；价格单位为白金。挂单价不等于成交价。",
-                "成交统计暂不可用；以下为当前挂单。",
-            ],
+            stale=snapshot.stale or details.stale or catalog.stale,
+            status=DataStatus.OK if board.sell or board.buy else DataStatus.EMPTY,
         )
-        if catalog.stale:
-            card.notes.append(
-                f"物品目录使用过期缓存，目录获取时间：{catalog.fetched_at:%Y-%m-%d %H:%M} UTC"
-            )
-        for side, label, limit in [("sell", "卖单（低价优先）", 5), ("buy", "买单（高价优先）", 3)]:
-            selected = sorted(
-                [o for o in orders if o.type == side],
-                key=lambda o: (
-                    o.platinum if side == "sell" else -o.platinum,
-                    -o.updated_at.timestamp(),
-                ),
-            )[:limit]
-            section = Section(
-                title=label,
-                columns=["玩家 / 状态 / 平台", "单价", "每次交易", "库存", "等级 / 子类型 / 属性"],
-            )
-            for order in selected:
-                status = "游戏中" if order.user.status == "ingame" else "在线"
-                traits = [str(order.rank) if order.rank is not None else "—", order.subtype or "—"]
-                for name, value in [
-                    ("充能", order.charges),
-                    ("琥珀星", order.amber_stars),
-                    ("青蓝星", order.cyan_stars),
-                ]:
-                    if value is not None:
-                        traits.append(f"{name} {value}")
-                section.rows.append(
-                    [
-                        f"{order.user.name} / {status} / {order.user.platform}",
-                        str(order.platinum),
-                        f"{order.per_trade} 件 / {order.platinum * order.per_trade} 白金",
-                        str(order.quantity),
-                        " / ".join(traits),
-                    ]
-                )
-            if not selected:
-                section.notes.append("暂无符合条件的在线挂单。")
-            card.sections.append(section)
-            if side == "sell" and selected:
-                best = selected[0]
-                rank_label = f" (rank {best.rank})" if best.rank is not None else ""
-                command = (
-                    f"/w {best.user.name} Hi! I want to buy: x{best.per_trade} "
-                    f'"{item.name("en")}{rank_label}" for '
-                    f"{best.platinum * best.per_trade} platinum. (warframe.market)"
-                )
-                card.sections.append(Section(title="最低卖单私聊指令", rows=[[command]]))
-        if not orders:
-            card.status = DataStatus.EMPTY
-        return card
 
     @staticmethod
     def visible(order: Order, query: MarketQuery) -> bool:
@@ -109,3 +86,9 @@ class MarketService:
             and (query.rank is None or order.rank == query.rank)
             and (query.subtype is None or order.subtype == query.subtype)
         )
+
+
+def plain_description(value: str) -> str:
+    value = re.sub(r"(?i)<br\s*/?>|</p>", "\n", value)
+    value = unescape(re.sub(r"<[^>]+>", "", value))
+    return "\n".join(line.strip() for line in value.splitlines() if line.strip())

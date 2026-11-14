@@ -1,0 +1,77 @@
+{
+  "source": "https://wiki.warframe.com/w/Riven_Mods",
+  "updated": "2026-11-14",
+  "disposition": 1.2,
+  "layouts": {
+    "2+0": [
+      0.99,
+      0
+    ],
+    "2+1": [
+      1.2375,
+      -0.495
+    ],
+    "3+0": [
+      0.75,
+      0
+    ],
+    "3+1": [
+      0.9375,
+      -0.75
+    ]
+  },
+  "license": "CC BY-SA 4.0",
+  "attribution": "Warframe Wiki contributors; coefficients transcribed and labels translated by Aameow",
+  "attributes": [
+    {"id":"Laci","name":"额外连击获取几率","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.00653},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":false},
+    {"id":"GainCombo","name":"连击获取几率","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":-0.01165},"positive":false,"negative":true,"unit":"%","inverse":true,"spliced":false},
+    {"id":"Ampi","name":"弹药上限","coefficients":{"rifle":0.00555,"shotgun":0.01,"pistol":0.01,"archgun":0.0111,"melee":null},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Manti","name":"对 Corpus 伤害","coefficients":{"rifle":0.005,"shotgun":0.005,"pistol":0.005,"archgun":0.005,"melee":0.005},"positive":true,"negative":true,"unit":"faction","inverse":false,"spliced":false},
+    {"id":"Argi","name":"对 Grineer 伤害","coefficients":{"rifle":0.005,"shotgun":0.005,"pistol":0.005,"archgun":0.005,"melee":0.005},"positive":true,"negative":true,"unit":"faction","inverse":false,"spliced":false},
+    {"id":"Pura","name":"对 Infested 伤害","coefficients":{"rifle":0.005,"shotgun":0.005,"pistol":0.005,"archgun":0.005,"melee":0.005},"positive":true,"negative":true,"unit":"faction","inverse":false,"spliced":false},
+    {"id":"Geli","name":"冰冻伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.0133,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Tempi","name":"连击持续时间","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.09},"positive":true,"negative":true,"unit":"s","inverse":false,"spliced":false},
+    {"id":"Crita","name":"暴击几率","coefficients":{"rifle":0.016666,"shotgun":0.01,"pistol":0.016666,"archgun":0.0111,"melee":0.02},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Pleci","name":"滑行攻击暴击几率","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.013334},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Acri","name":"暴击伤害","coefficients":{"rifle":0.013333,"shotgun":0.01,"pistol":0.01,"archgun":0.0089,"melee":0.01},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Visi","name":"伤害","coefficients":{"rifle":0.0183333,"shotgun":0.0183,"pistol":0.0244,"archgun":0.0111,"melee":0.0183},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Vexi","name":"电击伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.0133,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Igni","name":"火焰伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.0133,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Exi","name":"处决伤害","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.0133},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Croni","name":"射速","coefficients":{"rifle":0.00667,"shotgun":0.01,"pistol":0.0083,"archgun":0.00667,"melee":0.0061},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Conci","name":"弹道飞行速度","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":null,"melee":null},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Para","name":"初始连击","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.27224},"positive":true,"negative":false,"unit":"flat","inverse":false,"spliced":false},
+    {"id":"Magna","name":"冲击伤害","coefficients":{"rifle":0.013333,"shotgun":0.013333,"pistol":0.013333,"archgun":0.01,"melee":0.0133},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Arma","name":"弹匣容量","coefficients":{"rifle":0.005555,"shotgun":0.005555,"pistol":0.005555,"archgun":0.0067,"melee":null},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Forti","name":"重击效率","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.00816},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Sati","name":"多重射击","coefficients":{"rifle":0.01,"shotgun":0.0133,"pistol":0.0133,"archgun":0.0067,"melee":null},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Toxi","name":"毒素伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.0133,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Lexi","name":"穿透","coefficients":{"rifle":0.03,"shotgun":0.03,"pistol":0.03,"archgun":0.03,"melee":null},"positive":true,"negative":false,"unit":"m","inverse":false,"spliced":false},
+    {"id":"Insi","name":"穿刺伤害","coefficients":{"rifle":0.01333,"shotgun":0.01333,"pistol":0.01333,"archgun":0.01,"melee":0.0133},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Feva","name":"装填速度","coefficients":{"rifle":0.005555,"shotgun":0.005555,"pistol":0.005555,"archgun":0.0111,"melee":null},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Locti","name":"攻击范围","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.02158},"positive":true,"negative":true,"unit":"m","inverse":false,"spliced":false},
+    {"id":"Sci","name":"切割伤害","coefficients":{"rifle":0.013333,"shotgun":0.013333,"pistol":0.013333,"archgun":0.01,"melee":0.0133},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Hexa","name":"触发几率","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.0067,"melee":0.01},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Deci","name":"触发持续时间","coefficients":{"rifle":0.01111,"shotgun":0.01111,"pistol":0.01111,"archgun":0.01111,"melee":0.01111},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Zeti","name":"后坐力","coefficients":{"rifle":-0.01,"shotgun":-0.01,"pistol":-0.01,"archgun":-0.01,"melee":null},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Hera","name":"变焦","coefficients":{"rifle":0.006666,"shotgun":0.004666,"pistol":0.0089,"archgun":0.006666,"melee":null},"positive":true,"negative":true,"unit":"%","inverse":false,"spliced":false},
+    {"id":"Parci","name":"弹药效率","coefficients":{"rifle":-0.005,"shotgun":-0.005,"pistol":-0.005,"archgun":-0.005,"melee":null},"positive":true,"negative":false,"unit":"%","inverse":true,"spliced":true,"requires":[["Arma","Feva"],["Zeti","Ampi"]]},
+    {"id":"Fraga","name":"爆炸伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.01,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Igni","Geli"]]},
+    {"id":"Cori","name":"腐蚀伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.01,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Toxi","Vexi"]]},
+    {"id":"Effi","name":"对 Orokin 伤害","coefficients":{"rifle":0.005,"shotgun":0.005,"pistol":0.005,"archgun":0.005,"melee":0.005},"positive":true,"negative":false,"unit":"faction","inverse":false,"spliced":true,"requires":[["Argi","Manti"]]},
+    {"id":"Exsi","name":"对炽蛇军伤害","coefficients":{"rifle":0.005,"shotgun":0.005,"pistol":0.005,"archgun":0.005,"melee":0.005},"positive":true,"negative":false,"unit":"faction","inverse":false,"spliced":true,"requires":[["Pura","Argi"]]},
+    {"id":"Muti","name":"对科腐者伤害","coefficients":{"rifle":0.005,"shotgun":0.005,"pistol":0.005,"archgun":0.005,"melee":0.005},"positive":true,"negative":false,"unit":"faction","inverse":false,"spliced":true,"requires":[["Manti","Pura"]]},
+    {"id":"Cali","name":"毒气伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.01,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Toxi","Igni"]]},
+    {"id":"Veri","name":"重击准备速度","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.0133},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Forti","Tempi"]]},
+    {"id":"Magni","name":"磁力伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.01,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Vexi","Geli"]]},
+    {"id":"Robi","name":"重击伤害","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.0133},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Forti","Laci"]]},
+    {"id":"Defi","name":"格挡角度","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.009},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Croni","Locti"]]},
+    {"id":"Radi","name":"辐射伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.01,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Igni","Vexi"]]},
+    {"id":"Auxi","name":"收起时装填","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":null,"melee":null},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Ampi","Feva"],["Ampi","Arma"]]},
+    {"id":"Proci","name":"震地攻击伤害","coefficients":{"rifle":null,"shotgun":null,"pistol":null,"archgun":null,"melee":0.0133},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Visi","Croni"]]},
+    {"id":"Plaga","name":"触发伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.01,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Visi","Hexa"]]},
+    {"id":"Cari","name":"病毒伤害","coefficients":{"rifle":0.01,"shotgun":0.01,"pistol":0.01,"archgun":0.01,"melee":0.01},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Toxi","Geli"]]},
+    {"id":"Eni","name":"弱点伤害","coefficients":{"rifle":0.025,"shotgun":0.025,"pistol":0.025,"archgun":0.025,"melee":null},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Visi","Hera"],["Visi","Sati"]]},
+    {"id":"Exiti","name":"弱点暴击几率","coefficients":{"rifle":0.0275,"shotgun":0.0275,"pistol":0.0275,"archgun":0.0275,"melee":null},"positive":true,"negative":false,"unit":"%","inverse":false,"spliced":true,"requires":[["Crita","Hera"],["Crita","Sati"]]}
+  ]
+}

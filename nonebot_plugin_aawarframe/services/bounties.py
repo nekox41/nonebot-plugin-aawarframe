@@ -7,6 +7,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 
+from ..grq import get_grq
 from ..localization.resolver import load_mapping
 from ..models.bounties import BountyDisplay
 from ..models.common import DataStatus, Section, Snapshot
@@ -95,7 +96,6 @@ def build_bounties(
         card.notes.append("部分任务暂时无法显示。")
     card.bounty_expiry = current.expiry
     card.bounty_remaining = remaining_clock(current.expiry, now)
-    names = load_mapping("jobs.json")
     ordered = sorted(
         jobs,
         key=lambda job: (
@@ -106,7 +106,8 @@ def build_bounties(
     )
     for number, job in enumerate(ordered, 1):
         name = job.job_type.rsplit("/", 1)[-1]
-        display_name = names.get(name + "Title", name)
+        description = get_grq().get("Desc", name + "Title")
+        display_name = description.name() if description else name
         if job.is_vault:
             tier = {30: 1, 40: 2, 50: 3}.get(job.min_level)
             display_name = f"隔离库 · {tier} 级" if tier else "隔离库"
@@ -161,9 +162,10 @@ def build_bounties(
         except ParseError:
             logger.warning("赏金奖励暂不可用：%s", job.rewards, exc_info=True)
             selected.message = "阶段奖励数据暂缺"
-        pool = load_mapping(f"{region}_bounty_tasks.json")["jobs"].get(
-            job.job_type.rsplit("/", 1)[-1]
+        pool_resource = get_grq().get(
+            "Misc", f"bounty.tasks.{region}:" + job.job_type.rsplit("/", 1)[-1]
         )
+        pool = pool_resource.metadata["value"] if pool_resource else None
         if pool and bounty_kind(job) not in {"合一众", "隔离库"}:
             selected.task_pools = pool["stages"]
             if job.endless:

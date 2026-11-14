@@ -36,15 +36,22 @@ class WikiHttpClient:
         self.queue: asyncio.Queue[tuple[str, dict, asyncio.Future]] = asyncio.Queue()
         self._worker: asyncio.Task | None = None
         self._next_request = 0.0
+        self.interval = 1.0
         self._closed = False
 
     async def get_json(self, url: str, *, headers: dict[str, str] | None = None) -> Any:
         parsed = urlsplit(url)
-        if parsed.scheme not in {"http", "https"} or parsed.netloc != "warframe.huijiwiki.com" or parsed.path != "/api.php":
+        if (
+            parsed.scheme not in {"http", "https"}
+            or parsed.netloc != "warframe.huijiwiki.com"
+            or parsed.path != "/api.php"
+        ):
             raise ValueError("Wiki HTTP 客户端只接受本站 API 地址")
         if self._closed:
             raise RuntimeError("Wiki 请求队列已关闭")
-        safe_headers = {k: v for k, v in (headers or {}).items() if k.lower() in {"accept", "accept-language"}}
+        safe_headers = {
+            k: v for k, v in (headers or {}).items() if k.lower() in {"accept", "accept-language"}
+        }
         future = asyncio.get_running_loop().create_future()
         self.queue.put_nowait((url, safe_headers, future))
         if self._worker is None or self._worker.done():
@@ -64,8 +71,10 @@ class WikiHttpClient:
                         await asyncio.sleep(self._next_request - monotonic())
                     if future.cancelled():
                         break
-                    self._next_request = monotonic() + 1.0
-                    request = self.client.build_request("GET", current_url, headers={**WIKI_HEADERS, **headers})
+                    self._next_request = monotonic() + self.interval
+                    request = self.client.build_request(
+                        "GET", current_url, headers={**WIKI_HEADERS, **headers}
+                    )
                     request.headers.pop("Cookie", None)
                     response = await self.client.send(request, follow_redirects=False)
                     if not response.is_redirect:
@@ -74,8 +83,11 @@ class WikiHttpClient:
                     if target is None or redirect == 3:
                         raise RuntimeError("Wiki API 跳转次数过多或缺少跳转地址")
                     parsed = urlsplit(str(target.url))
-                    if (parsed.scheme not in {"http", "https"}
-                            or parsed.netloc != "warframe.huijiwiki.com" or parsed.path != "/api.php"):
+                    if (
+                        parsed.scheme not in {"http", "https"}
+                        or parsed.netloc != "warframe.huijiwiki.com"
+                        or parsed.path != "/api.php"
+                    ):
                         raise RuntimeError("Wiki API 跳转到了非本站地址")
                     if current_url.startswith("https:") and parsed.scheme != "https":
                         raise RuntimeError("Wiki API 请求不能从 HTTPS 降级")
@@ -87,7 +99,10 @@ class WikiHttpClient:
                         self._next_request,
                         monotonic() + retry_after(response.headers.get("Retry-After"), 1),
                     )
-                if response.status_code == 403 or response.headers.get("cf-mitigated") == "challenge":
+                if (
+                    response.status_code == 403
+                    or response.headers.get("cf-mitigated") == "challenge"
+                ):
                     raise WikiChallengeError("Wiki API 暂时要求浏览器验证")
                 response.raise_for_status()
                 result = response.json()

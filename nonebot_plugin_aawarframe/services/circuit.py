@@ -4,6 +4,7 @@
 
 from datetime import datetime
 
+from ..grq import get_grq
 from ..localization.resolver import load_mapping, normalize
 from ..models.common import DataStatus, Section, Snapshot
 from ..models.worldstate import CircuitWeek
@@ -25,11 +26,12 @@ def rotation_index(choices: list[str], rotation: list[list[str]]) -> int | None:
 
 
 def weapon_name(name: str) -> str:
-    names = load_mapping("riven_weapons.json")
-    if name in names:
-        return names[name]
-    aliases = {normalize(key.replace("&", "and")): value for key, value in names.items()}
-    return aliases.get(normalize(name.replace("&", "and")), name)
+    grq = get_grq()
+    resource = grq.get("Riven", name, "riven.compatibility")
+    if resource:
+        return resource.name()
+    result = grq.search("Riven", name)
+    return result.resource.name() if result.exact and result.resource else name
 
 
 def circuit_week(snapshot: Snapshot, now: datetime):

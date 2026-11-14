@@ -1,14 +1,36 @@
-# 作用：实现 rendering 层的 viewmodels 功能。
-# 编写日期：2026-11-07
-# 作者：Aameow
+# Desc: 实现 rendering 层的 viewmodels 功能。
+# Date: 2026-11-14
+# Author: Aameow
 
 from ..models.common import Card, Section
 from ..models.wiki import WikiSearchResult
 
 
 def paginate(card: Card, *, max_rows: int = 12, max_characters: int = 1000) -> list[Card]:
+    if card.riven_values_board:
+        variants = card.riven_values_board.variants
+        pages = []
+        for start in range(0, len(variants), 2):
+            page = card.model_copy(deep=True)
+            page.riven_values_board.variants = variants[start:start + 2]
+            pages.append(page)
+        return pages
+    if card.trader_board:
+        return [card]
+    if card.operation_board:
+        items = card.operation_board.invasions
+        if len(items) <= 20:
+            return [card.model_copy(deep=True)]
+        pages = []
+        for start in range(0, len(items), 20):
+            page = card.model_copy(deep=True)
+            page.operation_board.invasions = page.operation_board.invasions[start : start + 20]
+            pages.append(page)
+        return pages
     if (
-        card.fissure_mode
+        card.arbitration_board
+        or card.market_board
+        or card.fissure_mode
         or card.bounty_mode
         or card.archimedea_mode
         or card.nightwave_mode

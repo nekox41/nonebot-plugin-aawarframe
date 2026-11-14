@@ -2,6 +2,7 @@
 # 编写日期：2026-11-07
 # 作者：Aameow
 
+from ..grq import get_grq
 from ..models.wiki import WikiSearchResult
 from ..providers.wiki import WikiProvider
 
@@ -11,5 +12,8 @@ class WikiService:
         self.provider = provider
 
     async def search(self, query: str) -> WikiSearchResult:
+        result = get_grq().search("Items", query)
+        if result.resource:
+            query = result.resource.name()
         snapshot = await self.provider.search(query)
         return snapshot.data

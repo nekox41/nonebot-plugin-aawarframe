@@ -31,7 +31,8 @@ class WikiCurlTransport(httpx.AsyncBaseTransport):
         )
         # libcurl 已解压响应，移除传输编码信息，防止 HTTPX 再次解压。
         response_headers = {
-            key: value for key, value in response.headers.items()
+            key: value
+            for key, value in response.headers.items()
             if key.lower() not in {"content-encoding", "content-length", "transfer-encoding"}
         }
         return httpx.Response(

@@ -2,6 +2,7 @@
 # 编写日期：2026-11-07
 # 作者：Aameow
 
+import asyncio
 from math import ceil
 from typing import Literal
 
@@ -113,7 +114,7 @@ class RivenService:
     async def statistics(self, query: str) -> Card:
         snapshot = await self.provider.fetch()
         available = {record.compatibility for record in snapshot.data if record.compatibility}
-        matches = resolve_riven_names(query, available)
+        matches = await asyncio.to_thread(resolve_riven_names, query, available)
         notes = data_notes(snapshot)
         if not matches:
             notes.insert(0, f"未找到“{query}”的本周紫卡统计，请检查武器名称或使用英文名称。")

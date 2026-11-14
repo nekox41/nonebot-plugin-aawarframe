@@ -82,9 +82,6 @@ async def test_service_isolates_parser_failures(worldstate, monkeypatch):
     service = WorldStateService(provider)
     assert (await service.query("deep")).status == DataStatus.PARSE_ERROR
     assert (await service.query("fissures")).status == DataStatus.OK
-    provider.fetch.reset_mock()
-    assert (await service.query("arbitration")).status == DataStatus.UNAVAILABLE
-    provider.fetch.assert_not_awaited()
 
 
 async def test_provider_shared_snapshot_and_persistence(worldstate, tmp_path):

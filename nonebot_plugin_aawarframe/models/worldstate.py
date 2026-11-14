@@ -5,7 +5,7 @@
 from datetime import datetime, timezone
 from typing import Annotated, Any
 
-from pydantic import BaseModel, BeforeValidator, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, Field, FiniteFloat, model_validator
 
 
 def parse_date(value: Any) -> datetime:
@@ -25,6 +25,32 @@ def parse_date(value: Any) -> datetime:
 
 
 WorldDate = Annotated[datetime, BeforeValidator(parse_date)]
+
+
+class SortieMission(BaseModel):
+    mission_type: str = Field(alias="missionType", min_length=1)
+    node: str = Field(min_length=1)
+    modifier: str = Field(default="", alias="modifierType")
+
+
+class Sortie(BaseModel):
+    activation: WorldDate = Field(alias="Activation")
+    expiry: WorldDate = Field(alias="Expiry")
+    boss: str = Field(alias="Boss")
+    variants: list[dict] = Field(default_factory=list, alias="Variants")
+    missions: list[dict] = Field(default_factory=list, alias="Missions")
+
+
+class Invasion(BaseModel):
+    activation: WorldDate = Field(alias="Activation")
+    node: str = Field(alias="Node", min_length=1)
+    attacker: str = Field(alias="Faction")
+    defender: str = Field(alias="DefenderFaction")
+    count: FiniteFloat = Field(alias="Count")
+    goal: FiniteFloat = Field(alias="Goal", gt=0)
+    completed: bool = Field(alias="Completed")
+    attacker_reward: dict | list = Field(default_factory=dict, alias="AttackerReward")
+    defender_reward: dict | list = Field(default_factory=dict, alias="DefenderReward")
 
 
 class TimedMission(BaseModel):

@@ -1,6 +1,6 @@
-# 作用：验证 wiki 相关行为。
-# 编写日期：2026-11-07
-# 作者：Aameow
+# Desc: 记录 Wiki 查询的预期行为。
+# Date: 2026-11-14
+# Author: Aameow
 
 import asyncio
 import json
@@ -17,7 +17,6 @@ from nonebot_plugin_aawarframe.models.errors import UserInputError
 from nonebot_plugin_aawarframe.models.wiki import OpenSearchResponse
 from nonebot_plugin_aawarframe.providers.wiki import WikiProvider
 from nonebot_plugin_aawarframe.rendering.viewmodels import wiki_text
-from nonebot_plugin_aawarframe.services.help import help_card
 from nonebot_plugin_aawarframe.services.wiki import WikiService
 
 
@@ -127,7 +126,6 @@ def test_command_and_alias_registration(monkeypatch):
     monkeypatch.setattr(router, "register", lambda *args: registrations.append(args))
     router.setup()
     assert ("wk", {"wiki"}, "wiki") in registrations
-    assert "wk 关键词 / wiki 关键词" in help_card("3").text()
 
 
 def test_response_is_limited_to_three_even_if_upstream_returns_more(wiki_response):

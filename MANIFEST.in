@@ -1,8 +1,7 @@
-include AGENTS.md design.md
-recursive-include tests *.py *.json
-include tests/napcat/README.md tests/napcat/.env.example
-prune tests/napcat/.venv
-prune tests/napcat/runtime
-exclude tests/napcat/.env
-exclude tests/napcat/*.pid
-exclude WIKI.md
+include README.md LICENSE AGENTS.md
+recursive-include nonebot_plugin_aawarframe/assets offline.tar.gz
+include nonebot_plugin_aawarframe/assets/riven_stats.json
+recursive-include nonebot_plugin_aawarframe/rendering *.html *.css
+recursive-include nonebot_plugin_aawarframe/admin/static *.html *.css *.js
+prune tests
+exclude wiki.md WIKI.md GRQ.md sub.md i18n.md

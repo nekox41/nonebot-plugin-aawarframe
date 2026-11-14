@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+{% set board = card.trader_board %}
+<div class="trader-period"><strong>{{ board.location }}</strong>{% if board.time %}<span>{{ board.time_label }} {{ (board.time|beijing).strftime('%m-%d %H:%M') }}</span>{% endif %}</div>
+{% if board.message %}<p class="trader-empty">{{ board.message }}</p>{% endif %}
+{% for group in board.groups %}
+<section class="trader-group">
+  <h2>{{ group.name }}</h2>
+  <div class="trader-grid">
+  {% for item in group.items %}
+    <article class="trader-item">
+      <h3>{{ item.name }}</h3>
+      {% if item.location %}<p class="trader-location">{{ item.location }}</p>{% endif %}
+      <div class="trader-price"><span>杜卡德</span><strong>{{ '{:,}'.format(item.ducats) }}</strong></div>
+      <div class="trader-price"><span>现金</span><strong>{{ '{:,}'.format(item.credits) }}</strong></div>
+    </article>
+  {% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

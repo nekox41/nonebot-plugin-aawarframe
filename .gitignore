@@ -186,3 +186,11 @@ tests/napcat/*.pid
 /WIKI.md
 .env.*
 !.env.example
+
+# Local reference material and browser session notes
+/wiki.md
+/sub.md
+/PC.png
+/phone.jpg
+/example.png
+/jobs.json

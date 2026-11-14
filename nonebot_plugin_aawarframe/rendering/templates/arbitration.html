@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+{% set board=card.arbitration_board %}
+<div class="arbitrations{% if board.current %} arbitrations--current{% endif %}">
+{% for item in board.entries %}
+<article class="arbitration-row">
+  <div class="arbitration-time">{% if item.label %}<strong>{{ item.label }}</strong>{% endif %}<time>{{ (item.time|beijing).strftime('%m-%d %H:%M') }}</time></div>
+  <div class="arbitration-node"><strong>{{ item.node }} <span>/ {{ item.planet }}</span></strong><div class="arbitration-details"><b>{{ item.mission }}</b><span>{{ item.faction }}</span><span class="arbitration-grade">{{ item.grade }}</span></div>{% if board.current and loop.first %}<p class="arbitration-remaining">剩余 {{ item.remaining }}</p>{% endif %}</div>
+</article>
+{% else %}<p class="arbitration-empty">时间表中暂无符合条件的任务。</p>{% endfor %}
+</div>
+{% endblock %}

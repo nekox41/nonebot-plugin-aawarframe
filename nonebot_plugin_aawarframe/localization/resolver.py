@@ -1,63 +1,57 @@
-# 作用：实现 localization 层的 resolver 功能。
-# 编写日期：2026-11-07
+# 作用：兼容现有调用，明确选择 GRQ 域读取资料和翻译。
+# 编写日期：2026-11-13
 # 作者：Aameow
 
-import json
 import re
-from functools import lru_cache
-from pathlib import Path
 
-from rapidfuzz import process
-from rapidfuzz.distance import Levenshtein
-
-ASSETS = Path(__file__).resolve().parents[1] / "assets"
+from ..grq import get_grq
+from ..grq.normalizer import normalize_name as normalize  # noqa: F401
+from .resources import ASSETS  # noqa: F401
 
 
-@lru_cache(maxsize=16)
 def load_mapping(filename: str) -> dict:
-    return json.loads((ASSETS / filename).read_text(encoding="utf-8"))
+    return get_grq().mapping(filename)
 
 
 def translate(value: str) -> str:
-    for filename in ("conquest_zh.json", "mission_type.json", "faction_type.json", "jobs.json"):
-        mapping = load_mapping(filename)
-        if value in mapping:
-            return str(mapping[value])
-    # 未知标识保留原值，不推测翻译。
-    return value
+    grq = get_grq()
+    for domain in ("Desc",):
+        resource = grq.get(domain, value)
+        if resource:
+            return resource.name()
+    return grq.translate("Desc", value)
 
 
 def node_info(value: str) -> dict:
-    return load_mapping("ExportRegions_zh.json").get(value, {"name": value})
-
-
-def normalize(value: str) -> str:
-    return re.sub(r"[^a-z0-9\u4e00-\u9fff]", "", value.lower())
+    grq = get_grq()
+    resource = grq.get("Node", value)
+    if not resource:
+        grq.translate("Node", value)
+        return {"name": value}
+    return {**resource.metadata, "name": resource.name()}
 
 
 class ItemResolver:
     def __init__(self, items: list):
-        allowed = {item.slug for item in items}
-        self.names = {
-            normalize(name): slug
-            for name, slug in load_mapping("wm_pitems.json").items()
-            if slug in allowed
+        self.grq = get_grq()
+        self.grq.sync_market(items)
+        self.allowed = {
+            resource.id
+            for item in items
+            if item.tradable
+            if (resource := self.grq.get("Items", item.slug, "market.slug"))
         }
-        for item in items:
-            self.names[normalize(item.slug)] = item.slug
-            for locale in item.i18n.values():
-                self.names[normalize(locale.name)] = item.slug
 
-    def resolve(self, value: str) -> str | None:
-        cleaned = normalize(value)
-        if not cleaned:
-            return None
-        if cleaned in self.names:
-            return self.names[cleaned]
-        match = process.extractOne(
-            cleaned,
-            sorted(self.names),
-            scorer=Levenshtein.distance,
-            score_cutoff=max(1, len(cleaned) // 3),
-        )
-        return self.names[match[0]] if match else None
+    def resolve_result(self, value):
+        # 中文名称后的 p 表示 Prime；保留英文原名和自定义别名的精确匹配。
+        original = self.grq.search_market(value, self.allowed)
+        if original.exact:
+            return original
+        if re.search(r"(?:[\u4e00-\u9fff]|\s)[pP]$", value.strip()):
+            expanded = value.strip()[:-1].rstrip() + " Prime"
+            return self.grq.search_market(expanded, self.allowed)
+        return original
+
+    def resolve(self, value):
+        result = self.resolve_result(value)
+        return result.resource.identifiers.get("market.slug") if result.resource else None

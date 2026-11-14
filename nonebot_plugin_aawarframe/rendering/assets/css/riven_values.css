@@ -1,0 +1,13 @@
+.riven-variant-head { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 4px 16px; margin-bottom: 10px; }
+.riven-layout { color: var(--accent); font-size: calc(var(--data-font) + 3px); }
+.riven-layout, .riven-level { text-align: right; white-space: nowrap; }
+.riven-variants { display: flex; align-items: start; gap: 20px; }
+.riven-variant { flex: 1; min-width: 0; }
+.riven-variant h2 { font-size: calc(var(--data-font) + 3px); white-space: nowrap; }
+.riven-class, .riven-level { color: var(--muted); font-size: var(--data-font); }
+.riven-values-table { table-layout: auto; font-size: var(--data-font); }
+.riven-values-table td, .riven-values-table th { padding: 4px 6px; font-size: inherit; line-height: 1.18; white-space: nowrap; overflow-wrap: normal; font-variant-numeric: tabular-nums; }
+.riven-values-table th { color: var(--ink); }
+.riven-values-table .riven-section th { padding-top: 10px; color: var(--accent); }
+.riven-positive { color: #236b50; }
+.riven-negative { color: #9e4646; }

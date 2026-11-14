@@ -1,7 +1,8 @@
-# 作用：实现 commands 层的 parsing 功能。
-# 编写日期：2026-11-07
-# 作者：Aameow
+# Desc: 解析查询参数和紫卡词条修正。
+# Date: 2026-11-14
+# Author: Aameow
 
+import re
 import shlex
 
 from ..models.errors import UserInputError
@@ -31,9 +32,11 @@ def parse_market_query(text: str) -> MarketQuery:
             names.append(token)
             index += 1
     name = " ".join(names).strip()
-    max_rank = name.startswith("满级")
-    if max_rank:
+    max_rank = name.startswith("满级") or name.endswith("满级")
+    if name.startswith("满级"):
         name = name[2:].strip()
+    if name.endswith("满级"):
+        name = name[:-2].strip()
     if not name:
         raise UserInputError(USAGE)
     rank = None
@@ -82,6 +85,20 @@ def parse_riven_statistics_query(text: str) -> str:
     if len(query) > 200:
         raise UserInputError("武器名称过长（最多 200 字符）。")
     return query
+
+
+def parse_riven_values(text: str) -> tuple[str, str]:
+    text = text.strip()
+    parts = text.rsplit(maxsplit=1)
+    layout = "3+1"
+    if parts and re.fullmatch(r"\d+\s*[+＋]\s*\d+", parts[-1]):
+        layout = parts.pop().replace("＋", "+")
+        text = parts[0] if parts else ""
+    if layout not in {"2+0", "2+1", "3+0", "3+1"}:
+        raise UserInputError("词条修正支持 2+0、2+1、3+0、3+1。")
+    if not text or len(text) > 200:
+        raise UserInputError("用法：紫卡数值 武器名 [2+0 / 2+1 / 3+0 / 3+1]，默认 3+1。")
+    return text, layout
 
 
 def parse_bounty_index(text: str, command: str = "地球赏金") -> int | None:

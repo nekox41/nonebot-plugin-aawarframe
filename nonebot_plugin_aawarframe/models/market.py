@@ -9,11 +9,15 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ItemName(BaseModel):
+    model_config = ConfigDict(extra="allow")
     name: str
+    description: str = ""
+    icon: str = ""
+    thumb: str = ""
 
 
 class Item(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
     id: str
     slug: str = Field(pattern=r"^[a-z0-9_]+$")
     game_ref: str = Field(default="", alias="gameRef")
@@ -64,3 +68,19 @@ class MarketQuery(BaseModel):
     subtype: str | None = None
     platform: Literal["pc"] = "pc"
     crossplay: bool = True
+
+
+class TopOrders(BaseModel):
+    sell: list[Order]
+    buy: list[Order]
+
+
+class MarketBoard(BaseModel):
+    name: str
+    description: str = ""
+    image: str = ""
+    rank: int | None = None
+    max_rank: int | None = None
+    subtype: str | None = None
+    sell: list[Order] = Field(default_factory=list)
+    buy: list[Order] = Field(default_factory=list)

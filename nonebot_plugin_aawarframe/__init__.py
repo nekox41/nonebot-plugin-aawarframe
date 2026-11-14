@@ -1,6 +1,6 @@
-# 作用：初始化 nonebot_plugin_aawarframe 模块。
-# 编写日期：2026-11-07
-# 作者：Aameow
+# Desc: 声明插件信息并注册查询功能。
+# Date: 2026-11-14
+# Author: Aameow
 
 from nonebot import require
 from nonebot.plugin import PluginMetadata
@@ -12,7 +12,7 @@ require("nonebot_plugin_htmlrender")
 __plugin_meta__ = PluginMetadata(
     name="nonebot-plugin-aawarframe",
     description="国际服 Warframe 世界状态与交易市场查询",
-    usage="发送 help 或 wf help 查看命令。",
+    usage="命令与配置见 README。",
     type="application",
     homepage="https://github.com/nekox41/nonebot-plugin-aawarframe",
     config=Config,

@@ -91,7 +91,8 @@ async def test_lifecycle_closes_http_and_resets_runtime(monkeypatch, tmp_path):
     runtime = Runtime(Config(aawarframe_cache_dir=tmp_path))
     await runtime.close()
     assert runtime.http.client.is_closed
-    assert not list(tmp_path.iterdir())
+    assert {p.name for p in tmp_path.iterdir()} == {"registry.sqlite3", "resources"}
+    assert (tmp_path / "resources/current.json").exists()
 
 
 def test_fallback_is_concise_and_preserves_provenance():
@@ -118,6 +119,7 @@ async def test_worldstate_proxy_does_not_route_market_or_napcat(monkeypatch, tmp
     class FakeHttp:
         def __init__(self, timeout, *, proxy=None):
             self.proxy = proxy
+            self.client = SimpleNamespace(timeout=None)
             self.closed = False
             clients.append(self)
 
