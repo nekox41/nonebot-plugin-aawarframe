@@ -1,5 +1,5 @@
 # Desc: 定义共享快照、状态卡片与展示数据。
-# Date: 2026-11-14
+# Date: 2026-11-15
 # Author: Aameow
 
 from datetime import datetime, timedelta, timezone
@@ -12,7 +12,10 @@ from .arbitration import ArbitrationBoard
 from .bounties import BountyDisplay
 from .market import MarketBoard
 from .operations import OperationBoard
+from .relics import PartsBoard, RelicBoard
+from .riven_market import RivenMarketBoard
 from .riven_values import RivenValuesBoard
+from .trend import TrendBoard
 from .void_trader import TraderBoard
 
 
@@ -68,6 +71,13 @@ class FissureDisplay(BaseModel):
 
 
 class Card(BaseModel):
+    analysis_mode: bool = False
+    parts_board: PartsBoard | None = None
+    relic_board: RelicBoard | None = None
+    trend_board: TrendBoard | None = None
+    attribute_rows: list[tuple[str, str]] = Field(default_factory=list)
+    riven_market_board: RivenMarketBoard | None = None
+    command_names: list[str] = Field(default_factory=list)
     riven_values_board: RivenValuesBoard | None = None
     trader_board: TraderBoard | None = None
     arbitration_board: ArbitrationBoard | None = None
@@ -105,14 +115,43 @@ class Card(BaseModel):
     total_pages: int | None = Field(default=None, ge=1)
 
     def text(self) -> str:
+        if self.attribute_rows:
+            return "\n".join(f"{short}：{name}" for short, name in self.attribute_rows)
+        if self.command_names:
+            return "\n".join(self.command_names)
         lines = [self.title]
+        if self.parts_board:
+            for part in self.parts_board.parts:
+                lines.append(f"{part.name} ×{part.quantity}")
+                lines.append("、".join(r.name + ("（入库）" if r.vaulted else "") for r in part.relics) or "无遗物掉落")
+        if self.relic_board:
+            for reward in self.relic_board.rewards:
+                chances = " / ".join(f"{p:g}%" if p is not None else "—" for p in reward.chances)
+                price = f"{reward.price:g} 白金" if reward.price is not None else reward.price_status
+                lines.append(f"{reward.name} ×{reward.quantity} · {chances} · {price}")
+        if self.trend_board:
+            board = self.trend_board
+            if board.rank is not None:
+                lines.append(f"等级 {board.rank}/{board.max_rank}")
+            if board.subtype:
+                lines.append(board.subtype)
+            for period in board.periods:
+                price = f"{period.average:.2f} 白金" if period.average is not None else "—"
+                lines.append(f"{period.title}：成交量 {period.volume}，均价 {price}")
+        if self.riven_market_board:
+            board = self.riven_market_board
+            lines.append(board.positive_filter + " · " + board.negative_filter)
+            for item in board.listings:
+                lines.append(f"{item.seller} · {item.status} · {item.price_type} {item.price} 白金 · {item.rolls} 洗")
+                lines.extend([*item.positives, *item.negatives])
+            if not board.listings:
+                lines.append("暂无符合条件的挂单。")
         if self.riven_values_board:
-            lines.append("词条修正：" + self.riven_values_board.layout)
-            for variant in self.riven_values_board.variants:
-                lines.append(variant.name)
-                for title, attributes in [("普通词条", variant.ordinary), ("融合词条", variant.spliced)]:
-                    lines.append(title)
-                    lines.extend(f"{a.name}：正面 {a.positive} / 负面 {a.negative}" for a in attributes)
+            board = self.riven_values_board
+            lines.extend(["词条修正：" + board.layout, "、".join([board.name, *board.variants])])
+            for title, attributes in [("普通词条", board.ordinary), ("融合词条", board.spliced)]:
+                lines.append(title)
+                lines.extend(f"{a.name}：正面 {a.positive} / 负面 {a.negative}" for a in attributes)
         if self.stale:
             lines.append("【过期缓存】上游暂不可用，请留意数据时间。")
         if self.archimedea_expiry:

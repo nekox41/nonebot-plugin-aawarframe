@@ -1,5 +1,5 @@
 # Desc: 实现 nonebot_plugin_aawarframe 层的 bootstrap 功能。
-# Date: 2026-11-14
+# Date: 2026-11-15
 # Author: Aameow
 
 import asyncio
@@ -14,17 +14,23 @@ from .config import Config
 from .grq import GameResourceQuery, configure_grq
 from .infrastructure.http import HttpClient
 from .infrastructure.images import ItemImages
+from .infrastructure.riven_ocr import RivenOCR
 from .infrastructure.wiki_http import WikiHttpClient
 from .initialization.pipeline import ensure_offline, initialize
 from .providers.market import MarketProvider
+from .providers.riven_market import RivenMarketProvider
 from .providers.rivens import RivenProvider
 from .providers.wiki import WikiProvider
 from .providers.worldstate import WorldStateProvider
 from .rendering.renderer import CardRenderer
 from .services.arbitration import ArbitrationService
 from .services.market import MarketService
-from .services.rivens import RivenService
+from .services.relics import RelicService
+from .services.riven_market import RivenMarketService
 from .services.riven_values import RivenValuesService
+from .services.riven_analysis import RivenAnalysisService
+from .services.rivens import RivenService
+from .services.trend import TrendService
 from .services.wiki import WikiService
 from .services.worldstate import WorldStateService
 from .services.void_trader import VoidTraderService
@@ -63,10 +69,16 @@ class Runtime:
         self.riven_provider = RivenProvider(self.http, config.aawarframe_cache_dir)
         self.rivens = RivenService(self.riven_provider)
         self.riven_values = RivenValuesService()
+        self.ocr = RivenOCR(config.aawarframe_ocr_python)
+        self.riven_analysis = RivenAnalysisService(self.ocr)
         self.riven_task: asyncio.Task[None] | None = None
         self.world = WorldStateService(self.world_provider)
         self.trader = VoidTraderService(self.world_provider)
         self.market = MarketService(self.market_provider)
+        self.relics = RelicService(self.market_provider)
+        self.trend = TrendService(self.market)
+        self.riven_market_provider = RivenMarketProvider(self.http, config.aawarframe_market_ttl)
+        self.riven_market = RivenMarketService(self.riven_market_provider)
         self.wiki_http = WikiHttpClient(config.aawarframe_http_timeout)
         self.wiki_provider = WikiProvider(self.wiki_http)
         self.wiki = WikiService(self.wiki_provider)
@@ -79,6 +91,7 @@ class Runtime:
             http.client.timeout = httpx.Timeout(options.http_timeout)
         self.world_provider.cache.ttl = options.worldstate_ttl
         self.market_provider.cache.ttl = options.market_ttl
+        self.riven_market_provider.cache.ttl = options.market_ttl
         self.wiki_provider.cache.ttl = options.wiki_ttl
         self.wiki_http.interval = options.wiki_interval
 
@@ -98,11 +111,13 @@ class Runtime:
             self.riven_task.cancel()
             await asyncio.gather(self.riven_task, return_exceptions=True)
             self.riven_task = None
+        await self.ocr.close()
         await self.wiki_provider.close()
         await self.wiki_http.close()
         await self.renderer.close()
         await self.world_provider.close()
         await self.market_provider.close()
+        await self.riven_market_provider.close()
         await self.images.close()
         if self.world_http is not self.http:
             await self.world_http.close()

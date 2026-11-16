@@ -18,7 +18,7 @@ cp tests/napcat/.env.example tests/napcat/.env
 
 ```bash
 tests/napcat/.venv/bin/python tests/napcat/bot.py
-# 连接后额外向指定 QQ 发送两张真实卡片（帮助、满级膛线）：
+# 连接后额外向指定 QQ 发送满级膛线市场卡片：
 tests/napcat/.venv/bin/python tests/napcat/bot.py --send-smoke
 # 验证官方世界状态获取、渲染与发送：
 tests/napcat/.venv/bin/python tests/napcat/bot.py --send-worldstate

@@ -1,5 +1,5 @@
 # Desc: 保存管理配置并执行即时生效的命令路由和黑白名单规则。
-# Date: 2026-11-14
+# Date: 2026-11-15
 # Author: Aameow
 
 import asyncio
@@ -45,7 +45,7 @@ class Command(BaseModel):
     def validate_names(self):
         for name in [self.name, *self.aliases]:
             if not name or len(name) > 40 or any(c.isspace() or ord(c) < 32 for c in name):
-                raise ValueError("命令和别名不能包含空白，最长 40 字")
+                raise ValueError("命令不能包含空白，最长 40 字")
         return self
 
 
@@ -81,38 +81,44 @@ class Settings(BaseModel):
 
 
 DEFAULT_COMMANDS = [
+    ("帮助", set(), "help"),
     ("平原", set(), "plains"),
     ("突击", set(), "sortie"),
     ("奸商", set(), "void_trader"),
     ("入侵", set(), "invasions"),
     ("执刑官", set(), "archon"),
-    ("时光科研", {"时光"}, "temporal"),
-    ("深层科研", {"深层"}, "deep"),
-    ("裂缝", {"裂隙"}, "fissures"),
-    ("钢铁裂缝", {"钢铁裂隙"}, "steel_fissures"),
-    ("九重天", {"九重天裂缝"}, "railjack_fissures"),
-    ("氏族", {"氏族奖励"}, "clan"),
-    ("午夜电波", {"电波"}, "nightwave"),
+    ("时光", set(), "temporal"),
+    ("深层", set(), "deep"),
+    ("裂缝", set(), "fissures"),
+    ("钢铁裂缝", set(), "steel_fissures"),
+    ("九重天", set(), "railjack_fissures"),
+    ("氏族", set(), "clan"),
+    ("电波", set(), "nightwave"),
     ("日历", set(), "calendar"),
     ("钢精", set(), "steel_path"),
     ("回廊", set(), "circuit"),
     ("灵化", set(), "incarnons"),
     ("赏金", set(), "bounty_summary"),
-    ("地球赏金", {"地球"}, "bounties"),
-    ("金星赏金", {"金星"}, "venus_bounties"),
-    ("火卫二赏金", {"火卫二"}, "deimos_bounties"),
-    ("圣所赏金", set(), "sanctum_bounties"),
-    ("扎里曼赏金", set(), "zariman_bounties"),
-    ("1999赏金", set(), "hex_bounties"),
+    ("地球", set(), "bounties"),
+    ("金星", set(), "venus_bounties"),
+    ("火卫二", set(), "deimos_bounties"),
+    ("圣所", set(), "sanctum_bounties"),
+    ("扎里曼", set(), "zariman_bounties"),
+    ("1999", set(), "hex_bounties"),
     ("仲裁", set(), "arbitration"),
     ("今日仲裁", set(), "today_arbitration"),
     ("高效仲裁", set(), "efficient_arbitration"),
     ("wm", set(), "market"),
-    ("wk", {"wiki"}, "wiki"),
-    ("紫卡排行", set(), "riven_ranking"),
-    ("已洗紫卡排行", set(), "rolled_riven_ranking"),
-    ("紫卡统计", set(), "riven_statistics"),
-    ("紫卡数值", set(), "riven_values"),
+    ("趋势", set(), "trend"),
+    ("部件", set(), "parts"),
+    ("遗物", set(), "relic"),
+    ("wmr", set(), "riven_market"),
+    ("词条", set(), "riven_attributes"),
+    ("wk", set(), "wiki"),
+    ("zk", set(), "riven_ranking"),
+    ("zk已洗", set(), "rolled_riven_ranking"),
+    ("数值", set(), "riven_values"),
+    ("分析", set(), "riven_analysis"),
 ]
 
 
@@ -129,7 +135,15 @@ class Control:
         raw["commands"] = [item for item in raw["commands"] if item["feature"] in features]
         known = {item["feature"] for item in raw["commands"]}
         raw["commands"].extend(cmd.model_dump() for cmd in default.commands if cmd.feature not in known)
+        scheme, revision = registry.read_setting("command_scheme", 0)
+        if scheme != 2:
+            names = {cmd.feature: cmd.name for cmd in default.commands}
+            for item in raw["commands"]:
+                item.update(name=names[item["feature"]], aliases=[])
         self.settings = Settings.model_validate(raw)
+        if scheme != 2:
+            self.revision = registry.write_setting("control", self.settings.model_dump(), self.revision)
+            registry.write_setting("command_scheme", 2, revision)
         self.apply = None
         self._compile()
 

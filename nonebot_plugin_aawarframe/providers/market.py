@@ -16,10 +16,12 @@ from ..infrastructure.http import HttpClient
 from ..infrastructure.storage import read_json, write_json
 from ..models.common import Snapshot, utcnow
 from ..models.market import Item, MarketQuery, TopOrders
+from ..models.trend import SaleRecord
 
 logger = logging.getLogger(__name__)
 MARKET_URL = "https://api.warframe.market/v2"
 ITEMS = TypeAdapter(list[Item])
+SALES = TypeAdapter(list[SaleRecord])
 
 
 class MarketProvider:
@@ -30,6 +32,7 @@ class MarketProvider:
         self.images = images or ItemImages(http)
         self.owns_images = images is None
         self.catalog_cache = AsyncTTLCache[Snapshot](3600, 86400)
+        self.statistics_cache = AsyncTTLCache[Snapshot](300, 1800, max_entries=64)
 
     async def request(
         self, path: str, *, platform: str = "pc", crossplay: bool = True, params: dict | None = None
@@ -119,6 +122,17 @@ class MarketProvider:
 
         return await self.cache.get(key, load)
 
+    async def statistics(self, slug: str) -> Snapshot:
+        async def load():
+            url = "https://api.warframe.market/v1/items/" + slug + "/statistics"
+            data = await self.http.get_json(url, market=True, headers={"Platform": "pc", "Language": "en"})
+            closed = data.get("payload", {}).get("statistics_closed") if isinstance(data, dict) else None
+            if not isinstance(closed, dict) or any(not isinstance(closed.get(key), list) for key in ("48hours", "90days")):
+                raise ValueError("Market 成交统计格式异常")
+            return Snapshot(data={key: SALES.validate_python(closed[key]) for key in ("48hours", "90days")}, source=url)
+
+        return await self.statistics_cache.get(slug, load)
+
     async def icon(self, item: Item) -> str:
         resource = get_grq().get("Items", item.slug, "market.slug")
         localized = item.i18n.get("zh-hans") or item.i18n.get("en")
@@ -133,3 +147,4 @@ class MarketProvider:
             await self.images.close()
         await self.cache.close()
         await self.catalog_cache.close()
+        await self.statistics_cache.close()

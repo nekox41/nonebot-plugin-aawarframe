@@ -1,8 +1,9 @@
-# 作用：通过 GRQ 的 Riven 域处理紫卡武器名称与查询。
-# 编写日期：2026-11-13
-# 作者：Aameow
+# Desc: 通过 GRQ 共用紫卡武器名称、别名和模糊匹配。
+# Date: 2026-11-14
+# Author: Aameow
 
 from ..grq import get_grq
+from ..models.errors import UserInputError
 
 RIVEN_TYPES = {
     "Archgun Riven Mod": "重型武器紫卡",
@@ -28,6 +29,16 @@ def riven_name(compatibility: str | None, item_type: str) -> str:
     return resource.name() if resource else compatibility
 
 
+def resolve_riven_weapon(query: str):
+    grq = get_grq()
+    result = grq.search("Riven", query)
+    if not result.candidates and query.lower().endswith("p"):
+        result = grq.search("Riven", query[:-1].strip() + " Prime")
+    if not result.candidates:
+        raise UserInputError("未找到对应的紫卡武器，请使用完整武器名称。")
+    return result.candidates[0]
+
+
 def resolve_riven_names(query: str, available: set[str]) -> list[str]:
     grq = get_grq()
     grq.ensure_rivens(available)
@@ -36,8 +47,6 @@ def resolve_riven_names(query: str, available: set[str]) -> list[str]:
     if result.resource:
         return [result.resource.identifiers["riven.compatibility"]]
     if result.status == "ambiguous":
-        from ..models.errors import UserInputError
-
         raise UserInputError(
             "名称不够明确，请使用完整名称：" + "、".join(r.name() for r in result.candidates)
         )

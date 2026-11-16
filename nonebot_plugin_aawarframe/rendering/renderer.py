@@ -1,5 +1,5 @@
 # Desc: 通过 htmlrender 渲染并缓存 WebP 查询卡片。
-# Date: 2026-11-14
+# Date: 2026-11-15
 # Author: Aameow
 
 import asyncio
@@ -12,6 +12,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 
 from ..infrastructure.cache import AsyncTTLCache
 from ..models.common import Card, Snapshot
+from .charts import trend_chart
 from .viewmodels import paginate
 
 ROOT = Path(__file__).parent
@@ -31,13 +32,25 @@ class CardRenderer:
         selected = styles / "themes" / (theme + ".css")
         if selected.resolve().parent != (styles / "themes").resolve() or not selected.is_file():
             raise ValueError("未知卡片主题：" + theme)
-        self.css = "\n".join(path.read_text(encoding="utf-8") for path in [styles / "base.css", styles / "trader.css", styles / "riven_values.css", selected])
+        self.css = "\n".join(path.read_text(encoding="utf-8") for path in [styles / "base.css", styles / "trader.css", styles / "riven_values.css", styles / "riven_market.css", styles / "trend.css", styles / "relics.css", styles / "riven_analysis.css", selected])
         self.semaphore = asyncio.Semaphore(concurrency)
         self.cache = AsyncTTLCache[Snapshot](30, 0, max_entries=16)
         self.page_cache = AsyncTTLCache[Snapshot](86400, 0, max_entries=64)
 
     def html(self, card: Card, page: int | None = None, total: int | None = None) -> str:
-        if card.riven_values_board:
+        if card.analysis_mode:
+            template = "riven_analysis.html"
+        elif card.parts_board or card.relic_board:
+            template = "relics.html"
+        elif card.trend_board:
+            template = "trend.html"
+        elif card.attribute_rows:
+            template = "attributes.html"
+        elif card.command_names:
+            template = "commands.html"
+        elif card.riven_market_board:
+            template = "riven_market.html"
+        elif card.riven_values_board:
             template = "riven_values.html"
         elif card.trader_board:
             template = "void_trader.html"
@@ -65,13 +78,21 @@ class CardRenderer:
             card=card,
             page=page or card.page_number or 1,
             total=total or card.total_pages or 1,
+            trend_charts=[(period, trend_chart(period)) for period in card.trend_board.periods] if card.trend_board else [],
         )
         return document.replace("</head>", "<style>" + self.css + "</style></head>", 1)
 
     async def render(self, card: Card) -> list[bytes]:
         # 显式分页和专用卡片各渲染一张图片，保留任务顺序与完整信息。
         single_page = (
-            card.page_number is not None
+            card.analysis_mode
+            or card.relic_board
+            or card.trend_board
+            or card.attribute_rows
+            or card.command_names
+            or card.riven_market_board
+            or card.riven_values_board
+            or card.page_number is not None
             or card.cycle_items
             or card.bounty_mode
             or card.archimedea_mode
@@ -88,7 +109,14 @@ class CardRenderer:
             key = sha256(html.encode()).hexdigest()
 
             compact = bool(
-                page.riven_values_board
+                page.analysis_mode
+                or page.parts_board
+                or page.relic_board
+                or page.trend_board
+                or page.attribute_rows
+                or page.command_names
+                or page.riven_market_board
+                or page.riven_values_board
                 or page.operation_board
                 or page.fissure_mode
                 or page.cycle_items
@@ -147,8 +175,13 @@ class CardRenderer:
                 const arbitration = body.classList.contains('arbitration-page');
                 const trader = body.classList.contains('trader-page');
                 const riven = body.classList.contains('riven-values-page');
+                const commands = body.classList.contains('commands-page');
+                const attributeTable = body.classList.contains('attributes-page');
+                const trend = body.classList.contains('trend-page');
+                const relic = body.classList.contains('relic-page');
+                const auctions = body.classList.contains('riven-market-page');
                 const singleCycle = document.querySelectorAll('.cycle').length === 1;
-                const maximum = riven ? 26 : trader ? 24 : arbitration ? 30 : market ? 32 : operation ? 30 : weekly || nightwave ? 30 : research ? 28 : fissure ? 28 : (bounty ? 28 : (singleCycle ? 44 : 36));
+                const maximum = relic ? 28 : attributeTable ? 32 : commands ? 36 : auctions ? 28 : riven ? 26 : trader ? 24 : arbitration ? 30 : market ? 32 : operation ? 30 : weekly || nightwave ? 30 : research ? 28 : fissure ? 28 : (bounty ? 28 : (singleCycle ? 44 : 36));
                 const textWidth = element => {
                     if (!element) return 0;
                     const range = document.createRange();
@@ -158,7 +191,29 @@ class CardRenderer:
                 for (let font = maximum; font >= (trader ? 8 : 12); font--) {
                     root.style.setProperty('--data-font', font + 'px');
                     let needed = 600;
-                    if (trader) {
+                    if (relic) {
+                        needed = Math.max(900, textWidth(document.querySelector('h1')) + 70);
+                        for (const heading of document.querySelectorAll('.part-heading')) needed = Math.max(needed, textWidth(heading) + 64);
+                        for (const chip of document.querySelectorAll('.relic-chip')) {
+                            const width = [...chip.children].reduce((sum, child) => sum + textWidth(child), 0) + 40;
+                            needed = Math.max(needed, width * 3 + 80);
+                        }
+                        for (const table of document.querySelectorAll('.relic-rewards')) {
+                            let width = 64;
+                            for (let column = 0; column < table.rows[0].cells.length; column++) {
+                                width += Math.max(...[...table.rows].map(row => textWidth(row.cells[column]))) + 20;
+                            }
+                            needed = Math.max(needed, width);
+                        }
+                    } else if (trend) {
+                        needed = Math.max(1100, textWidth(document.querySelector('h1')) + 70);
+                    } else if (commands) {
+                        needed = Math.max(800, (Math.max(...[...document.querySelectorAll('.command-name')].map(textWidth)) + 32) * 4 + 92);
+                    } else if (attributeTable) {
+                        const widths = [...document.querySelectorAll('.attribute-table')].map(table =>
+                            [0, 1].reduce((sum, column) => sum + Math.max(...[...table.rows].map(row => textWidth(row.cells[column]))) + 24, 0));
+                        needed = Math.max(800, Math.max(...widths) * 2 + 80);
+                    } else if (trader) {
                         for (const width of [1320, 1560, 1800, 1980]) {
                             root.style.setProperty('--trader-columns', String(Math.floor(width / 230)));
                             body.style.width = width + 'px';
@@ -167,8 +222,16 @@ class CardRenderer:
                             if (height <= 2000 && fits) return {width, height};
                         }
                         continue;
+                    } else if (auctions) {
+                        let column = 420;
+                        for (const row of document.querySelectorAll('.riven-listing-head, .riven-listing-price')) {
+                            column = Math.max(column, [...row.children].reduce((sum, cell) => sum + textWidth(cell), 0) + 52);
+                        }
+                        for (const field of document.querySelectorAll('.riven-listing-meta, .riven-listing-stat')) {
+                            column = Math.max(column, textWidth(field) + 40);
+                        }
+                        needed = Math.max(column * 2 + 80, textWidth(document.querySelector('.riven-market-filter')) + 60);
                     } else if (riven) {
-                        const panels = [...document.querySelectorAll('.riven-variant')];
                         let panelWidth = 650;
                         for (const table of document.querySelectorAll('.riven-values-table')) {
                             let width = 24;
@@ -177,8 +240,11 @@ class CardRenderer:
                             }
                             panelWidth = Math.max(panelWidth, width);
                         }
-                        panelWidth = Math.max(panelWidth, ...panels.map(panel => textWidth(panel.querySelector('h2')) + textWidth(panel.querySelector('.riven-layout')) + 46));
-                        needed = panelWidth * panels.length + 76;
+                        panelWidth = Math.max(panelWidth, textWidth(document.querySelector('.riven-values h2')) + textWidth(document.querySelector('.riven-layout')) + 46);
+                        for (const name of document.querySelectorAll('.riven-family-name')) {
+                            panelWidth = Math.max(panelWidth, textWidth(name) + 24);
+                        }
+                        needed = panelWidth + 56;
                     } else if (arbitration) {
                         const rows = [...document.querySelectorAll('.arbitration-row')];
                         needed = Math.max(800, ...rows.map(row => textWidth(row.querySelector('.arbitration-time')) + Math.max(textWidth(row.querySelector('.arbitration-node>strong')), textWidth(row.querySelector('.arbitration-details'))) + 100));
@@ -283,7 +349,7 @@ class CardRenderer:
                     body.style.width = width + 'px';
                     const height = Math.ceil(body.getBoundingClientRect().height);
                     const bounds = content.getBoundingClientRect();
-                    const fields = [...content.querySelectorAll('strong, h2, td, th, time, .cycle__next, .fissure span, .task-chip, .stage-pool-label, .bounty-meta, .bounty-location span, .hub-bounty-objective, .hub-bounty-top span, .hub-bounty-meta span, .research-modifier p, .research-modifier-name, .research-period, .nightwave-task__body p, .nightwave-task__meta > span, .operation-period span, .operation-condition, .operation-task-head span, .invasion-head span, .invasion-reward')];
+                    const fields = [...content.querySelectorAll('.command-name, strong, h2, td, th, time, .cycle__next, .fissure span, .task-chip, .stage-pool-label, .bounty-meta, .bounty-location span, .hub-bounty-objective, .hub-bounty-top span, .hub-bounty-meta span, .research-modifier p, .research-modifier-name, .research-period, .nightwave-task__body p, .nightwave-task__meta > span, .operation-period span, .operation-condition, .operation-task-head span, .invasion-head span, .invasion-reward')];
                     const fits = fields.every(element => {
                         const r = element.getBoundingClientRect();
                         return r.right <= bounds.right + 1 && r.left >= bounds.left - 1 &&

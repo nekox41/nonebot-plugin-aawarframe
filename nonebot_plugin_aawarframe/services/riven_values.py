@@ -1,5 +1,5 @@
 # Desc: 按最接近的武器家族计算满级紫卡普通与融合词条范围。
-# Date: 2026-11-14
+# Date: 2026-11-15
 # Author: Aameow
 
 import json
@@ -8,9 +8,10 @@ from struct import pack, unpack
 from ..grq import get_grq
 from ..grq.links import PREFIXES, SUFFIXES
 from ..localization.resources import PACKAGED
+from ..localization.rivens import resolve_riven_weapon
 from ..models.common import Card
 from ..models.errors import UserInputError
-from ..models.riven_values import RivenAttribute, RivenValuesBoard, RivenVariant
+from ..models.riven_values import RivenAttribute, RivenValuesBoard
 
 CLASS_NAMES = {"rifle": "步枪", "shotgun": "霰弹枪", "pistol": "手枪", "archgun": "Arch 枪械", "melee": "近战"}
 VINTAGE = {"Hera", "Zeti", "Ampi", "Tempi", "Pleci", "Exi", "Forti", "Para", "GainCombo"}
@@ -32,20 +33,22 @@ def f32(value):
     return unpack("f", pack("f", value))[0]
 
 
+def numerical_value(attribute, weapon_class, multiplier, disposition, rank=8, quality=1):
+    value = f32(attribute["coefficients"][weapon_class])
+    for factor in (10, rank + 1, disposition, multiplier, quality):
+        value = f32(value * f32(factor))
+    if attribute["unit"] == "%":
+        value = f32(value * (-100 if attribute["inverse"] else 100))
+    return value
+
+
 def value_range(attribute, weapon_class, multiplier, disposition):
     if not multiplier:
         return "—"
-    values = []
-    for quality in (0.9, 1.1):
-        value = f32(attribute["coefficients"][weapon_class])
-        for factor in (10, 9, disposition, multiplier, quality):
-            value = f32(value * f32(factor))
-        unit = attribute["unit"]
-        if unit == "%":
-            value = f32(value * (-100 if attribute["inverse"] else 100))
-        elif unit == "faction":
-            value = f32(1 + value)
-        values.append(value)
+    unit = attribute["unit"]
+    values = [numerical_value(attribute, weapon_class, multiplier, disposition, quality=q) for q in (0.9, 1.1)]
+    if unit == "faction":
+        values = [f32(1 + value) for value in values]
     low, high = sorted(values)
     if unit == "faction":
         return f"×{low:.2f}～×{high:.2f}"
@@ -121,13 +124,7 @@ class RivenValuesService:
     def query(self, query, layout="3+1"):
         if layout not in self.rules["layouts"]:
             raise UserInputError("词条修正支持 2+0、2+1、3+0、3+1。")
-        grq = get_grq()
-        result = grq.search("Riven", query)
-        if not result.candidates and query.lower().endswith("p"):
-            result = grq.search("Riven", query[:-1].strip() + " Prime")
-        if not result.candidates:
-            raise UserInputError("未找到对应的紫卡武器，请使用完整武器名称。")
-        riven = result.candidates[0]
+        riven = resolve_riven_weapon(query)
         weapons = self.family(riven)
         if not weapons:
             raise UserInputError("该武器暂缺完整资料，请更新物品资源后重试。")
@@ -137,8 +134,13 @@ class RivenValuesService:
         weapon_class = {"kitgun": "pistol", "zaw": "melee"}.get(weapon_class, weapon_class)
         if weapon_class not in CLASS_NAMES:
             raise UserInputError("暂不支持该武器的紫卡类型。")
-        variants = []
-        for weapon in weapons:
-            ordinary, spliced = self.attributes(weapon, riven, weapons, layout, weapon_class)
-            variants.append(RivenVariant(name=weapon.name(), weapon_class=CLASS_NAMES[weapon_class], ordinary=ordinary, spliced=spliced))
-        return Card(title="紫卡数值 · " + riven.name(), source=self.rules["source"], riven_values_board=RivenValuesBoard(layout=layout, variants=variants))
+        ordinary, spliced = self.attributes(weapons[0], riven, weapons, layout, weapon_class)
+        board = RivenValuesBoard(
+            layout=layout,
+            name=riven.name(),
+            weapon_class=CLASS_NAMES[weapon_class],
+            variants=list(dict.fromkeys(w.name() for w in weapons if w.name() != riven.name())),
+            ordinary=ordinary,
+            spliced=spliced,
+        )
+        return Card(title="紫卡数值 · " + riven.name(), source=self.rules["source"], riven_values_board=board)

@@ -1,6 +1,6 @@
-# 作用：实现 services 层的 rivens 功能。
-# 编写日期：2026-11-07
-# 作者：Aameow
+# Desc: 展示紫卡排行与单武器周统计。
+# Date: 2026-11-14
+# Author: Aameow
 
 import asyncio
 from math import ceil
@@ -46,12 +46,12 @@ class RivenService:
         *,
         rerolled: bool = False,
     ) -> Card:
-        command = "已洗紫卡排行" if rerolled else "紫卡排行"
+        command = "zk已洗" if rerolled else "zk"
         state = "已洗" if rerolled else "未洗"
         if page < 1:
-            raise UserInputError(f"页码必须是正整数，例如：{command}2。")
+            raise UserInputError(f"页码必须是正整数，例如：{command} 2。")
         if sort_by not in {"median", "popularity"}:
-            raise UserInputError(f"排序只支持中位价或热度，例如：{command}3 热度。")
+            raise UserInputError(f"排序只支持中位价或热度，例如：{command} 3 热度。")
         snapshot = await self.provider.fetch()
 
         def sort_key(record):
@@ -72,7 +72,7 @@ class RivenService:
         total = max(1, ceil(len(records) / PAGE_SIZE))
         if page > total:
             raise UserInputError(
-                f"{command}共有 {total} 页，请输入 1–{total}，例如：{command}3 热度。"
+                f"{command}共有 {total} 页，请输入 1–{total}，例如：{command} 3 热度。"
             )
         start = (page - 1) * PAGE_SIZE
         section = Section(

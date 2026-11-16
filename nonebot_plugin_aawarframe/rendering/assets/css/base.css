@@ -9,6 +9,13 @@
   --radius: 20px;
 }
 * { box-sizing: border-box; animation: none !important; transition: none !important; }
+.command-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.command-name { padding: 14px 12px; border-radius: 10px; background: var(--soft); color: var(--ink); text-align: center; white-space: nowrap; font-size: var(--data-font, 36px); font-weight: 600; }
+.command-footer { justify-content: flex-end; }
+.attribute-tables { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.attribute-table { table-layout: auto; font-size: var(--data-font); }
+.attribute-table th, .attribute-table td { padding: 6px 8px; font-size: inherit; line-height: 1.2; white-space: nowrap; overflow-wrap: normal; }
+.attribute-table td:first-child { color: var(--accent); font-weight: 600; }
 body { margin: 0; padding: 24px; background: var(--background); color: var(--ink); font-family: "Noto Sans CJK SC", "Noto Sans SC", "Source Han Sans SC", "WenQuanYi Zen Hei", "Microsoft YaHei", sans-serif; font-size: 19px; line-height: 1.6; }
 .card { padding: 32px; background: var(--paper); border: 1px solid var(--line); border-radius: 26px; }
 .card__header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 28px; }

@@ -1,6 +1,6 @@
-# 作用：查询仲裁时间表，维护节点评级与每分钟生息精华掉落记录。
-# 编写日期：2026-11-14
-# 作者：Aameow
+# Desc: 查询仲裁排期并维护节点评级与生息精华记录。
+# Date: 2026-11-14
+# Author: Aameow
 
 import bisect
 import gzip
@@ -115,7 +115,7 @@ class ArbitrationService:
                 if query in synonyms:
                     matches = {synonyms[query]}
                 if not matches:
-                    raise UserInputError("未找到此任务类型，例如：仲裁生存、仲裁防御、仲裁中断。")
+                    raise UserInputError("未找到此任务类型，例如：仲裁 生存、仲裁 防御、仲裁 中断。")
                 title = "仲裁 · " + query
 
                 def predicate(node):

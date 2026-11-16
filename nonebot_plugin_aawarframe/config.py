@@ -1,5 +1,5 @@
 # Desc: 实现 nonebot_plugin_aawarframe 层的 config 功能。
-# Date: 2026-11-14
+# Date: 2026-11-15
 # Author: Aameow
 
 from pathlib import Path
@@ -17,6 +17,7 @@ class Config(BaseModel):
     aawarframe_render_concurrency: int = Field(default=2, ge=1, le=2)
 
     aawarframe_data_auto_update: bool = True
+    aawarframe_ocr_python: str | None = None
 
     aawarframe_admin_enabled: bool = False
     aawarframe_admin_host: str = "127.0.0.1"

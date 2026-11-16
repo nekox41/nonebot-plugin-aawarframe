@@ -1,0 +1,14 @@
+.analysis-page { font-size: var(--data-font, 32px); }
+.analysis-page h1 { font-size: 1.35em; }
+.analysis-page h2 { font-size: 1em; margin: 0 0 18px; }
+.analysis-table { width: 100%; border-collapse: collapse; table-layout: auto; font-size: 1em; }
+.analysis-table th, .analysis-table td { padding: 12px 10px; white-space: nowrap; text-align: right; }
+.analysis-table th { font-size: .72em; }
+.analysis-table th:first-child, .analysis-table td:first-child { text-align: left; }
+.analysis-grade { font-weight: 800; font-size: 1.2em; }
+.grade-S { color: #a36813; }
+.grade-A { color: #a23d8d; }
+.grade-B { color: #4269be; }
+.grade-C { color: #28766c; }
+.grade-D, .grade-E, .grade-F { color: #a55c59; }
+.analysis-page .notes { font-size: .67em; }

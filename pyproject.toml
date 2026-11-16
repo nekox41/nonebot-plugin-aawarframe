@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nonebot-plugin-aawarframe"
-version = "0.17.3"
+version = "0.22.5"
 description = "aa 的 Warframe 助手"
 authors = [
     {name = "nekox41",email = "aameow@outlook.com"},
@@ -42,6 +42,7 @@ nonebot_plugin_aawarframe = ["assets/offline.tar.gz", "assets/riven_stats.json",
 distribution = false
 
 [project.optional-dependencies]
+ocr = ["paddlepaddle==3.2.0", "paddleocr==3.3.2", "Pillow>=11,<13"]
 dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.9", "build>=1"]
 
 [tool.pytest.ini_options]

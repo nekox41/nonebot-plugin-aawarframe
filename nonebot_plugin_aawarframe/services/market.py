@@ -1,6 +1,6 @@
-# 作用：匹配可交易物品与等级，整理 Top 买卖订单和物品展示信息。
-# 编写日期：2026-11-07
-# 作者：Aameow
+# Desc: 共用市场物品、等级匹配并整理 Top 买卖订单。
+# Date: 2026-11-14
+# Author: Aameow
 
 import asyncio
 import re
@@ -17,7 +17,7 @@ class MarketService:
     def __init__(self, provider: MarketProvider):
         self.provider = provider
 
-    async def query(self, query: MarketQuery) -> Card:
+    async def resolve_item(self, query: MarketQuery):
         catalog = await self.provider.catalog()
         resolver = await asyncio.to_thread(ItemResolver, catalog.data)
         result = resolver.resolve_result(query.name)
@@ -45,7 +45,13 @@ class MarketService:
             rank = 0
         if query.subtype is not None and query.subtype not in item.subtypes:
             raise UserInputError("不支持此子类型，可用值：" + "、".join(item.subtypes))
-        effective = query.model_copy(update={"rank": rank})
+        return catalog, details, query.model_copy(update={"rank": rank})
+
+    async def query(self, query: MarketQuery) -> Card:
+        catalog, details, effective = await self.resolve_item(query)
+        item = details.data
+        rank = effective.rank
+        slug = item.slug
         snapshot = await self.provider.orders(slug, effective)
         board = MarketBoard(
             name=item.name(),

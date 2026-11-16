@@ -1,0 +1,15 @@
+.trend-context { display: flex; gap: 16px; margin-bottom: 10px; color: var(--accent); font-size: 26px; }
+.trend-period + .trend-period { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.trend-period-head, .trend-summary { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; white-space: nowrap; }
+.trend-period-head h2 { font-size: 30px; }
+.trend-period-head > span { font-size: 23px; color: var(--muted); }
+.trend-summary { margin: 8px 0; font-size: 28px; }
+.trend-summary strong { color: var(--accent); }
+.trend-chart { display: block; width: 100%; height: auto; overflow: visible; }
+.trend-axis, .trend-axis-title { fill: var(--muted); font-size: 21px; }
+.trend-axis-title { fill: var(--ink); font-weight: 600; }
+.trend-grid { stroke: var(--line); stroke-width: 1.5; }
+.trend-price-line { stroke: var(--accent); stroke-width: 3; fill: none; }
+.trend-price-dot { fill: var(--accent); }
+.trend-volume-bar { fill: var(--accent); opacity: .45; }
+.trend-empty { padding: 24px 0; font-size: 26px; color: var(--muted); }

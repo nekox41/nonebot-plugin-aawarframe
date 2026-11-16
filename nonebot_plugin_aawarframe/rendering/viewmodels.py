@@ -1,5 +1,5 @@
 # Desc: 实现 rendering 层的 viewmodels 功能。
-# Date: 2026-11-14
+# Date: 2026-11-15
 # Author: Aameow
 
 from ..models.common import Card, Section
@@ -7,14 +7,29 @@ from ..models.wiki import WikiSearchResult
 
 
 def paginate(card: Card, *, max_rows: int = 12, max_characters: int = 1000) -> list[Card]:
-    if card.riven_values_board:
-        variants = card.riven_values_board.variants
-        pages = []
-        for start in range(0, len(variants), 2):
-            page = card.model_copy(deep=True)
-            page.riven_values_board.variants = variants[start:start + 2]
+    if card.parts_board:
+        pages, parts, cost = [], [], 0
+
+        def flush():
+            page = card.model_copy(update={"parts_board": card.parts_board.model_copy(update={"parts": list(parts)})})
             pages.append(page)
-        return pages
+
+        for part in card.parts_board.parts:
+            chunks = [part.relics[i:i + 48] for i in range(0, len(part.relics), 48)] or [[]]
+            for chunk in chunks:
+                size = len(chunk) + 6
+                if parts and cost + size > 64:
+                    flush()
+                    parts, cost = [], 0
+                parts.append(part.model_copy(update={"relics": chunk}))
+                cost += size
+        if parts:
+            flush()
+        return pages or [card]
+    if card.relic_board:
+        return [card]
+    if card.trend_board or card.attribute_rows or card.command_names or card.riven_market_board or card.riven_values_board:
+        return [card]
     if card.trader_board:
         return [card]
     if card.operation_board:
