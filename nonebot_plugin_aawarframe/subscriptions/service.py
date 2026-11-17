@@ -452,7 +452,7 @@ class SubscriptionService:
             bot.send_group_msg(group_id=int(delivery.group_id), message=plan.message),
             timeout=20,
         )
-        await replies.send_pokes(bot, plan, group_id=delivery.group_id)
+        await replies.send_actions(bot, plan, group_id=delivery.group_id)
 
     async def _tick(self, now: datetime | None = None) -> None:
         now = now or datetime.now(UTC)
