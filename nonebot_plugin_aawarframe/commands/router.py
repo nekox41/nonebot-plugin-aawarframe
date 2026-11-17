@@ -22,6 +22,7 @@ from ..localization.riven_attributes import attributes
 from ..models.common import Card
 from ..models.errors import UserInputError, WikiChallengeError
 from ..rendering.viewmodels import fallback_text, wiki_text
+from ..replies import replies
 from ..services.bounties import BOUNTY_FEATURES
 from .parsing import (
     parse_bounty_index,
@@ -41,10 +42,10 @@ logger = logging.getLogger(__name__)
 async def response(card: Card, runtime) -> Message:
     try:
         images = await runtime.renderer.render(card)
-        return Message([MessageSegment.image(image) for image in images])
+        return replies.plan("QUERY_IMAGE", IMAGES=images).message
     except Exception:
         logger.exception("图片渲染失败，回退文本")
-        return Message(MessageSegment.text(fallback_text(card)))
+        return replies.plan("QUERY_FALLBACK", CONTENT=fallback_text(card)).message
 
 
 async def dispatch(
@@ -62,18 +63,18 @@ async def dispatch(
                 card = runtime.subscriptions.list_card(subscriber)
                 if card is not None:
                     return await response(card, runtime)
-            return Message(MessageSegment.text(text))
+            return replies.plan("SUBSCRIPTION_RESULT", CONTENT=text).message
         if feature == "riven_analysis":
             if image is None:
-                raise UserInputError("请附上或引用一张紫卡图片。")
+                raise UserInputError(replies.text("ROUTER_IMAGE_MISSING"))
             card = await runtime.riven_analysis.query(image, arguments)
         elif feature == "help":
             if arguments.strip():
-                raise UserInputError("用法：帮助")
+                raise UserInputError(replies.text("ROUTER_HELP_USAGE"))
             card = Card(title="帮助", source="命令列表", command_names=[cmd.name for cmd in runtime.control.settings.commands])
         elif feature == "riven_attributes":
             if arguments.strip():
-                raise UserInputError("用法：词条")
+                raise UserInputError(replies.text("ROUTER_ATTR_USAGE"))
             card = Card(title="紫卡词条", source="词条映射", attribute_rows=[(" / ".join([a["short"], *a.get("short_aliases", [])]), a["name"]) for a in attributes().values()])
         elif feature == "riven_ranking" and any(
             token != "热度" and not (token.isascii() and token.isdecimal())
@@ -97,7 +98,7 @@ async def dispatch(
                 card = Card(title=title, source="命令提示", notes=[str(exc)])
         elif feature == "wiki":
             result = await runtime.wiki.search(parse_wiki_query(arguments))
-            return Message(MessageSegment.text(wiki_text(result)))
+            return replies.plan("TEXT", CONTENT=wiki_text(result)).message
         elif feature in {"arbitration", "today_arbitration", "efficient_arbitration"}:
             card = runtime.arbitration.query(feature, arguments)
         elif feature == "void_trader":
@@ -116,15 +117,15 @@ async def dispatch(
             card = await runtime.riven_market.query(parse_riven_market(arguments))
         else:
             if arguments.strip():
-                raise UserInputError("此命令不接受参数。")
+                raise UserInputError(replies.text("ROUTER_NO_ARGUMENTS"))
             card = await runtime.world.query(feature)
     except WikiChallengeError:
-        return Message(MessageSegment.text("Wiki 暂时要求浏览器验证，请稍后重试。"))
+        return replies.plan("ERROR_WIKI").message
     except UserInputError as exc:
-        return Message(MessageSegment.text(str(exc)))
+        return replies.plan("ERROR_USER_INPUT", ERROR=str(exc)).message
     except Exception:
         logger.exception("查询 %s 失败", feature)
-        return Message(MessageSegment.text("数据源暂时不可用，请稍后重试。"))
+        return replies.plan("ERROR_INTERNAL").message
     return await response(card, runtime)
 
 
@@ -152,10 +153,16 @@ def register(name: str, aliases: set[str], feature: str) -> None:
             try:
                 image = await message_image(bot, event, get_runtime().http)
             except UserInputError as exc:
-                await matcher.finish(str(exc))
+                await matcher.finish(
+                    replies.plan("ERROR_IMAGE", CONTENT=str(exc)).message
+                )
             except Exception:
                 logger.exception("下载紫卡图片失败")
-                await matcher.finish("无法下载图片，请重新上传。")
+                await matcher.finish(
+                    replies.plan(
+                        "ERROR_IMAGE", CONTENT=replies.text("ROUTER_IMAGE_DOWNLOAD")
+                    ).message
+                )
         subscriber = (
             (str(bot.self_id), str(event.group_id), str(event.user_id))
             if isinstance(event, GroupMessageEvent)
@@ -164,7 +171,17 @@ def register(name: str, aliases: set[str], feature: str) -> None:
         result = await dispatch(
             feature, state["aawarframe_arguments"], image, subscriber=subscriber
         )
-        await matcher.finish(result)
+        plan = replies.plan(
+            "COMMAND_ENVELOPE",
+            CONTENT=result,
+            USER_ID=str(event.user_id),
+            MESSAGE_ID=str(getattr(event, "message_id", "")),
+            GROUP_ID=str(getattr(event, "group_id", "")),
+        )
+        await replies.send_pokes(
+            bot, plan, group_id=getattr(event, "group_id", None)
+        )
+        await matcher.finish(plan.message)
 
 
 def setup() -> None:
