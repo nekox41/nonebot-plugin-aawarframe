@@ -38,6 +38,7 @@ class ReplyCatalog:
         self.path: Path | None = None
         self.signature: tuple[int, int] | None = None
         self.phrases: dict[str, str] = {}
+        self.invalid_signature: tuple[int, int] | None = None
 
     @staticmethod
     def _read(path: Path) -> dict:
@@ -80,7 +81,7 @@ class ReplyCatalog:
         try:
             stat = self.path.stat()
             signature = (stat.st_mtime_ns, stat.st_size)
-            if signature == self.signature:
+            if signature in {self.signature, self.invalid_signature}:
                 return
             user = self._read(self.path)
             # 新增键从包内默认配置补齐，已有用户自定义配置不被升级覆盖。
@@ -96,9 +97,25 @@ class ReplyCatalog:
             self.values = merged
             self.phrases = altered
             self.signature = signature
+            self.invalid_signature = None
         except (OSError, ValueError, tomllib.TOMLDecodeError):
             # 人手编辑一半时不会导致机器人发送消息失败。
+            try:
+                stat = self.path.stat() if self.path is not None else None
+                if stat is not None:
+                    self.invalid_signature = (stat.st_mtime_ns, stat.st_size)
+            except OSError:
+                pass
             logger.exception("回复文件加载失败，沿用上一次有效配置：%s", self.path)
+
+    def reset(self) -> None:
+        """关闭运行时后恢复包内默认设置，避免持有临时测试目录路径。"""
+        with self.lock:
+            self.path = None
+            self.signature = None
+            self.invalid_signature = None
+            self.values = self.defaults
+            self.phrases = {}
 
     def _section(self, name: str) -> dict:
         with self.lock:
@@ -202,13 +219,13 @@ class ReplyCatalog:
                 if group_id is not None:
                     await asyncio.wait_for(
                         bot.call_api(
-                            "send_group_poke", group_id=int(group_id), user_id=int(user_id)
+                            "group_poke", group_id=int(group_id), user_id=int(user_id)
                         ),
                         timeout=5,
                     )
                 else:
                     await asyncio.wait_for(
-                        bot.call_api("send_private_poke", user_id=int(user_id)),
+                        bot.call_api("friend_poke", user_id=int(user_id)),
                         timeout=5,
                     )
             except Exception:
