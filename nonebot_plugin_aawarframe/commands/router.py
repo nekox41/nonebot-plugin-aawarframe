@@ -58,6 +58,10 @@ async def dispatch(
     try:
         if feature in {"subscribe", "list_subscriptions", "unsubscribe"}:
             text = await runtime.subscriptions.handle(feature, arguments, subscriber)
+            if feature == "list_subscriptions":
+                card = runtime.subscriptions.list_card(subscriber)
+                if card is not None:
+                    return await response(card, runtime)
             return Message(MessageSegment.text(text))
         if feature == "riven_analysis":
             if image is None:
