@@ -134,6 +134,7 @@ class Runtime:
         await self.http.close()
         self.grq.close()
         configure_grq(None)
+        replies.reset()
 
 
 _runtime: Runtime | None = None
