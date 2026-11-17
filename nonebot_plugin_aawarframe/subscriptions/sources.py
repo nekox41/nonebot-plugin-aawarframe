@@ -12,7 +12,15 @@ from ..services.bounties import bounty_kind
 from ..services.fissures import TIERS
 from ..services.market import MarketService
 from ..worldstate.parsers.common import records
-from .rules import REGIONS
+# 保留旧版赏金解析辅助函数的映射，不再开放这些命令。
+REGIONS = {
+    "地球": "CetusSyndicate",
+    "金星": "SolarisSyndicate",
+    "火卫二": "EntratiSyndicate",
+    "圣所": "EntratiLabSyndicate",
+    "扎里曼": "ZarimanSyndicate",
+    "1999": "HexSyndicate",
+}
 
 BEIJING = timezone(timedelta(hours=8))
 
