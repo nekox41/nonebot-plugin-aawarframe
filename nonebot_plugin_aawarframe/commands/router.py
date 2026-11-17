@@ -10,7 +10,7 @@ from nonebot.adapters.onebot.v11 import (
     GroupMessageEvent,
     Message,
     MessageEvent,
-    MessageSegment,
+    NoticeEvent,
     PokeNotifyEvent,
 )
 from nonebot.matcher import Matcher
@@ -197,7 +197,7 @@ def register_poke() -> None:
     poke_matcher = on_notice(block=False, priority=15)
 
     @poke_matcher.handle()
-    async def handle_poke(bot: Bot, event: PokeNotifyEvent):
+    async def handle_poke(bot: Bot, event: NoticeEvent):
         if not isinstance(event, PokeNotifyEvent) or not event.is_tome():
             return
         group_id = getattr(event, "group_id", None)
