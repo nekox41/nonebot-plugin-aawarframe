@@ -34,6 +34,7 @@ from .services.trend import TrendService
 from .services.wiki import WikiService
 from .services.worldstate import WorldStateService
 from .services.void_trader import VoidTraderService
+from .subscriptions import SubscriptionService
 
 
 class Runtime:
@@ -73,6 +74,7 @@ class Runtime:
         self.riven_analysis = RivenAnalysisService(self.ocr)
         self.riven_task: asyncio.Task[None] | None = None
         self.world = WorldStateService(self.world_provider)
+        self.subscriptions = SubscriptionService(config.aawarframe_cache_dir, self.world_provider)
         self.trader = VoidTraderService(self.world_provider)
         self.market = MarketService(self.market_provider)
         self.relics = RelicService(self.market_provider)
@@ -101,10 +103,12 @@ class Runtime:
                 self.admin.start()
             except Exception:
                 logging.getLogger(__name__).exception("管理台启动失败")
+        self.subscriptions.start()
         if self.riven_task is None or self.riven_task.done():
             self.riven_task = asyncio.create_task(self.riven_provider.run_daily())
 
     async def close(self) -> None:
+        await self.subscriptions.close()
         if self.admin:
             await self.admin.close()
         if self.riven_task is not None:
