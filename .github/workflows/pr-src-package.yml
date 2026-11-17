@@ -25,7 +25,7 @@ jobs:
         run: python -m pip install -e '.[dev]'
 
       - name: Check subscription tests
-        run: python -m pytest -q tests/test_subscriptions.py tests/test_subscription_extensions.py
+        run: python -m pytest -q tests/test_subscriptions.py tests/test_subscription_extensions.py tests/test_subscription_numbers.py
 
       - name: Prepare directly extractable src artifact
         env:
