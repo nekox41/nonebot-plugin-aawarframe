@@ -74,7 +74,6 @@ class Runtime:
         self.riven_analysis = RivenAnalysisService(self.ocr)
         self.riven_task: asyncio.Task[None] | None = None
         self.world = WorldStateService(self.world_provider)
-        self.subscriptions = SubscriptionService(config.aawarframe_cache_dir, self.world_provider)
         self.trader = VoidTraderService(self.world_provider)
         self.market = MarketService(self.market_provider)
         self.relics = RelicService(self.market_provider)
@@ -85,6 +84,10 @@ class Runtime:
         self.wiki_provider = WikiProvider(self.wiki_http)
         self.wiki = WikiService(self.wiki_provider)
         self.renderer = CardRenderer(config.aawarframe_render_concurrency, config.aawarframe_theme)
+        self.subscriptions = SubscriptionService(
+            config.aawarframe_cache_dir, self.world_provider,
+            arbitration=self.arbitration, market=self.market, renderer=self.renderer,
+        )
         self.control.apply = self.apply_options
         self.apply_options(self.control.settings.options)
 
