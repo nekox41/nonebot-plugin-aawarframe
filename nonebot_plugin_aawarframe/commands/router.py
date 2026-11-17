@@ -4,13 +4,14 @@
 
 import logging
 
-from nonebot import get_driver, on_message
+from nonebot import get_driver, on_message, on_notice
 from nonebot.adapters.onebot.v11 import (
     Bot,
     GroupMessageEvent,
     Message,
     MessageEvent,
     MessageSegment,
+    PokeNotifyEvent,
 )
 from nonebot.matcher import Matcher
 from nonebot.typing import T_State
@@ -184,6 +185,44 @@ def register(name: str, aliases: set[str], feature: str) -> None:
         await matcher.finish(plan.message)
 
 
+_poke_registered = False
+
+
+def register_poke() -> None:
+    """可选戳一戳回复：使用 QQ PokeNotifyEvent，而不是解析文本。"""
+    global _poke_registered
+    if _poke_registered:
+        return
+    _poke_registered = True
+    poke_matcher = on_notice(block=False, priority=15)
+
+    @poke_matcher.handle()
+    async def handle_poke(bot: Bot, event: PokeNotifyEvent):
+        if not isinstance(event, PokeNotifyEvent) or not event.is_tome():
+            return
+        group_id = getattr(event, "group_id", None)
+        user_id = str(event.user_id)
+        plan = replies.plan(
+            "POKE_RECEIVED",
+            USER_ID=user_id,
+            TARGET_ID=str(getattr(event, "target_id", bot.self_id)),
+            GROUP_ID=str(group_id or ""),
+            MESSAGE_ID="",
+        )
+        if not plan.message and not plan.pokes:
+            return
+        try:
+            if plan.message:
+                if group_id is not None:
+                    await bot.send_group_msg(group_id=int(group_id), message=plan.message)
+                else:
+                    await bot.send_private_msg(user_id=int(user_id), message=plan.message)
+            await replies.send_pokes(bot, plan, group_id=group_id)
+        except Exception:
+            logger.exception("戳一戳通知回复失败")
+
+
 def setup() -> None:
     for name, aliases, feature in DEFAULT_COMMANDS:
         register(name, aliases, feature)
+    register_poke()
