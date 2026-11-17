@@ -89,7 +89,7 @@ async def test_command_registration_and_world_service(monkeypatch):
     registered = []
     monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
     router.setup()
-    assert ("午夜电波", {"电波"}, "nightwave") in registered
+    assert ("电波", set(), "nightwave") in registered
     snapshot, now = recorded()
     monkeypatch.setattr("nonebot_plugin_aawarframe.services.worldstate.utcnow", lambda: now)
     provider = SimpleNamespace(fetch=AsyncMock(return_value=snapshot))
