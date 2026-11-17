@@ -91,7 +91,9 @@ async def test_lifecycle_closes_http_and_resets_runtime(monkeypatch, tmp_path):
     runtime = Runtime(Config(aawarframe_cache_dir=tmp_path))
     await runtime.close()
     assert runtime.http.client.is_closed
-    assert {p.name for p in tmp_path.iterdir()} == {"registry.sqlite3", "resources"}
+    assert {p.name for p in tmp_path.iterdir()} == {
+        "registry.sqlite3", "resources", "subscriptions.sqlite3"
+    }
     assert (tmp_path / "resources/current.json").exists()
 
 
