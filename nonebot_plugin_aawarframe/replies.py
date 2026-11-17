@@ -28,6 +28,7 @@ SEGMENT_TYPES = {"face", "record", "video", "file", "music", "share", "location"
 class ReplyPlan:
     message: Message = field(default_factory=Message)
     pokes: list[str] = field(default_factory=list)
+    reactions: list[tuple[int, str]] = field(default_factory=list)
 
 
 class ReplyCatalog:
@@ -60,7 +61,7 @@ class ReplyCatalog:
                 raise ValueError(f"消息 {key} 必须是消息段数组")
             for segment in segments:
                 if segment.get("type") not in {
-                    "text", "content", "at", "reply", "image", "poke", "segment"
+                    "text", "content", "at", "reply", "image", "poke", "reaction", "segment"
                 }:
                     raise ValueError(f"消息 {key} 含有未知段类型")
         return data
@@ -212,6 +213,15 @@ class ReplyCatalog:
                     result.message += MessageSegment.reply(int(ident))
                 else:
                     result.pokes.append(ident)
+            elif kind == "reaction":
+                # QQ 表情回应是对原消息执行 set_msg_emoji_like，不是回复消息段。
+                message_id = self.format(str(segment.get("message_id", "")), variables)
+                emoji_id = self.format(str(segment.get("emoji_id", "")), variables)
+                if not message_id.isdecimal() or not emoji_id.isdecimal():
+                    if segment.get("optional", False):
+                        continue
+                    raise ValueError(f"回复消息 {key} 的 reaction 参数必须是数字")
+                result.reactions.append((int(message_id), emoji_id))
             elif kind == "image":
                 # 用 name 读取运行时图片（例如查询卡片），也可用 file 设置
                 # 静态图片的 OneBot file / URL；两者不依赖手工 CQ:image 文本。
@@ -238,6 +248,27 @@ class ReplyCatalog:
                 }
                 result.message += MessageSegment(segment_type, data)
         return result
+
+    async def send_reactions(self, bot: Any, plan: ReplyPlan) -> None:
+        """NapCat 表情回应，不支持时不影响原回复。"""
+        for message_id, emoji_id in plan.reactions:
+            try:
+                await asyncio.wait_for(
+                    bot.call_api(
+                        "set_msg_emoji_like",
+                        message_id=message_id,
+                        emoji_id=emoji_id,
+                    ),
+                    timeout=5,
+                )
+            except Exception:
+                logger.warning("当前 OneBot 后端不支持消息表情回应", exc_info=True)
+
+    async def send_actions(
+        self, bot: Any, plan: ReplyPlan, *, group_id=None
+    ) -> None:
+        await self.send_reactions(bot, plan)
+        await self.send_pokes(bot, plan, group_id=group_id)
 
     async def send_pokes(self, bot: Any, plan: ReplyPlan, *, group_id=None) -> None:
         """戳一戳使用 NapCat/Go-CQ 的扩展 API；不能伪装成普通文本消息段。"""
