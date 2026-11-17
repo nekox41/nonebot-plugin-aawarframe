@@ -83,7 +83,7 @@ WM 展示物品图片、名称和描述，上方为 5 条卖单，下方为 3 �
 回复目录按三部分组织：
 
 - `[text]`：语义 key 对应文本，可编辑多行文字、重新安排变量位置，例如 `%CODE%`、`%TYPE%`、`%WEAPON%`、`%LIMIT%`、`%REGION%`。
-- `[messages]`：每个回复由一个或多个 OneBot V11 消息段组成。支持 `text`、`content`（引用已有复合消息）、`at`、`reply`（引用消息 ID）、`image`（图片文件、URL 或渲染图片）、`segment`（表情、录音等）和 `poke`（戳一戳动作）。
+- `[messages]`：每个回复由一个或多个 OneBot V11 消息段组成。支持 `text`、`content`（引用已有复合消息）、`at`、`reply`（引用消息 ID）、`image`（图片文件、URL 或渲染图片）、`segment`（表情、录音等）、`poke`（戳一戳动作）和 `reaction`（消息表情回应）。
 - `[phrases]`：数百条原有命令、查询图片和卡片内的固定词句索引。修改一个 value 后会更新使用该短句的显示处；不改变接口中的原始数据、数据库标识或业务判断。
 
 例如输入 `订阅 wmr 伯斯顿 病毒暴率暴伤 1000` 后，可以在文件的 `[text]` 部分修改以下已有键：
@@ -100,11 +100,12 @@ COMMAND_ENVELOPE = [
   { type = "reply", message_id = "%MESSAGE_ID%", optional = true },
   { type = "at", target = "%USER_ID%" },
   { type = "content", name = "CONTENT" },
+  { type = "reaction", message_id = "%MESSAGE_ID%", emoji_id = "128512" },
   { type = "poke", target = "%USER_ID%" }
 ]
 ```
 
-默认命令回复只包含 `content`，不会自动 @ 或引用。示例会为**所有普通命令**添加引用、@ 和戳一戳，因此请按实际需求配置。`poke` 会使用 NapCat 的 `group_poke` / `friend_poke` 扩展操作单独执行，而不是将 `[CQ:poke]` 当作纯文本发出；后端不支持时只记录日志，正常消息仍然发送。
+默认命令回复只包含 `content`，不会自动 @ 或引用。 表情回应使用 NapCat 的 `set_msg_emoji_like` 扩展接口；`reaction` 是对原消息添加 QQ 表情，并非发送一条表情消息或引用回复。示例会为**所有普通命令**添加引用、@ 和戳一戳，因此请按实际需求配置。`poke` 会使用 NapCat 的 `group_poke` / `friend_poke` 扩展操作单独执行，而不是将 `[CQ:poke]` 当作纯文本发出；后端不支持时只记录日志，正常消息仍然发送。
 
 图片可使用 `{ type = "image", name = "IMAGE" }` 读取运行时生成的图片，或者 `{ type = "image", file = "https://example.org/picture.png" }` 附加指定图片。回复别人戳机器人：默认 `POKE_RECEIVED = []`（不自动响应），可改成 `POKE_RECEIVED = [{ type = "text", value = "喵？" }]`。所有动态变量只做字面值替换，不执行 Python、JS 或 CQ 字符串，因此用户输入中的 `[CQ:at,qq=...]` 不会被当成实际艾特。
 
