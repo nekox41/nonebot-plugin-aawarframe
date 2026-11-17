@@ -63,8 +63,11 @@ class SubscriptionService:
                     if self.market is None:
                         raise ValueError("Market 数据源暂不可用。")
                     user = rule["user"]
+                    endpoint = "userId" if (
+                        len(user) == 24 and all(c in "0123456789abcdef" for c in user.lower())
+                    ) else "user"
                     profile = await self.market.provider.request(
-                        "/user/" + quote(user, safe="")
+                        "/" + endpoint + "/" + quote(user, safe="")
                     )
                     if not isinstance(profile, dict) or not profile.get("slug"):
                         raise ValueError("未找到此 Warframe Market 用户。")
@@ -201,6 +204,9 @@ class SubscriptionService:
                     if sub.kind == "fissure":
                         events, status = fissure_events(snapshot.data, now, sub.rule)
                     elif sub.kind == "bounty":
+                        if sub.rule.get("region") not in {"扎里曼", "圣所", "1999"}:
+                            self.store.set_status(sub.id, "旧版赏金规则已停用，请取消并重订")
+                            continue
                         events, status = efficient_bounty_events(snapshot, now, sub.rule)
                     else:
                         events, status = aya_events(snapshot, now)
