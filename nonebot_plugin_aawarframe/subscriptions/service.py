@@ -7,7 +7,6 @@ from pathlib import Path
 from urllib.parse import quote
 
 from nonebot import get_bots
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
 from ..commands.parsing import parse_riven_market
 from ..localization.riven_attributes import allowed, attributes
@@ -17,6 +16,7 @@ from ..models.errors import UserInputError
 from ..models.riven_market import RivenMarketQuery
 from ..providers.worldstate import WorldStateProvider
 from ..rendering.viewmodels import fallback_text
+from ..replies import replies
 from ..worldstate.parsers.cycles import cetus_cycle
 from .rules import (
     CETUS_LEAD_MINUTES,
@@ -53,7 +53,7 @@ class SubscriptionService:
         self, feature: str, arguments: str, scope: tuple[str, str, str] | None
     ) -> str:
         if scope is None:
-            raise UserInputError("订阅提醒暂时只支持在 QQ 群中使用。")
+            raise UserInputError(replies.text("SUB_SCOPE"))
         bot_id, group_id, user_id = scope
         if feature == "subscribe":
             try:
@@ -107,8 +107,11 @@ class SubscriptionService:
                 raise
             except ValueError as exc:
                 raise UserInputError(str(exc)) from exc
-            prefix = "订阅成功" if created else "该订阅已存在"
-            message = f"{prefix}（编号 {subscription.number}）：{subscription.label}。"
+            message = replies.text(
+                "SUB_CREATED" if created else "SUB_EXISTS",
+                CODE=subscription.number,
+                TYPE=subscription.label,
+            )
             if spec.kind == "cetus_night":
                 try:
                     snapshot = await self.provider.fetch()
@@ -118,46 +121,50 @@ class SubscriptionService:
                         occurrence = next_cetus_occurrence(
                             cycle, now, subscription.created_at
                         )
-                        message += (
-                            "\n预计下次提醒：北京时间 "
-                            f"{occurrence.due_at.astimezone(BEIJING):%m-%d %H:%M}。"
+                        message += replies.text(
+                            "SUB_CETUS_NEXT",
+                            TIME=f"{occurrence.due_at.astimezone(BEIJING):%m-%d %H:%M}",
                         )
                 except Exception:
                     logger.warning("夜灵订阅保存成功，但无法计算提醒时间", exc_info=True)
-                    message += "\n暂时无法取得最新周期，后台会自动重试。"
+                    message += replies.text("SUB_CETUS_UNAVAILABLE")
             elif spec.kind == "arbitration":
-                message += "\n所有 S 级仲裁将在开始前固定 15 分钟提醒。"
+                message += replies.text("SUB_ARBITRATION")
             elif spec.kind == "market_user":
-                message += "\n用户处于 ingame 状态时，每分钟检查卖单排名，失去最低价位置时提醒。"
+                message += replies.text("SUB_MARKET_USER")
             else:
-                message += "\n首次检查建立基线；之后发现新的符合条件事件才提醒。"
+                message += replies.text("SUB_BASELINE")
             return message
         if feature == "list_subscriptions":
             if arguments.strip():
-                raise UserInputError("用法：我的订阅")
+                raise UserInputError(replies.text("SUB_LIST_USAGE"))
             subscriptions = self.store.list_for(bot_id, group_id, user_id)
             if not subscriptions:
-                return "你在本群暂无订阅。"
+                return replies.text("SUB_LIST_EMPTY")
             rows = self._grid_rows(subscriptions)
             return "\n".join(
-                ["你在本群的订阅："] + ["  |  ".join(row) for row in rows]
-                + ["取消方式：取消订阅 <编号>"]
+                [replies.text("SUB_LIST_HEADING")]
+                + [replies.text("SUB_LIST_SEPARATOR").join(row) for row in rows]
+                + [replies.text("SUB_LIST_FOOTER")]
             )
         if feature == "unsubscribe":
             if not arguments.strip().isascii() or not arguments.strip().isdecimal():
-                raise UserInputError("用法：取消订阅 <编号>")
+                raise UserInputError(replies.text("SUB_CANCEL_USAGE"))
             number = int(arguments.strip())
             if number <= 0 or not self.store.remove_number(
                 number, bot_id, group_id, user_id
             ):
-                raise UserInputError("未找到你在本群的该订阅。")
-            return f"已取消订阅 #{number}。"
-        raise UserInputError("未知订阅命令。")
+                raise UserInputError(replies.text("SUB_CANCEL_NOT_FOUND"))
+            return replies.text("SUB_CANCEL_OK", CODE=number)
+        raise UserInputError(replies.text("SUB_UNKNOWN"))
 
     @staticmethod
     def _grid_rows(subscriptions: list[Subscription]) -> list[list[str]]:
         """按编号升序，三列紧凑排列，每项只显示编号和订阅名称。"""
-        cells = [f"#{sub.number} {sub.label}" for sub in subscriptions]
+        cells = [
+            replies.text("SUB_LIST_CELL", CODE=sub.number, TYPE=sub.label)
+            for sub in subscriptions
+        ]
         return [
             cells[index:index + 3] + [""] * (3 - len(cells[index:index + 3]))
             for index in range(0, len(cells), 3)
@@ -166,17 +173,17 @@ class SubscriptionService:
     def list_card(self, scope: tuple[str, str, str] | None) -> Card | None:
         """供消息路由渲染；内部 ID 和运行状态都不展示。"""
         if scope is None:
-            raise UserInputError("订阅提醒暂时只支持在 QQ 群中使用。")
+            raise UserInputError(replies.text("SUB_SCOPE"))
         subscriptions = self.store.list_for(*scope)
         if not subscriptions:
             return None
         return Card(
-            title="我的订阅",
+            title=replies.text("SUB_GRID_TITLE"),
             source="AAWarframe · 订阅清单",
             sections=[
                 Section(
-                    title=f"当前订阅 · {len(subscriptions)} 项",
-                    columns=["订阅", "订阅", "订阅"],
+                    title=replies.text("SUB_GRID_SECTION", COUNT=len(subscriptions)),
+                    columns=[replies.text("SUB_GRID_COLUMN")] * 3,
                     rows=self._grid_rows(subscriptions),
                 )
             ],
@@ -371,30 +378,40 @@ class SubscriptionService:
             delivery.bot_id, delivery.group_id, delivery.user_id
         )
         others = [
-            [f"#{sub.number} {sub.label}", statuses.get(sub.id, "等待检查")]
+            [
+                replies.text("SUB_LIST_CELL", CODE=sub.number, TYPE=sub.label),
+                statuses.get(sub.id, replies.text("SUB_NOTIFY_UNCHECKED")),
+            ]
             for sub in subscriptions if sub.id != delivery.subscription_id
         ]
         card = Card(
-            title=delivery.title or "夜灵平野即将进入黑夜",
+            title=delivery.title or replies.text("SUB_NOTIFY_DEFAULT_TITLE"),
             source="AAWarframe · 订阅提醒",
             fetched_at=now,
             sections=[
                 Section(
-                    title="本次触发",
-                    columns=["事件", "当前信息"],
-                    rows=[[delivery.title or "夜灵平野黑夜",
-                           delivery.detail or (
-                               "预计北京时间 "
-                               f"{delivery.event_at.astimezone(BEIJING):%m-%d %H:%M} "
-                               "进入黑夜 · 提前15分钟"
-                           )]],
+                    title=replies.text("SUB_NOTIFY_SECTION"),
+                    columns=[
+                        replies.text("SUB_NOTIFY_EVENT_COLUMN"),
+                        replies.text("SUB_NOTIFY_STATUS_COLUMN"),
+                    ],
+                    rows=[[
+                        delivery.title or replies.text("SUB_NOTIFY_DEFAULT_EVENT"),
+                        delivery.detail or replies.text(
+                            "SUB_NOTIFY_DEFAULT_DETAIL",
+                            TIME=f"{delivery.event_at.astimezone(BEIJING):%m-%d %H:%M}",
+                        ),
+                    ]],
                     highlighted_rows=[0],
                 ),
                 Section(
-                    title=f"你的其他订阅（{len(others)}）",
-                    columns=["订阅项目", "当前状态"],
+                    title=replies.text("SUB_NOTIFY_OTHERS", COUNT=len(others)),
+                    columns=[
+                        replies.text("SUB_NOTIFY_OTHER_COLUMN"),
+                        replies.text("SUB_NOTIFY_OTHER_STATUS"),
+                    ],
                     rows=others[:9],
-                    notes=[] if others else ["当前没有其他订阅。"],
+                    notes=[] if others else [replies.text("SUB_NOTIFY_EMPTY")],
                 ),
             ],
         )
@@ -404,23 +421,30 @@ class SubscriptionService:
 
     async def _send(self, bot, delivery, now: datetime) -> None:
         card = self._notification_card(delivery, now)
-        message = Message([MessageSegment.at(delivery.user_id)])
+        image = None
+        fallback = ""
         if self.renderer is not None:
             try:
                 images = await self.renderer.render(card)
                 if not images:
                     raise ValueError("卡片渲染结果为空")
-                message += MessageSegment.image(images[0])
+                image = images[0]
             except Exception:
                 logger.exception("订阅图片生成失败，回退为文本")
-                message += MessageSegment.text("\n" + fallback_text(card))
+                fallback = fallback_text(card)
         else:
-            # 无浏览器的测试环境；正式运行时 Runtime 注入 CardRenderer。
-            message += MessageSegment.text("\n" + fallback_text(card))
+            fallback = fallback_text(card)
+        plan = replies.plan(
+            "SUB_NOTIFICATION",
+            USER_ID=delivery.user_id,
+            IMAGE=image,
+            FALLBACK=fallback,
+        )
         await asyncio.wait_for(
-            bot.send_group_msg(group_id=int(delivery.group_id), message=message),
+            bot.send_group_msg(group_id=int(delivery.group_id), message=plan.message),
             timeout=20,
         )
+        await replies.send_pokes(bot, plan, group_id=delivery.group_id)
 
     async def _tick(self, now: datetime | None = None) -> None:
         now = now or datetime.now(UTC)
