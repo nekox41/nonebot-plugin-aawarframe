@@ -2,7 +2,7 @@
 # 编辑数据目录中的文件，保存后自动加载，勿在更新插件时覆盖自己的配置。
 # [text] 是可替换变量的文案；[messages] 是 QQ 消息段；[phrases] 管理其他查询卡片和错误文案。
 # 支持 %CODE%、%TYPE%、%TIME% 等变量。普通用户数据始终作为纯文本消息段，防止 CQ 码注入。
-# 消息段类型：text、content、at、reply、image、poke、segment。
+# 消息段类型：text、content、at、reply、image、poke、reaction（表情回应）、segment。
 # 可向 COMMAND_ENVELOPE 添加 at / reply / poke；poke 需要 NapCat/Go-CQ 扩展 API。
 # 业务数值（任务、价格、时间、物品名称）来自世界状态和 Market API，不属于静态文案。
 
