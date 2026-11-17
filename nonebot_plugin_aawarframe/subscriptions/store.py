@@ -84,7 +84,8 @@ class SubscriptionStore:
             CREATE TABLE IF NOT EXISTS subscription_poll_state (
                 subscription_id INTEGER PRIMARY KEY
                     REFERENCES subscriptions(id) ON DELETE CASCADE,
-                last_status TEXT NOT NULL DEFAULT '等待首次检查'
+                last_status TEXT NOT NULL DEFAULT '等待首次检查',
+                initialized INTEGER NOT NULL DEFAULT 0
             );
             CREATE TABLE IF NOT EXISTS subscription_seen (
                 subscription_id INTEGER NOT NULL
@@ -97,6 +98,19 @@ class SubscriptionStore:
                 ON subscription_seen(seen_at);
         """)
         with self.lock, self.db:
+            poll_columns = {row["name"] for row in self.db.execute(
+                "PRAGMA table_info(subscription_poll_state)"
+            )}
+            if "initialized" not in poll_columns:
+                self.db.execute(
+                    "ALTER TABLE subscription_poll_state "
+                    "ADD COLUMN initialized INTEGER NOT NULL DEFAULT 0"
+                )
+                self.db.execute(
+                    "UPDATE subscription_poll_state SET initialized=1 "
+                    "WHERE subscription_id IN (SELECT DISTINCT subscription_id "
+                    "FROM subscription_seen)"
+                )
             columns = {row["name"] for row in self.db.execute(
                 "PRAGMA table_info(subscription_deliveries)"
             )}
@@ -239,14 +253,18 @@ class SubscriptionStore:
         """首次同步只设置基线；之后仅对新事件入队（不可因重启重发）。"""
         queued = 0
         with self.lock, self.db:
-            initial = self.db.execute(
-                "SELECT 1 FROM subscription_poll_state WHERE subscription_id=?",
+            state = self.db.execute(
+                "SELECT initialized FROM subscription_poll_state WHERE subscription_id=?",
                 (subscription_id,),
-            ).fetchone() is None
+            ).fetchone()
+            initial = state is None or not state["initialized"]
             if initial:
                 self.db.execute(
-                    "INSERT INTO subscription_poll_state(subscription_id,last_status) "
-                    "SELECT id,'监控中' FROM subscriptions WHERE id=?", (subscription_id,),
+                    "INSERT INTO subscription_poll_state("
+                    "subscription_id,last_status,initialized) "
+                    "SELECT id,'监控中',1 FROM subscriptions WHERE id=? "
+                    "ON CONFLICT(subscription_id) DO UPDATE SET initialized=1",
+                    (subscription_id,),
                 )
             for event in events:
                 created = self.db.execute(
