@@ -1,4 +1,4 @@
-"""新增订阅类型、初次基线、图片推送、去重与仲裁提前提醒。"""
+"""订阅 v2：三类裂缝、S仲裁、目标赏金、阿耶、Market、紫卡和图片提醒。"""
 
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
@@ -9,13 +9,14 @@ import pytest
 from nonebot_plugin_aawarframe.models.common import Snapshot
 from nonebot_plugin_aawarframe.subscriptions.rules import parse_rule
 from nonebot_plugin_aawarframe.subscriptions.service import SubscriptionService
-from nonebot_plugin_aawarframe.subscriptions.sources import (
-    arbitration_events,
-    bounty_events,
-    fissure_events,
-    market_events,
-)
+from nonebot_plugin_aawarframe.subscriptions.sources import arbitration_events, fissure_events
 from nonebot_plugin_aawarframe.subscriptions.store import SubscriptionStore
+from nonebot_plugin_aawarframe.subscriptions.targets import (
+    aya_events,
+    efficient_bounty_events,
+    market_rank_events,
+    riven_events,
+)
 
 UTC = timezone.utc
 
@@ -24,291 +25,292 @@ def _stamp(value):
     return {"$date": {"$numberLong": str(int(value.timestamp() * 1000))}}
 
 
-def _fissure(node, now):
-    return {
-        "Node": node, "Modifier": "VoidT1",
+def _fissure(node, now, *, hard=False, railjack=False):
+    entry = {
+        "Node": node,
         "Activation": _stamp(now - timedelta(seconds=10)),
         "Expiry": _stamp(now + timedelta(minutes=50)),
     }
+    if railjack:
+        entry["ActiveMissionTier"] = "VoidT1"
+    else:
+        entry["Modifier"] = "VoidT1"
+        entry["Hard"] = hard
+    return entry
 
 
-def _bounty(now):
+def _order(order_id, item="abc", price=40, *, user="competing"):
     return {
-        "Tag": "CetusSyndicate",
-        "Activation": _stamp(now - timedelta(seconds=10)),
-        "Expiry": _stamp(now + timedelta(minutes=50)),
-        "Jobs": [{"jobType": "/Lotus/Jobs/Quest", "rewards": "RewardPool",
-                  "minEnemyLevel": 5, "maxEnemyLevel": 15}],
+        "id": order_id,
+        "type": "sell",
+        "itemId": item,
+        "platinum": price,
+        "quantity": 1,
+        "perTrade": 1,
+        "visible": True,
+        "rank": 0,
+        "user": {"status": "ingame", "ingameName": user},
     }
-
-
-def _order(order_id, price=40):
-    return SimpleNamespace(
-        id=order_id, type="sell", visible=True, platinum=price, per_trade=1,
-        rank=None, subtype=None, quantity=4,
-        user=SimpleNamespace(
-            name="Seller", status="online", platform="pc", crossplay=True
-        ),
-    )
 
 
 def test_rules_are_normalized_and_bounded():
     assert parse_rule("夜灵").kind == "cetus_night"
     assert parse_rule("地球平原").rule == {"lead_minutes": 15}
-    fissure = parse_rule("裂缝 钢铁 后纪 生存")
-    assert fissure.rule == {
-        "tier": "后纪", "planet": "", "mission": "生存", "hard": True
+    assert parse_rule("裂缝 生存").rule == {
+        "mode": "normal", "tier": "", "planet": "", "mission": "生存"
     }
-    assert parse_rule("裂缝 虚空 生存").rule["planet"] == "虚空"
-    assert parse_rule("仲裁 生存").rule["mission"] == "生存"
-    assert parse_rule("赏金 金星 钢铁之路").rule["region"] == "金星"
-    assert parse_rule("wm 伯斯顿 卖价<=50").rule["price"] == 50
-    for invalid in ("夜灵 提前5分钟", "仲裁 防御 提前10分钟",
-                    "wm", "赏金 月球", "裂缝 古纪 后纪"):
+    assert parse_rule("钢铁裂缝 塞德娜").rule["planet"] == "塞德娜"
+    assert parse_rule("钢铁裂缝 塞德娜 生存 后纪").rule == {
+        "mode": "steel", "tier": "后纪", "planet": "塞德娜", "mission": "生存"
+    }
+    assert parse_rule("九重天 古纪").rule["mode"] == "railjack"
+    assert parse_rule("九重天").kind == "fissure"
+    assert parse_rule("仲裁").rule == {}
+    assert parse_rule("扎里曼").rule["region"] == "扎里曼"
+    assert parse_rule("1999").kind == "bounty"
+    assert parse_rule("阿耶").kind == "aya"
+    assert parse_rule("wm aa_market_123").rule == {"user": "aa_market_123"}
+    assert parse_rule("wmr 伯斯顿 伤害 200").rule["price"] == 200
+    for invalid in (
+        "夜灵 提前5分钟", "仲裁 防御", "订阅 仲裁", "赏金 地球",
+        "wm", "wm 伯斯顿 卖价<=50", "裂缝 钢铁 古纪",
+        "裂缝 古纪 后纪", "裂缝 任意", "wmr 伯斯顿 伤害 0",
+    ):
         with pytest.raises(ValueError):
             parse_rule(invalid)
 
 
-def test_world_event_extractors(monkeypatch):
+def test_three_fissure_modes_and_combined_filters(monkeypatch):
     now = datetime(2026, 11, 17, 12, tzinfo=UTC)
     monkeypatch.setattr(
         "nonebot_plugin_aawarframe.subscriptions.sources.node_info",
-        lambda node: {"name": "测试节点", "missionName": "生存", "systemName": "虚空"},
+        lambda node: {
+            "name": node, "missionName": "生存", "systemName": "塞德娜"
+        },
     )
-    fissures, status = fissure_events(
-        {"ActiveMissions": [_fissure("SolNode1", now)]}, now,
-        parse_rule("裂缝 古纪 生存").rule,
-    )
-    assert len(fissures) == 1 and "1 项" in status
-    assert fissures[0].key == fissure_events(
-        {"ActiveMissions": [_fissure("SolNode1", now)]}, now,
-        parse_rule("裂缝 古纪 生存").rule,
-    )[0][0].key
-    assert fissure_events(
-        {"ActiveMissions": [_fissure("SolNode1", now)]}, now,
-        parse_rule("裂缝 钢铁 古纪").rule,
-    )[0] == []
-    bounties, _ = bounty_events(
-        {"SyndicateMissions": [_bounty(now)]}, now,
-        parse_rule("赏金 地球 常规").rule,
-    )
-    assert len(bounties) == 1 and bounties[0].title == "地球赏金更新"
+    data = {
+        "ActiveMissions": [
+            _fissure("normal", now),
+            _fissure("steel", now, hard=True),
+        ],
+        "VoidStorms": [_fissure("railjack", now, railjack=True)],
+    }
+    for command, expected in (
+        ("裂缝 生存", "normal"),
+        ("钢铁裂缝 塞德娜 生存 古纪", "steel"),
+        ("九重天 古纪 生存 塞德娜", "railjack"),
+    ):
+        result, _ = fissure_events(data, now, parse_rule(command).rule)
+        assert len(result) == 1
+        assert expected in result[0].detail
+    assert fissure_events(data, now, parse_rule("九重天 防御").rule)[0] == []
+    a = fissure_events(data, now, parse_rule("裂缝 生存").rule)[0][0]
+    b = fissure_events(data, now, parse_rule("裂缝 生存").rule)[0][0]
+    assert a.key == b.key
 
 
-def test_arbitration_uses_fixed_15_minute_warning():
+def test_arbitration_only_s_and_15_minutes():
     now = datetime(2026, 11, 17, 12, tzinfo=UTC)
     start = now + timedelta(minutes=15)
+    nodes = {
+        "s": {"missionName": "生存", "name": "S节点"},
+        "a": {"missionName": "防御", "name": "A节点"},
+    }
+    schedule = [
+        (int(start.timestamp()), "s"),
+        (int((start + timedelta(hours=1)).timestamp()), "a"),
+    ]
     events, status = arbitration_events(
-        [(int(start.timestamp()), "node")],
-        {"node": {"missionName": "生存", "name": "测试节点", "systemName": "火星"}},
-        now, now - timedelta(minutes=2), parse_rule("仲裁 生存").rule,
+        schedule, nodes, now, now - timedelta(minutes=1), {},
+        stats=lambda key: {"grade": "S" if key == "s" else "A"},
     )
     assert len(events) == 1
     assert events[0].due_at == now
     assert events[0].event_at == start
-    assert "下场" in status
+    assert "S 级" in status
 
 
-def test_market_filters_by_real_price_and_online_status():
+def test_quick_bounty_conditions(monkeypatch):
     now = datetime(2026, 11, 17, 12, tzinfo=UTC)
-    rule = {"name": "伯斯顿", "slug": "burston", "price": 50,
-            "rank": None, "subtype": None}
-    events, status = market_events(
-        SimpleNamespace(sell=[_order("ok", 40), _order("expensive", 60)], buy=[]),
-        now, rule,
+    good = SimpleNamespace(
+        index=4, mission="歼灭", name="简单目标", node="测试",
+        objectives=["收集3个物品"], kind="常规",
     )
-    assert len(events) == 1 and events[0].key == "market-order:ok"
-    assert "最低 40" in status
-
-
-@pytest.mark.asyncio
-async def test_fissure_initial_baseline_new_event_image_and_restart(tmp_path, monkeypatch):
-    now = datetime.now(UTC) + timedelta(minutes=10)
-    data = {"ActiveMissions": [_fissure("old", now)]}
-    provider = SimpleNamespace(
-        fetch=AsyncMock(return_value=Snapshot(data=data, source="test"))
+    blocked = SimpleNamespace(
+        index=5, mission="歼灭", name="危险目标", node="测试",
+        objectives=["禁用技能"], kind="常规",
     )
-    renderer = SimpleNamespace(render=AsyncMock(return_value=[b"image-content"]))
-    bot = SimpleNamespace(send_group_msg=AsyncMock(return_value={"message_id": 100}))
-    monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.sources.node_info",
-        lambda node: {"name": node, "missionName": "生存", "systemName": "虚空"},
+    good1999 = SimpleNamespace(
+        index=7, mission="歼灭", name="杀毒任务", node="测试",
+        objectives=[], kind="杀毒",
+    )
+    vault = SimpleNamespace(
+        index=7, mission="捕获", name="捕获传承种", node="测试",
+        objectives=["找到保险箱"], kind="杀毒",
     )
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
-        lambda: {"bot": bot},
+        "nonebot_plugin_aawarframe.subscriptions.targets.build_bounties",
+        lambda snapshot, now, region: SimpleNamespace(
+            bounty_items=[good, blocked] if region != "hex" else [good1999, vault],
+            bounty_expiry=now + timedelta(hours=1),
+        ),
     )
-    service = SubscriptionService(tmp_path, provider, renderer=renderer)
-    rule = parse_rule("裂缝 古纪 生存")
-    service.store.subscribe("bot", "100", "200", rule.kind, rule.rule)
-    service.store.subscribe("bot", "100", "200", "market", {
-        "slug": "test", "name": "其他物品", "price": 50
-    })
-    await service._tick(now)
-    bot.send_group_msg.assert_not_awaited()  # 初次基线不通知旧裂缝
-
-    next_now = now + timedelta(seconds=20)
-    data["ActiveMissions"].append(_fissure("new", next_now))
-    await service._tick(next_now)
-    assert bot.send_group_msg.await_count == 1
-    message = bot.send_group_msg.await_args.kwargs["message"]
-    assert "[CQ:at,qq=200]" in str(message)
-    assert any(segment.type == "image" for segment in message)
-    card = renderer.render.await_args.args[0]
-    assert card.sections[0].title == "本次触发"
-    assert any("Market" in row[0] for row in card.sections[1].rows)
-    await service.close()
-
-    # 重启以后仍保留事件基线和发件箱去重。
-    restarted = SubscriptionService(tmp_path, provider, renderer=renderer)
-    await restarted._tick(next_now)
-    assert bot.send_group_msg.await_count == 1
-    await restarted.close()
+    snapshot = Snapshot(data={}, source="test")
+    for region in ("扎里曼", "圣所"):
+        events, status = efficient_bounty_events(snapshot, now, {"region": region})
+        assert len(events) == 1
+        assert "符合 1 项" in status
+    events, _ = efficient_bounty_events(snapshot, now, {"region": "1999"})
+    assert len(events) == 2
+    assert any("捕获" in event.detail for event in events)
 
 
-@pytest.mark.asyncio
-async def test_arbitration_send_without_worldstate(tmp_path, monkeypatch):
-    now = datetime.now(UTC) + timedelta(minutes=10)
-    at = now + timedelta(minutes=15)
-    arbit = SimpleNamespace(
-        schedule=[(int(at.timestamp()), "node")],
-        nodes={"node": {"name": "测试", "missionName": "生存", "systemName": "火星"}},
-    )
-    bot = SimpleNamespace(send_group_msg=AsyncMock())
+def test_aya_three_tents(monkeypatch):
+    now = datetime(2026, 11, 17, 12, tzinfo=UTC)
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
-        lambda: {"bot": bot},
+        "nonebot_plugin_aawarframe.subscriptions.targets.build_bounties",
+        lambda *args, **kwargs: SimpleNamespace(
+            bounty_expiry=now + timedelta(minutes=30),
+            bounty_locations={
+                "帐篷 A": ["搜索并救援", "间谍"],
+                "帐篷 B": ["捕获 Grineer 特工"],
+                "帐篷 C": ["防御"],
+            },
+        ),
     )
-    provider = SimpleNamespace(fetch=AsyncMock(side_effect=RuntimeError("no worldstate")))
-    service = SubscriptionService(tmp_path, provider, arbitration=arbit)
-    service.store.subscribe("bot", "100", "200", "arbitration", {"mission": "生存"})
-    await service._tick(now)
-    provider.fetch.assert_not_awaited()
-    assert bot.send_group_msg.await_count == 1
-    await service._tick(now)
-    assert bot.send_group_msg.await_count == 1
-    await service.close()
-
-
-@pytest.mark.asyncio
-async def test_market_baseline_and_new_order_only(tmp_path, monkeypatch):
-    now = datetime.now(UTC) + timedelta(minutes=10)
-    orders = SimpleNamespace(sell=[_order("old")], buy=[])
-    provider = SimpleNamespace(
-        orders=AsyncMock(return_value=Snapshot(data=orders, source="market"))
-    )
-    market = SimpleNamespace(provider=provider)
-    bot = SimpleNamespace(send_group_msg=AsyncMock())
-    monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
-        lambda: {"bot": bot},
-    )
-    world = SimpleNamespace(fetch=AsyncMock(side_effect=RuntimeError("not needed")))
-    service = SubscriptionService(tmp_path, world, market=market)
-    service.store.subscribe("bot", "100", "200", "market", {
-        "slug": "burston", "name": "伯斯顿", "price": 50,
-        "rank": None, "subtype": None,
-    })
-    await service._tick(now)
-    assert bot.send_group_msg.await_count == 0
-    assert provider.orders.await_count == 1
-    await service._tick(now + timedelta(seconds=30))
-    assert provider.orders.await_count == 1
-    orders.sell.append(_order("new", 35))
-    await service._tick(now + timedelta(minutes=3))
-    assert provider.orders.await_count == 2
-    assert bot.send_group_msg.await_count == 1
-    await service.close()
-
-
-def test_store_baselines_persist_and_scope(tmp_path):
-    path = tmp_path / "sub.sqlite3"
-    store = SubscriptionStore(path)
-    sub, created = store.subscribe(
-        "bot", "group-a", "user", "fissure", parse_rule("裂缝 古纪 生存").rule
-    )
-    assert created
-    assert not store.subscribe(
-        "bot", "group-a", "user", "fissure", parse_rule("裂缝 古纪 生存").rule
-    )[1]
-    assert store.subscribe(
-        "bot", "group-b", "user", "fissure", parse_rule("裂缝 古纪 生存").rule
-    )[1]
-    now = datetime.now(UTC)
-    from nonebot_plugin_aawarframe.subscriptions.sources import Event
-    event = Event("event-1", "裂缝", "说明", now, now)
-    assert store.observe(sub.id, [event], now) == 0
-    assert store.observe(sub.id, [event], now) == 0
-    assert store.observe(sub.id, [Event("event-2", "新裂缝", "说明", now, now)], now) == 1
-    store.close()
-    reopened = SubscriptionStore(path)
-    assert reopened.observe(sub.id, [event], now) == 0
-    assert reopened.observe(
-        sub.id, [Event("event-2", "新裂缝", "说明", now, now)], now
-    ) == 0
-    reopened.close()
-
-
-def test_source_failure_does_not_cancel_first_event_baseline(tmp_path):
-    now = datetime.now(UTC)
-    store = SubscriptionStore(tmp_path / "state.sqlite3")
-    rule = parse_rule("裂缝 古纪 生存")
-    sub, _ = store.subscribe("bot", "group", "user", rule.kind, rule.rule)
-    store.set_status(sub.id, "世界状态暂不可用")
-    from nonebot_plugin_aawarframe.subscriptions.sources import Event
-    event = Event("existing", "任务", "信息", now, now)
-    assert store.observe(sub.id, [event], now) == 0
-    assert store.observe(
-        sub.id, [Event("new", "任务", "信息", now, now)], now
-    ) == 1
-    store.close()
-
-
-def test_challenge_region_rotation_without_jobs():
-    now = datetime.now(UTC)
-    raw = {"SyndicateMissions": [{
-        "Tag": "EntratiLabSyndicate",
-        "Activation": _stamp(now - timedelta(minutes=1)),
-        "Expiry": _stamp(now + timedelta(minutes=50)),
-        "Nodes": [],
-    }]}
-    events, status = bounty_events(raw, now, parse_rule("赏金 圣所").rule)
+    events, status = aya_events(Snapshot(data={}, source="test"), now)
     assert len(events) == 1
-    assert "新一轮任务" in events[0].detail
-    assert "圣所" in status
+    assert "帐篷 A" in events[0].detail and "帐篷 B" in events[0].detail
+    assert "2 项" in status
+
+
+def test_market_rank_only_competitor_cheaper():
+    now = datetime(2026, 11, 17, 12, tzinfo=UTC)
+    own = _order("own", price=50)
+    orders = {"abc": [_order("comp", price=40), _order("tie", price=50)]}
+    events, status = market_rank_events([own], orders, now, labels={"abc": "测试物品"})
+    assert len(events) == 1
+    assert "测试物品" in events[0].detail and "40" in events[0].detail
+    assert "1 单" in status
+    assert market_rank_events([own], {"abc": [_order("tie", price=50)]}, now)[0] == []
+
+
+def test_riven_price_is_strict_and_needs_buyout():
+    now = datetime(2026, 11, 17, 12, tzinfo=UTC)
+    rule = {
+        "slug": "burston", "weapon": "伯斯顿", "positives": ["damage"],
+        "negative": None, "price": 200,
+    }
+    def listing(id, cost):
+        return {
+            "id": id, "visible": True, "platform": "pc",
+            "buyout_price": cost, "item": {
+                "type": "riven", "weapon_url_name": "burston",
+                "attributes": [{"url_name": "damage", "positive": True}],
+            },
+            "owner": {"ingame_name": "Alice"},
+        }
+    events, _ = riven_events([
+        listing("good", 199), listing("equal", 200), listing("high", 500),
+        listing("no-buyout", None),
+    ], now, rule)
+    assert len(events) == 1 and events[0].key == "riven-auction:good"
+
+
+def test_store_transition_dedup_and_rearm(tmp_path):
+    from nonebot_plugin_aawarframe.subscriptions.sources import Event
+    now = datetime.now(UTC)
+    store = SubscriptionStore(tmp_path / "sub.sqlite3")
+    sub, _ = store.subscribe(
+        "bot", "100", "200", "market_user", {"user": "alice"}
+    )
+    event = Event("market-rank:123", "卖单被压价", "详情", now, now)
+    assert store.observe_changes(sub.id, [event], now, notify_initial=True) == 1
+    assert store.observe_changes(sub.id, [event], now, notify_initial=True) == 0
+    store.close()
+    restored = SubscriptionStore(tmp_path / "sub.sqlite3")
+    assert restored.observe_changes(sub.id, [event], now, notify_initial=True) == 0
+    assert restored.observe_changes(sub.id, [], now, notify_initial=True) == 0
+    assert restored.observe_changes(sub.id, [event], now, notify_initial=True) == 1
+    restored.close()
 
 
 @pytest.mark.asyncio
-async def test_market_late_keys_get_checked_in_later_window(tmp_path, monkeypatch):
-    now = datetime.now(UTC) + timedelta(minutes=10)
-    data = Snapshot(data=SimpleNamespace(sell=[], buy=[]), source="market")
-    provider = SimpleNamespace(orders=AsyncMock(return_value=data))
-    market = SimpleNamespace(provider=provider)
+async def test_market_account_ingame_one_minute_poll(tmp_path, monkeypatch):
+    now = datetime.now(UTC) + timedelta(minutes=1)
+    calls = []
+    async def request(path):
+        calls.append(path)
+        if path.startswith("/user/"):
+            return {"status": "ingame", "slug": "alice"}
+        if path.startswith("/orders/user/"):
+            return [_order("mine", price=80)]
+        if path.startswith("/orders/itemId/"):
+            return [_order("other", price=70)]
+        raise AssertionError(path)
+    market = SimpleNamespace(provider=SimpleNamespace(
+        request=request,
+        catalog=AsyncMock(return_value=Snapshot(data=[], source="test")),
+    ))
     bot = SimpleNamespace(send_group_msg=AsyncMock())
     monkeypatch.setattr(
         "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
         lambda: {"bot": bot},
     )
     service = SubscriptionService(
-        tmp_path,
-        SimpleNamespace(fetch=AsyncMock(side_effect=RuntimeError("not needed"))),
-        market=market,
+        tmp_path, SimpleNamespace(fetch=AsyncMock()), market=market
     )
-    for index in range(9):
-        service.store.subscribe(
-            "bot", "100", str(index), "market",
-            {"slug": f"item{index}", "name": f"物品{index}", "price": 50},
-        )
+    service.store.subscribe("bot", "100", "200", "market_user", {"user": "alice"})
     await service._tick(now)
-    assert provider.orders.await_count == 8
-    await service._tick(now + timedelta(minutes=3))
-    queried = {call.args[0] for call in provider.orders.await_args_list}
-    assert queried == {f"item{i}" for i in range(9)}
+    assert bot.send_group_msg.await_count == 1
+    assert calls.count("/orders/user/alice") == 1
+    await service._tick(now + timedelta(seconds=30))
+    assert calls.count("/orders/user/alice") == 1
+    await service._tick(now + timedelta(minutes=1))
+    assert calls.count("/orders/user/alice") == 2
+    assert bot.send_group_msg.await_count == 1
     await service.close()
 
 
-def test_subscription_card_renders_with_notification_header(tmp_path):
-    """模板层完整渲染，不需要启动 Chromium 浏览器。"""
+@pytest.mark.asyncio
+async def test_riven_watcher_baseline_then_new_auction(tmp_path, monkeypatch):
+    now = datetime.now(UTC) + timedelta(minutes=1)
+    rule = {"slug": "burston", "weapon": "伯斯顿",
+            "positives": ["damage"], "negative": None, "price": 200}
+    def listing(ident):
+        return {
+            "id": ident, "visible": True, "platform": "pc",
+            "buyout_price": 150,
+            "item": {"type": "riven", "weapon_url_name": "burston",
+                     "attributes": [{"url_name": "damage", "positive": True}]},
+            "owner": {"ingame_name": "Seller"},
+        }
+    rows = [listing("old")]
+    provider = SimpleNamespace(search=AsyncMock(
+        side_effect=lambda slug, query: Snapshot(data=list(rows), source="test")
+    ))
+    renderer = SimpleNamespace(render=AsyncMock(return_value=[b"image"]))
+    bot = SimpleNamespace(send_group_msg=AsyncMock())
+    monkeypatch.setattr(
+        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
+        lambda: {"bot": bot},
+    )
+    service = SubscriptionService(
+        tmp_path, SimpleNamespace(fetch=AsyncMock()),
+        riven_market=SimpleNamespace(provider=provider), renderer=renderer,
+    )
+    service.store.subscribe("bot", "100", "200", "riven", rule)
+    await service._tick(now)
+    assert bot.send_group_msg.await_count == 0
+    rows.append(listing("new"))
+    await service._tick(now + timedelta(minutes=3))
+    assert bot.send_group_msg.await_count == 1
+    message = bot.send_group_msg.await_args.kwargs["message"]
+    assert any(segment.type == "image" for segment in message)
+    await service.close()
+
+
+def test_subscription_card_renders_with_notification_header():
     from nonebot_plugin_aawarframe.models.common import Card, Section
     from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
 
@@ -321,4 +323,3 @@ def test_subscription_card_renders_with_notification_header(tmp_path):
     assert "subscription-page" in rendered
     assert "订阅提醒" in rendered
     assert "古纪生存" in rendered
-    assert "本次触发" in rendered
