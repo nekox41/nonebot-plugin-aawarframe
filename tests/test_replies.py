@@ -85,6 +85,7 @@ def test_onebot_images_mentions_quotes_and_text_not_cq(tmp_path):
         '{ type = "content", name = "CONTENT" }, '
         '{ type = "image", file = "https://example.org/sample.png" }, '
         '{ type = "segment", segment_type = "face", data = { id = "14" } }, '
+        '{ type = "reaction", message_id = "%MESSAGE_ID%", emoji_id = "128512" }, '
         '{ type = "poke", target = "%USER_ID%" }'
         ']',
     )
@@ -99,6 +100,7 @@ def test_onebot_images_mentions_quotes_and_text_not_cq(tmp_path):
         "reply", "at", "text", "image", "face"
     ]
     assert plan.pokes == ["987654"]
+    assert plan.reactions == [(1234, "128512")]
     assert literal in plan.message.extract_plain_text()
 
 
@@ -114,8 +116,16 @@ async def test_poke_extension_group_private_and_unsupported(tmp_path):
     await catalog.send_pokes(fake, plan)
     fake.call_api.assert_awaited_with("friend_poke", user_id=123456)
 
-    fake.call_api.side_effect = RuntimeError("no poke action")
-    await catalog.send_pokes(fake, plan, group_id=2468)
+    plan.reactions.append((777, "128512"))
+    await catalog.send_reactions(fake, plan)
+    fake.call_api.assert_awaited_with(
+        "set_msg_emoji_like", message_id=777, emoji_id="128512"
+    )
+    await catalog.send_actions(fake, plan, group_id=2468)
+    fake.call_api.assert_awaited_with("group_poke", group_id=2468, user_id=123456)
+
+    fake.call_api.side_effect = RuntimeError("no poke or reaction action")
+    await catalog.send_actions(fake, plan, group_id=2468)
 
 
 def test_phrase_escaping_and_error_tolerant_reload(tmp_path):
