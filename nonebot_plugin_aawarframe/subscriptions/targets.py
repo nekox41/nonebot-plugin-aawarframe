@@ -19,7 +19,9 @@ def _event_key(prefix: str, *values: object) -> str:
 def _quick_bounty(item, region: str) -> bool:
     context = " ".join([item.name, item.mission, *item.objectives])
     blocked = any(keyword in context for keyword in SKILL_BLOCKERS) or (
-        "技能" in context and ("禁用" in context or "禁止" in context)
+        "技能" in context and any(
+            word in context for word in ("禁用", "禁止", "不可", "无法", "不使用", "不能")
+        )
     )
     if blocked:
         return False
@@ -118,8 +120,10 @@ def market_rank_events(
                 continue
             if other.get("id") == own.get("id"):
                 continue
-            if any(other.get(k) != own.get(k) for k in
-                   ("rank", "subtype", "charges", "amberStars", "cyanStars")):
+            if any((other.get(k) or 0) != (own.get(k) or 0) for k in
+                   ("rank", "charges", "amberStars", "cyanStars")):
+                continue
+            if other.get("subtype") != own.get("subtype"):
                 continue
             user = other.get("user") or {}
             if user.get("status") not in {"online", "ingame"}:
