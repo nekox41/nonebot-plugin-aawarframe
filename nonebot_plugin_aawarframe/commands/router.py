@@ -179,7 +179,7 @@ def register(name: str, aliases: set[str], feature: str) -> None:
             MESSAGE_ID=str(getattr(event, "message_id", "")),
             GROUP_ID=str(getattr(event, "group_id", "")),
         )
-        await replies.send_pokes(
+        await replies.send_actions(
             bot, plan, group_id=getattr(event, "group_id", None)
         )
         await matcher.finish(plan.message)
@@ -217,7 +217,7 @@ def register_poke() -> None:
                     await bot.send_group_msg(group_id=int(group_id), message=plan.message)
                 else:
                     await bot.send_private_msg(user_id=int(user_id), message=plan.message)
-            await replies.send_pokes(bot, plan, group_id=group_id)
+            await replies.send_actions(bot, plan, group_id=group_id)
         except Exception:
             logger.exception("戳一戳通知回复失败")
 
