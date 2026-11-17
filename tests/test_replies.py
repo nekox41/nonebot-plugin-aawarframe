@@ -192,3 +192,33 @@ def test_invalid_user_variables_and_segment_specs_fall_back(tmp_path):
     message = catalog.plan("COMMAND_ENVELOPE", CONTENT="正常回复").message
     assert [segment.type for segment in message] == ["text"]
     assert message.extract_plain_text() == "正常回复"
+
+
+def test_actual_card_html_and_text_fallback_use_editable_phrase(tmp_path, monkeypatch):
+    from nonebot_plugin_aawarframe.models.common import Card, Section
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+    from nonebot_plugin_aawarframe.rendering.viewmodels import fallback_text
+
+    catalog = ReplyCatalog()
+    path = tmp_path / "replies.toml"
+    catalog.configure(path)
+    key, original = next(iter(catalog.defaults["phrases"].items()))
+    updated = "自定义页面标题"
+    edit(
+        path,
+        f"{key} = {json.dumps(original, ensure_ascii=False)}",
+        f'{key} = "{updated}"',
+    )
+    card = Card(
+        title=original,
+        source="test",
+        sections=[Section(title="测试", rows=[["类型", "说明"]])],
+    )
+    monkeypatch.setattr(
+        "nonebot_plugin_aawarframe.rendering.renderer.replies", catalog
+    )
+    monkeypatch.setattr(
+        "nonebot_plugin_aawarframe.rendering.viewmodels.replies", catalog
+    )
+    assert updated in CardRenderer().html(card)
+    assert updated in fallback_text(card)
