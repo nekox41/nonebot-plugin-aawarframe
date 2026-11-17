@@ -74,6 +74,42 @@ WM 展示物品图片、名称和描述，上方为 5 条卖单，下方为 3 �
 
 紫卡排行默认按中位价降序，每页 10 条，只展示热度不低于 5 的记录。`zk 武器名` 查询周统计，统计结果不做热度筛选。发送 `zk 2` 翻页，发送 `zk 3 热度` 按热度查看第三页，已洗榜用法相同。紫卡数据每日同步，反映官方公布的周交易情况；市场挂单价与实际成交价有所区别。
 
+### 可编辑回复模板：`replies.toml`
+
+机器人命令的文字回复、错误回显、Wiki 文本、订阅确认/取消、图片推送，以及卡片中的**固定文案**由回复目录控制；物品名称、价格、时间等**动态业务数据**仍由原数据源计算，不需要硬编码成文案。
+
+首次启动时会将完整默认配置复制到 `data/aawarframe/replies.toml`（路径随 `aawarframe_cache_dir` 变化）。**编辑数据目录中的文件，保存后无需重启**。升级源码包不覆盖此文件；默认键在升级后自动补齐。也可以通过 NoneBot 环境变量 `AAWARFRAME_REPLY_FILE=/path/to/replies.toml` 指定独立文件。TOML 编写到一半、暂时语法错误时会使用上一份有效配置并记日志。
+
+回复目录按三部分组织：
+
+- `[text]`：语义 key 对应文本，可编辑多行文字、重新安排变量位置，例如 `%CODE%`、`%TYPE%`、`%WEAPON%`、`%LIMIT%`、`%REGION%`。
+- `[messages]`：每个回复由一个或多个 OneBot V11 消息段组成。支持 `text`、`content`（引用已有复合消息）、`at`、`reply`（引用消息 ID）、`image`（图片文件、URL 或渲染图片）、`segment`（表情、录音等）和 `poke`（戳一戳动作）。
+- `[phrases]`：数百条原有命令、查询图片和卡片内的固定词句索引。修改一个 value 后会更新使用该短句的显示处；不改变接口中的原始数据、数据库标识或业务判断。
+
+例如输入 `订阅 wmr 伯斯顿 病毒暴率暴伤 1000` 后，可以在文件的 `[text]` 部分修改以下已有键：
+
+```toml
+SUB_CREATED = "订阅 #%CODE% 成功！\n武器：%WEAPON%\n价格上限：%LIMIT% 白金\n订阅：%TYPE%"
+SUB_BASELINE = "\n首次检查只建立基线，以后有符合条件的新挂单才提醒。"
+```
+
+回复段的结构示例（只替换文件内的 `COMMAND_ENVELOPE` 值，**不要重复创建第二个 `[messages]` 表**）：
+
+```toml
+COMMAND_ENVELOPE = [
+  { type = "reply", message_id = "%MESSAGE_ID%", optional = true },
+  { type = "at", target = "%USER_ID%" },
+  { type = "content", name = "CONTENT" },
+  { type = "poke", target = "%USER_ID%" }
+]
+```
+
+默认命令回复只包含 `content`，不会自动 @ 或引用。示例会为**所有普通命令**添加引用、@ 和戳一戳，因此请按实际需求配置。`poke` 会使用 NapCat 的 `group_poke` / `friend_poke` 扩展操作单独执行，而不是将 `[CQ:poke]` 当作纯文本发出；后端不支持时只记录日志，正常消息仍然发送。
+
+图片可使用 `{ type = "image", name = "IMAGE" }` 读取运行时生成的图片，或者 `{ type = "image", file = "https://example.org/picture.png" }` 附加指定图片。回复别人戳机器人：默认 `POKE_RECEIVED = []`（不自动响应），可改成 `POKE_RECEIVED = [{ type = "text", value = "喵？" }]`。所有动态变量只做字面值替换，不执行 Python、JS 或 CQ 字符串，因此用户输入中的 `[CQ:at,qq=...]` 不会被当成实际艾特。
+
+**限制**：管理后台 API/系统日志不是聊天回复，不属于该文件；动态接口字段（例如实时任务、卖单、词条数值）不会变成静态 key/value。其他用户可见的固定卡片文案可在 `[phrases]` 中查找对应值；同一原文的重复出现处可能一起变化。
+
 ### QQ 群订阅与图片提醒（测试版）
 
 订阅到点会在原 QQ 群 **@订阅者并发送图片**：醒目展示本次事件、以及该用户在当前群里的其他订阅状态。
