@@ -18,7 +18,12 @@ async def test_command_sends_result_without_reply_segment(monkeypatch):
     monkeypatch.setattr(router, "dispatch", AsyncMock(return_value=result))
     router.register("裂缝", set(), "fissures")
     matcher = SimpleNamespace(finish=AsyncMock())
-    await handlers[0](matcher, {"aawarframe_arguments": ""})
+    await handlers[0](
+        SimpleNamespace(self_id="bot"),
+        SimpleNamespace(user_id=10001),
+        matcher,
+        {"aawarframe_arguments": ""},
+    )
     sent = matcher.finish.await_args.args[0]
     assert sent == result
     assert [segment.type for segment in sent] == ["image"]
