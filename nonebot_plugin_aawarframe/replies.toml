@@ -1,0 +1,69 @@
+# AAWarframe 回复配置：本文件为完整默认值，首启自动复制到 data/aawarframe/replies.toml。
+# 编辑数据目录中的文件，保存后自动加载，勿在更新插件时覆盖自己的配置。
+# [text] 是可替换变量的文案；[messages] 是 QQ 消息段；[phrases] 管理其他查询卡片和错误文案。
+# 支持 %CODE%、%TYPE%、%TIME% 等变量。普通用户数据始终作为纯文本消息段，防止 CQ 码注入。
+# 消息段类型：text、content、at、reply、image、poke、segment。
+# 可向 COMMAND_ENVELOPE 添加 at / reply / poke；poke 需要 NapCat/Go-CQ 扩展 API。
+# 业务数值（任务、价格、时间、物品名称）来自世界状态和 Market API，不属于静态文案。
+
+[text]
+SUB_CREATED = "订阅成功（编号 %CODE%）：%TYPE%。"
+SUB_EXISTS = "该订阅已存在（编号 %CODE%）：%TYPE%。"
+SUB_CETUS_NEXT = "\n预计下次提醒：北京时间 %TIME%。"
+SUB_CETUS_UNAVAILABLE = "\n暂时无法取得最新周期，后台会自动重试。"
+SUB_ARBITRATION = "\n所有 S 级仲裁将在开始前固定 15 分钟提醒。"
+SUB_MARKET_USER = "\n用户处于 ingame 状态时，每分钟检查卖单排名，失去最低价位置时提醒。"
+SUB_BASELINE = "\n首次检查建立基线；之后发现新的符合条件事件才提醒。"
+SUB_SCOPE = "订阅提醒暂时只支持在 QQ 群中使用。"
+SUB_LIST_USAGE = "用法：我的订阅"
+SUB_LIST_EMPTY = "你在本群暂无订阅。"
+SUB_LIST_HEADING = "你在本群的订阅："
+SUB_LIST_CELL = "#%CODE% %TYPE%"
+SUB_LIST_SEPARATOR = "  |  "
+SUB_LIST_FOOTER = "取消方式：取消订阅 <编号>"
+SUB_CANCEL_USAGE = "用法：取消订阅 <编号>"
+SUB_CANCEL_NOT_FOUND = "未找到你在本群的该订阅。"
+SUB_CANCEL_OK = "已取消订阅 #%CODE%。"
+SUB_UNKNOWN = "未知订阅命令。"
+SUB_GRID_TITLE = "我的订阅"
+SUB_GRID_SECTION = "当前订阅 · %COUNT% 项"
+SUB_GRID_COLUMN = "订阅"
+SUB_NOTIFY_DEFAULT_TITLE = "夜灵平野即将进入黑夜"
+SUB_NOTIFY_DEFAULT_EVENT = "夜灵平野黑夜"
+SUB_NOTIFY_DEFAULT_DETAIL = "预计北京时间 %TIME% 进入黑夜 · 提前15分钟"
+SUB_NOTIFY_SECTION = "本次触发"
+SUB_NOTIFY_EVENT_COLUMN = "事件"
+SUB_NOTIFY_STATUS_COLUMN = "当前信息"
+SUB_NOTIFY_OTHERS = "你的其他订阅（%COUNT%）"
+SUB_NOTIFY_OTHER_COLUMN = "订阅项目"
+SUB_NOTIFY_OTHER_STATUS = "当前状态"
+SUB_NOTIFY_EMPTY = "当前没有其他订阅。"
+SUB_NOTIFY_UNCHECKED = "等待检查"
+SUB_NOTIFICATION_FALLBACK = "\n%FALLBACK%"
+ROUTER_USER_INPUT = "%ERROR%"
+ROUTER_WIKI_CHALLENGE = "Wiki 暂时要求浏览器验证，请稍后重试。"
+ROUTER_INTERNAL_ERROR = "数据源暂时不可用，请稍后重试。"
+ROUTER_IMAGE_MISSING = "请附上或引用一张紫卡图片。"
+ROUTER_IMAGE_DOWNLOAD = "无法下载图片，请重新上传。"
+ROUTER_HELP_USAGE = "用法：帮助"
+ROUTER_ATTR_USAGE = "用法：词条"
+ROUTER_NO_ARGUMENTS = "此命令不接受参数。"
+RAW_TEXT = "%CONTENT%"
+QUERY_FALLBACK = "%CONTENT%"
+WIKI_NOT_FOUND = "未找到与“%QUERY%”相关的 Wiki 条目。"
+FALLBACK_TOO_LONG = "内容较长，仅显示部分结果；请稍后重新查询完整图片。"
+
+[messages]
+TEXT = [{ type = "text", key = "RAW_TEXT" }]
+SUBSCRIPTION_RESULT = [{ type = "text", key = "RAW_TEXT" }]
+QUERY_IMAGE = [{ type = "image", name = "IMAGES" }]
+QUERY_FALLBACK = [{ type = "text", key = "QUERY_FALLBACK" }]
+ERROR_USER_INPUT = [{ type = "text", key = "ROUTER_USER_INPUT" }]
+ERROR_WIKI = [{ type = "text", key = "ROUTER_WIKI_CHALLENGE" }]
+ERROR_INTERNAL = [{ type = "text", key = "ROUTER_INTERNAL_ERROR" }]
+ERROR_IMAGE = [{ type = "text", key = "RAW_TEXT" }]
+COMMAND_ENVELOPE = [{ type = "content", name = "CONTENT" }]
+SUB_NOTIFICATION = [{ type = "at", target = "%USER_ID%" }, { type = "image", name = "IMAGE", optional = true }, { type = "text", key = "SUB_NOTIFICATION_FALLBACK", when = "FALLBACK" }]
+POKE_RECEIVED = []
+
+[phrases]
