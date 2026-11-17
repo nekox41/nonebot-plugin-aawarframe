@@ -73,10 +73,10 @@ def bounty_events(data: dict, now: datetime, rule: dict) -> tuple[list[Event], s
         kinds = sorted({bounty_kind(job) for job in jobs})
         if rule.get("type") and rule["type"] not in kinds:
             continue
+        category = rule.get("type") or ("、".join(kinds) if kinds else "新一轮任务")
         detail = (
-            f"{rule['region']}赏金已轮换 · "
-            + ("、".join(kinds) if not rule.get("type") else rule["type"])
-            + f" · 北京时间 {mission.expiry.astimezone(BEIJING):%m-%d %H:%M} 截止"
+            f"{rule['region']}赏金已轮换 · {category}"
+            f" · 北京时间 {mission.expiry.astimezone(BEIJING):%m-%d %H:%M} 截止"
         )
         result.append(Event(
             key=_key("bounty", tag, mission.activation.isoformat(),
