@@ -113,7 +113,7 @@ def test_cetus_alias_is_removed(monkeypatch):
     registered = []
     monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
     router.setup()
-    assert ("地球赏金", {"地球"}, "bounties") in registered
+    assert ("地球", set(), "bounties") in registered
     assert not any(name == "希图斯" or "希图斯" in aliases for name, aliases, _ in registered)
 
 
