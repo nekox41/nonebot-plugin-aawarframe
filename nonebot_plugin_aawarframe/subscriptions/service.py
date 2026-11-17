@@ -108,7 +108,7 @@ class SubscriptionService:
             except ValueError as exc:
                 raise UserInputError(str(exc)) from exc
             prefix = "订阅成功" if created else "该订阅已存在"
-            message = f"{prefix}（编号 {subscription.id}）：{subscription.label}。"
+            message = f"{prefix}（编号 {subscription.number}）：{subscription.label}。"
             if spec.kind == "cetus_night":
                 try:
                     snapshot = await self.provider.fetch()
@@ -138,24 +138,49 @@ class SubscriptionService:
             subscriptions = self.store.list_for(bot_id, group_id, user_id)
             if not subscriptions:
                 return "你在本群暂无订阅。"
-            statuses = self.store.statuses_for(bot_id, group_id, user_id)
-            lines = ["你在本群的订阅："]
-            lines.extend(
-                f"#{sub.id} {sub.label} — {statuses.get(sub.id, '等待检查')}"
-                for sub in subscriptions
+            rows = self._grid_rows(subscriptions)
+            return "\n".join(
+                ["你在本群的订阅："] + ["  |  ".join(row) for row in rows]
+                + ["取消方式：取消订阅 <编号>"]
             )
-            lines.append("取消方式：取消订阅 <编号>")
-            return "\n".join(lines)
         if feature == "unsubscribe":
             if not arguments.strip().isascii() or not arguments.strip().isdecimal():
                 raise UserInputError("用法：取消订阅 <编号>")
-            subscription_id = int(arguments.strip())
-            if subscription_id <= 0 or not self.store.remove(
-                subscription_id, bot_id, group_id, user_id
+            number = int(arguments.strip())
+            if number <= 0 or not self.store.remove_number(
+                number, bot_id, group_id, user_id
             ):
                 raise UserInputError("未找到你在本群的该订阅。")
-            return f"已取消订阅 #{subscription_id}。"
+            return f"已取消订阅 #{number}。"
         raise UserInputError("未知订阅命令。")
+
+    @staticmethod
+    def _grid_rows(subscriptions: list[Subscription]) -> list[list[str]]:
+        """按编号升序，三列紧凑排列，每项只显示编号和订阅名称。"""
+        cells = [f"#{sub.number} {sub.label}" for sub in subscriptions]
+        return [
+            cells[index:index + 3] + [""] * (3 - len(cells[index:index + 3]))
+            for index in range(0, len(cells), 3)
+        ]
+
+    def list_card(self, scope: tuple[str, str, str] | None) -> Card | None:
+        """供消息路由渲染；内部 ID 和运行状态都不展示。"""
+        if scope is None:
+            raise UserInputError("订阅提醒暂时只支持在 QQ 群中使用。")
+        subscriptions = self.store.list_for(*scope)
+        if not subscriptions:
+            return None
+        return Card(
+            title="我的订阅",
+            source="AAWarframe · 订阅清单",
+            sections=[
+                Section(
+                    title=f"当前订阅 · {len(subscriptions)} 项",
+                    columns=["订阅", "订阅", "订阅"],
+                    rows=self._grid_rows(subscriptions),
+                )
+            ],
+        )
 
     def start(self) -> None:
         if self.task is None or self.task.done():
@@ -346,7 +371,7 @@ class SubscriptionService:
             delivery.bot_id, delivery.group_id, delivery.user_id
         )
         others = [
-            [f"#{sub.id} {sub.label}", statuses.get(sub.id, "等待检查")]
+            [f"#{sub.number} {sub.label}", statuses.get(sub.id, "等待检查")]
             for sub in subscriptions if sub.id != delivery.subscription_id
         ]
         card = Card(
