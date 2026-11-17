@@ -244,3 +244,61 @@ def test_store_baselines_persist_and_scope(tmp_path):
         sub.id, [Event("event-2", "新裂缝", "说明", now, now)], now
     ) == 0
     reopened.close()
+
+
+def test_source_failure_does_not_cancel_first_event_baseline(tmp_path):
+    now = datetime.now(UTC)
+    store = SubscriptionStore(tmp_path / "state.sqlite3")
+    rule = parse_rule("裂缝 古纪 生存")
+    sub, _ = store.subscribe("bot", "group", "user", rule.kind, rule.rule)
+    store.set_status(sub.id, "世界状态暂不可用")
+    from nonebot_plugin_aawarframe.subscriptions.sources import Event
+    event = Event("existing", "任务", "信息", now, now)
+    assert store.observe(sub.id, [event], now) == 0
+    assert store.observe(
+        sub.id, [Event("new", "任务", "信息", now, now)], now
+    ) == 1
+    store.close()
+
+
+def test_challenge_region_rotation_without_jobs():
+    now = datetime.now(UTC)
+    raw = {"SyndicateMissions": [{
+        "Tag": "EntratiLabSyndicate",
+        "Activation": _stamp(now - timedelta(minutes=1)),
+        "Expiry": _stamp(now + timedelta(minutes=50)),
+        "Nodes": [],
+    }]}
+    events, status = bounty_events(raw, now, parse_rule("赏金 圣所").rule)
+    assert len(events) == 1
+    assert "新一轮任务" in events[0].detail
+    assert "圣所" in status
+
+
+@pytest.mark.asyncio
+async def test_market_late_keys_get_checked_in_later_window(tmp_path, monkeypatch):
+    now = datetime.now(UTC) + timedelta(minutes=10)
+    data = Snapshot(data=SimpleNamespace(sell=[], buy=[]), source="market")
+    provider = SimpleNamespace(orders=AsyncMock(return_value=data))
+    market = SimpleNamespace(provider=provider)
+    bot = SimpleNamespace(send_group_msg=AsyncMock())
+    monkeypatch.setattr(
+        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
+        lambda: {"bot": bot},
+    )
+    service = SubscriptionService(
+        tmp_path,
+        SimpleNamespace(fetch=AsyncMock(side_effect=RuntimeError("not needed"))),
+        market=market,
+    )
+    for index in range(9):
+        service.store.subscribe(
+            "bot", "100", str(index), "market",
+            {"slug": f"item{index}", "name": f"物品{index}", "price": 50},
+        )
+    await service._tick(now)
+    assert provider.orders.await_count == 8
+    await service._tick(now + timedelta(minutes=3))
+    queried = {call.args[0] for call in provider.orders.await_args_list}
+    assert queried == {f"item{i}" for i in range(9)}
+    await service.close()
