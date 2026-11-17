@@ -34,3 +34,14 @@ jobs:
         run: python -m ruff check nonebot_plugin_aawarframe/subscriptions nonebot_plugin_aawarframe/replies.py nonebot_plugin_aawarframe/commands/router.py tests/test_subscription_extensions.py tests/test_subscription_numbers.py tests/test_replies.py
       - name: Run full regression suite
         run: python -m pytest -q
+      - name: Verify reply TOML is included in built wheel
+        run: |
+          python -m build --wheel
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          wheel = next(Path("dist").glob("*.whl"))
+          with ZipFile(wheel) as artifact:
+              assert "nonebot_plugin_aawarframe/replies.toml" in artifact.namelist()
+          print("Reply catalog is present in the wheel")
+          PY
