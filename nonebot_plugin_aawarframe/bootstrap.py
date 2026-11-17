@@ -86,7 +86,8 @@ class Runtime:
         self.renderer = CardRenderer(config.aawarframe_render_concurrency, config.aawarframe_theme)
         self.subscriptions = SubscriptionService(
             config.aawarframe_cache_dir, self.world_provider,
-            arbitration=self.arbitration, market=self.market, renderer=self.renderer,
+            arbitration=self.arbitration, market=self.market,
+            riven_market=self.riven_market, renderer=self.renderer,
         )
         self.control.apply = self.apply_options
         self.apply_options(self.control.settings.options)
