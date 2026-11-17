@@ -12,6 +12,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 
 from ..infrastructure.cache import AsyncTTLCache
 from ..models.common import Card, Snapshot
+from ..replies import replies
 from .charts import trend_chart
 from .viewmodels import paginate
 
@@ -80,6 +81,9 @@ class CardRenderer:
             total=total or card.total_pages or 1,
             trend_charts=[(period, trend_chart(period)) for period in card.trend_board.periods] if card.trend_board else [],
         )
+        # 卡片中由业务数据组成的数值仍实时生成；
+        # 可见固定标签则由 replies.toml 的 phrases 覆盖。
+        document = replies.localize(document, html=True)
         return document.replace("</head>", "<style>" + self.css + "</style></head>", 1)
 
     async def render(self, card: Card) -> list[bytes]:
