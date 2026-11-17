@@ -35,7 +35,7 @@ where = ["."]
 include = ["nonebot_plugin_aawarframe*"]
 
 [tool.setuptools.package-data]
-nonebot_plugin_aawarframe = ["assets/offline.tar.gz", "assets/riven_stats.json", "rendering/templates/*.html", "rendering/assets/css/*.css", "rendering/assets/css/themes/*.css", "admin/static/*"]
+nonebot_plugin_aawarframe = ["replies.toml", "assets/offline.tar.gz", "assets/riven_stats.json", "rendering/templates/*.html", "rendering/assets/css/*.css", "rendering/assets/css/themes/*.css", "admin/static/*"]
 
 
 [tool.pdm]
