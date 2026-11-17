@@ -124,7 +124,16 @@ class ReplyCatalog:
 
     def text(self, key: str, **variables: Any) -> str:
         template = self._section("text")[key]
-        return self.localize(self.format(template, variables))
+        try:
+            rendered = self.format(template, variables)
+        except ValueError:
+            # 配置里误写了 %UNDEFINED% 时，不让上游业务命令失败。
+            default = self.defaults["text"][key]
+            if template == default:
+                raise
+            logger.warning("回复文本 %s 包含无效变量，临时使用默认文案", key)
+            rendered = self.format(default, variables)
+        return self.localize(rendered)
 
     @staticmethod
     def format(template: str, variables: dict[str, Any]) -> str:
@@ -155,6 +164,18 @@ class ReplyCatalog:
         definition = self._section("messages").get(key)
         if definition is None:
             raise KeyError(f"未定义回复消息 {key}")
+        try:
+            return self._build_plan(key, definition, variables)
+        except (ValueError, KeyError, TypeError, AttributeError):
+            default = self.defaults["messages"].get(key)
+            if default is None or definition == default:
+                raise
+            logger.exception("回复消息 %s 的自定义消息段无效，回退默认消息段", key)
+            return self._build_plan(key, default, variables)
+
+    def _build_plan(
+        self, key: str, definition: list[dict], variables: dict[str, Any]
+    ) -> ReplyPlan:
         result = ReplyPlan()
         for segment in definition:
             kind = segment["type"]
