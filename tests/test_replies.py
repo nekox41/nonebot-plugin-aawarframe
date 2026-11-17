@@ -160,3 +160,25 @@ def test_unknown_variables_are_not_evaluated():
     )
     with pytest.raises(ValueError, match="MISSING"):
         catalog.format("%MISSING%", {})
+
+
+def test_invalid_user_variables_and_segment_specs_fall_back(tmp_path):
+    catalog = ReplyCatalog()
+    path = tmp_path / "replies.toml"
+    catalog.configure(path)
+    edit(
+        path,
+        'SUB_CREATED = "订阅成功（编号 %CODE%）：%TYPE%。"',
+        'SUB_CREATED = "无效变量：%DOES_NOT_EXIST%"',
+    )
+    assert catalog.text("SUB_CREATED", CODE=4, TYPE="夜灵") == (
+        "订阅成功（编号 4）：夜灵。"
+    )
+    edit(
+        path,
+        'COMMAND_ENVELOPE = [{ type = "content", name = "CONTENT" }]',
+        'COMMAND_ENVELOPE = [{ type = "at", target = "%NOT_DEFINED%" }]',
+    )
+    message = catalog.plan("COMMAND_ENVELOPE", CONTENT="正常回复").message
+    assert [segment.type for segment in message] == ["text"]
+    assert message.extract_plain_text() == "正常回复"
