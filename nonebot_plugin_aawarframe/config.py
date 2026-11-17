@@ -9,6 +9,7 @@ from pydantic import AnyHttpUrl, BaseModel, Field, SecretStr
 
 class Config(BaseModel):
     aawarframe_cache_dir: Path = Path("data/aawarframe")
+    aawarframe_reply_file: Path | None = None  # 默认使用 <cache_dir>/replies.toml
     aawarframe_worldstate_proxy: AnyHttpUrl | None = Field(default=None, repr=False)
     aawarframe_http_timeout: float = Field(default=12, gt=0, le=60)
     aawarframe_worldstate_ttl: float = Field(default=45, gt=0, le=180)
