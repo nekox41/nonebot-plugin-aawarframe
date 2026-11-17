@@ -192,7 +192,13 @@ class ReplyCatalog:
                 else:
                     result.pokes.append(ident)
             elif kind == "image":
-                image = variables.get(segment.get("name", "IMAGE"))
+                # 用 name 读取运行时图片（例如查询卡片），也可用 file 设置
+                # 静态图片的 OneBot file / URL；两者不依赖手工 CQ:image 文本。
+                image = (
+                    self.format(str(segment["file"]), variables)
+                    if "file" in segment
+                    else variables.get(segment.get("name", "IMAGE"))
+                )
                 if image is None:
                     if segment.get("optional", False):
                         continue
