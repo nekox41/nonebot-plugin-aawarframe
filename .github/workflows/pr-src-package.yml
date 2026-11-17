@@ -112,7 +112,8 @@ jobs:
           nonebot.init(driver="~none", render={"provider": "playwright", "startup": "off"})
           loaded = nonebot.load_plugins("src/plugins")
           assert any(p.name == "nonebot_plugin_aawarframe" for p in loaded), loaded
-          import nonebot_plugin_aawarframe as plugin
+          import importlib
+          plugin = importlib.import_module("src.plugins.nonebot_plugin_aawarframe")
           src_plugins = (Path.cwd() / "src" / "plugins").resolve()
           assert Path(plugin.__file__).resolve().is_relative_to(src_plugins), plugin.__file__
           print("OK: plugin loaded from extracted src/plugins directory:", plugin.__file__)
