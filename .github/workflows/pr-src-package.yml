@@ -108,6 +108,15 @@ jobs:
               shutil.copytree("dist/nonebot2-src", sandbox / "src")
               check = """
           from pathlib import Path
+          from importlib import metadata
+          original_version = metadata.version
+
+          def version_without_plugin_metadata(name):
+              if name == "nonebot-plugin-aawarframe":
+                  raise metadata.PackageNotFoundError(name)
+              return original_version(name)
+
+          metadata.version = version_without_plugin_metadata
           import nonebot
           nonebot.init(driver="~none", render={"provider": "playwright", "startup": "off"})
           loaded = nonebot.load_plugins("src/plugins")
@@ -116,7 +125,9 @@ jobs:
           plugin = importlib.import_module("src.plugins.nonebot_plugin_aawarframe")
           src_plugins = (Path.cwd() / "src" / "plugins").resolve()
           assert Path(plugin.__file__).resolve().is_relative_to(src_plugins), plugin.__file__
-          print("OK: plugin loaded from extracted src/plugins directory:", plugin.__file__)
+          from src.plugins.nonebot_plugin_aawarframe.infrastructure.wiki_http import WIKI_HEADERS
+          assert WIKI_HEADERS["User-Agent"].startswith("AAWarframe/dev "), WIKI_HEADERS
+          print("OK: plugin loaded from extracted src/plugins without distribution metadata:", plugin.__file__)
           """
               env = os.environ.copy()
               env.pop("PYTHONPATH", None)
