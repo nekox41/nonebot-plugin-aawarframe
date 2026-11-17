@@ -10,7 +10,10 @@ from nonebot_plugin_aawarframe.models.common import Snapshot
 from nonebot_plugin_aawarframe.subscriptions.rules import parse_rule
 from nonebot_plugin_aawarframe.subscriptions.service import SubscriptionService
 from nonebot_plugin_aawarframe.subscriptions.sources import (
-    arbitration_events, bounty_events, fissure_events, market_events,
+    arbitration_events,
+    bounty_events,
+    fissure_events,
+    market_events,
 )
 from nonebot_plugin_aawarframe.subscriptions.store import SubscriptionStore
 
