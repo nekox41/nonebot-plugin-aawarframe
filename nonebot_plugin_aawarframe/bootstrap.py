@@ -22,6 +22,7 @@ from .providers.riven_market import RivenMarketProvider
 from .providers.rivens import RivenProvider
 from .providers.wiki import WikiProvider
 from .providers.worldstate import WorldStateProvider
+from .replies import replies
 from .rendering.renderer import CardRenderer
 from .services.arbitration import ArbitrationService
 from .services.market import MarketService
@@ -39,6 +40,7 @@ from .subscriptions import SubscriptionService
 
 class Runtime:
     def __init__(self, config: Config):
+        replies.configure(config.aawarframe_reply_file or (config.aawarframe_cache_dir / "replies.toml"))
         ensure_offline(config.aawarframe_cache_dir)
         self.grq = GameResourceQuery(config.aawarframe_cache_dir / "registry.sqlite3")
         configure_grq(self.grq)
