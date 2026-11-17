@@ -4,14 +4,17 @@ import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from urllib.parse import quote
 
 from nonebot import get_bots
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
-from ..commands.parsing import parse_market_query
+from ..commands.parsing import parse_riven_market
 from ..models.common import Card, Section
 from ..models.errors import UserInputError
-from ..models.market import MarketQuery
+from ..models.riven_market import RivenMarketQuery
+from ..localization.rivens import resolve_riven_weapon
+from ..localization.riven_attributes import allowed, attributes
 from ..providers.worldstate import WorldStateProvider
 from ..rendering.viewmodels import fallback_text
 from ..worldstate.parsers.cycles import cetus_cycle
@@ -20,35 +23,31 @@ from .rules import (
     next_cetus_occurrence,
     parse_rule,
 )
-from .sources import (
-    arbitration_events,
-    bounty_events,
-    fissure_events,
-    market_events,
-)
+from .sources import arbitration_events, fissure_events
+from .targets import aya_events, efficient_bounty_events, market_rank_events, riven_events
 from .store import Subscription, SubscriptionStore
 
 logger = logging.getLogger(__name__)
 UTC = timezone.utc
 BEIJING = timezone(timedelta(hours=8))
-MARKET_INTERVAL = timedelta(minutes=3)
-MARKET_MAX_QUERIES_PER_WINDOW = 8
+MARKET_INTERVAL = timedelta(minutes=1)
+RIVEN_INTERVAL = timedelta(minutes=3)
 
 
 class SubscriptionService:
     def __init__(
         self, cache_dir: Path, provider: WorldStateProvider,
-        *, arbitration=None, market=None, renderer=None,
+        *, arbitration=None, market=None, riven_market=None, renderer=None,
     ):
         self.provider = provider
         self.arbitration = arbitration
         self.market = market
+        self.riven_market = riven_market
         self.renderer = renderer
         self.store = SubscriptionStore(cache_dir / "subscriptions.sqlite3")
         self.task: asyncio.Task[None] | None = None
         self._market_checked: dict[tuple, datetime] = {}
-        self._market_window: datetime | None = None
-        self._market_count = 0
+
 
     async def handle(
         self, feature: str, arguments: str, scope: tuple[str, str, str] | None
@@ -60,29 +59,42 @@ class SubscriptionService:
             try:
                 spec = parse_rule(arguments)
                 rule = spec.rule
-                if spec.kind == "arbitration" and self.arbitration is not None:
-                    known = {
-                        value for node in self.arbitration.nodes.values()
-                        for value in (node.get("missionName"), node.get("missionType"))
-                    }
-                    if rule["mission"] not in known:
-                        raise ValueError("未知仲裁任务类型，例如：生存、防御、中断。")
-                if spec.kind == "bounty" and rule["region"] in {
-                    "圣所", "扎里曼", "1999"
-                } and rule.get("type"):
-                    raise ValueError("此地区赏金暂不支持按类型筛选，请仅订阅地区。")
-                if spec.kind == "market":
+                if spec.kind == "market_user":
                     if self.market is None:
-                        raise ValueError("Market 订阅数据源暂不可用。")
-                    # 订阅时只解析一次物品名称，后台全部用规范化的 slug 查询。
-                    catalog, details, effective = await self.market.resolve_item(
-                        parse_market_query(rule["name"])
+                        raise ValueError("Market 数据源暂不可用。")
+                    user = rule["user"]
+                    profile = await self.market.provider.request(
+                        "/user/" + quote(user, safe="")
                     )
-                    if catalog.stale or details.stale:
-                        raise ValueError("Market 目录暂不可用，请稍后再订阅。")
+                    if not isinstance(profile, dict) or not profile.get("slug"):
+                        raise ValueError("未找到此 Warframe Market 用户。")
                     rule = {
-                        "name": details.data.name(), "slug": details.data.slug,
-                        "rank": effective.rank, "subtype": effective.subtype,
+                        "user": profile["slug"],
+                        "name": profile.get("ingameName", profile["slug"]),
+                    }
+                if spec.kind == "riven":
+                    if self.riven_market is None:
+                        raise ValueError("紫卡 Market 数据源暂不可用。")
+                    query = parse_riven_market(rule["query"])
+                    if not query.positives and query.negative is None:
+                        raise ValueError("紫卡订阅必须指定至少一个词条。")
+                    weapon = resolve_riven_weapon(query.weapon)
+                    kind = weapon.metadata.get("weapon_type") or weapon.metadata.get(
+                        "rivenType"
+                    )
+                    catalog = attributes()
+                    for slug in query.positives:
+                        if not allowed(catalog[slug], kind, True):
+                            raise ValueError("该武器不支持正面词条：" + slug)
+                    if query.negative not in {None, "has"} and not allowed(
+                        catalog[query.negative], kind, False
+                    ):
+                        raise ValueError("该武器不支持负面词条：" + query.negative)
+                    rule = {
+                        "weapon": weapon.name(),
+                        "slug": weapon.metadata.get("slug") or weapon.id,
+                        "positives": sorted(query.positives),
+                        "negative": query.negative,
                         "price": rule["price"],
                     }
                 subscription, created = self.store.subscribe(
@@ -111,9 +123,11 @@ class SubscriptionService:
                     logger.warning("夜灵订阅保存成功，但无法计算提醒时间", exc_info=True)
                     message += "\n暂时无法取得最新周期，后台会自动重试。"
             elif spec.kind == "arbitration":
-                message += "\n匹配的仲裁将在开始前固定 15 分钟提醒。"
+                message += "\n所有 S 级仲裁将在开始前固定 15 分钟提醒。"
+            elif spec.kind == "market_user":
+                message += "\n用户处于 ingame 状态时，每分钟检查卖单排名，失去最低价位置时提醒。"
             else:
-                message += "\n首次检查仅记录当前任务/挂单；之后发现新匹配事件才提醒。"
+                message += "\n首次检查建立基线；之后发现新的符合条件事件才提醒。"
             return message
         if feature == "list_subscriptions":
             if arguments.strip():
@@ -156,7 +170,7 @@ class SubscriptionService:
             await asyncio.sleep(15)
 
     async def _world_tick(self, subscriptions: list[Subscription], now: datetime) -> None:
-        relevant = [s for s in subscriptions if s.kind in {"cetus_night", "fissure", "bounty"}]
+        relevant = [s for s in subscriptions if s.kind in {"cetus_night", "fissure", "bounty", "aya"}]
         if not relevant:
             return
         try:
@@ -186,8 +200,10 @@ class SubscriptionService:
                 else:
                     if sub.kind == "fissure":
                         events, status = fissure_events(snapshot.data, now, sub.rule)
+                    elif sub.kind == "bounty":
+                        events, status = efficient_bounty_events(snapshot, now, sub.rule)
                     else:
-                        events, status = bounty_events(snapshot.data, now, sub.rule)
+                        events, status = aya_events(snapshot, now)
                     self.store.observe(sub.id, events, now)
                     self.store.set_status(sub.id, status)
             except Exception:
@@ -204,6 +220,7 @@ class SubscriptionService:
                 events, status = arbitration_events(
                     self.arbitration.schedule, self.arbitration.nodes,
                     now, sub.created_at, sub.rule,
+                    stats=self.arbitration.stats_for,
                 )
                 for event in events:
                     self.store.enqueue(
@@ -216,46 +233,104 @@ class SubscriptionService:
                 self.store.set_status(sub.id, "仲裁排期暂不可用")
 
     async def _market_tick(self, subscriptions: list[Subscription], now: datetime) -> None:
-        if self.market is None:
+        """每个 Market 用户每分钟一次；所有自身卖单与同品类在线竞争者比较。"""
+        if self.market is not None:
+            grouped: dict[str, list[Subscription]] = {}
+            for sub in subscriptions:
+                if sub.kind == "market_user":
+                    grouped.setdefault(sub.rule["user"], []).append(sub)
+                elif sub.kind == "market":
+                    self.store.set_status(sub.id, "旧版规则已停用，请取消后使用：订阅 wm 用户ID")
+            for user, group in grouped.items():
+                key = ("user", user)
+                if now - self._market_checked.get(
+                    key, now - MARKET_INTERVAL
+                ) < MARKET_INTERVAL:
+                    continue
+                self._market_checked[key] = now
+                try:
+                    profile = await self.market.provider.request(
+                        "/user/" + quote(user, safe="")
+                    )
+                    if not isinstance(profile, dict):
+                        raise ValueError("Market 用户数据结构异常")
+                    if profile.get("status") != "ingame":
+                        for sub in group:
+                            self.store.set_status(sub.id, "玩家未处于游戏中，暂停检查")
+                        continue
+                    orders = await self.market.provider.request(
+                        "/orders/user/" + quote(user, safe="")
+                    )
+                    if not isinstance(orders, list):
+                        raise ValueError("Market 用户订单数据结构异常")
+                    own = [o for o in orders if isinstance(o, dict) and
+                           o.get("type") == "sell" and o.get("visible")]
+                    item_ids = {
+                        o.get("itemId") for o in own if isinstance(o.get("itemId"), str)
+                    }
+                    market_orders = {}
+                    for item_id in sorted(item_ids):
+                        listings = await self.market.provider.request(
+                            "/orders/itemId/" + quote(item_id, safe="")
+                        )
+                        if not isinstance(listings, list):
+                            raise ValueError("Market 物品订单数据结构异常")
+                        market_orders[item_id] = listings
+                    labels = {}
+                    try:
+                        catalog = await self.market.provider.catalog()
+                        labels = {
+                            i.id: i.name() for i in catalog.data if i.id in item_ids
+                        }
+                    except Exception:
+                        logger.debug("Market 物品名称映射不可用，使用 ID", exc_info=True)
+                    events, status = market_rank_events(
+                        own, market_orders, now, labels=labels
+                    )
+                    for sub in group:
+                        self.store.observe_changes(
+                            sub.id, events, now, notify_initial=True
+                        )
+                        self.store.set_status(sub.id, status)
+                except Exception:
+                    logger.warning("Market 用户排名检查失败：%s", user, exc_info=True)
+                    for sub in group:
+                        self.store.set_status(sub.id, "Market 用户检查暂不可用")
+
+        if self.riven_market is None:
             return
-        if self._market_window is None or now - self._market_window >= MARKET_INTERVAL:
-            self._market_window = now
-            self._market_count = 0
-        grouped: dict[tuple, list[Subscription]] = {}
+        rivens: dict[tuple, list[Subscription]] = {}
         for sub in subscriptions:
-            if sub.kind != "market":
+            if sub.kind != "riven":
                 continue
             rule = sub.rule
-            key = (rule["slug"], rule.get("rank"), rule.get("subtype"))
-            grouped.setdefault(key, []).append(sub)
-        # 最久未检查的组合优先，避免订阅超过上限后排在末尾的物品一直饥饿。
-        groups = sorted(
-            grouped.items(),
-            key=lambda item: self._market_checked.get(
-                item[0], datetime.min.replace(tzinfo=UTC)
-            ),
-        )
-        for key, group in groups:
-            if self._market_count >= MARKET_MAX_QUERIES_PER_WINDOW:
-                break
-            if now - self._market_checked.get(key, now - MARKET_INTERVAL) < MARKET_INTERVAL:
+            key = (
+                rule["slug"], tuple(rule["positives"]), rule.get("negative")
+            )
+            rivens.setdefault(key, []).append(sub)
+        for key, group in rivens.items():
+            clock = ("riven", *key)
+            if now - self._market_checked.get(
+                clock, now - RIVEN_INTERVAL
+            ) < RIVEN_INTERVAL:
                 continue
-            self._market_checked[key] = now
-            self._market_count += 1
-            slug, rank, subtype = key
-            query = MarketQuery(name=slug, rank=rank, subtype=subtype)
+            self._market_checked[clock] = now
+            slug, positives, negative = key
+            query = RivenMarketQuery(
+                weapon=slug, positives=list(positives), negative=negative
+            )
             try:
-                snapshot = await self.market.provider.orders(slug, query)
+                snapshot = await self.riven_market.provider.search(slug, query)
                 if snapshot.stale:
-                    raise ValueError("Market 缓存已经过期")
+                    raise ValueError("Market 紫卡搜索为过期缓存")
                 for sub in group:
-                    events, status = market_events(snapshot.data, now, sub.rule)
+                    events, status = riven_events(snapshot.data, now, sub.rule)
                     self.store.observe(sub.id, events, now)
                     self.store.set_status(sub.id, status)
             except Exception:
-                logger.warning("Market 订阅查询失败：%s", key, exc_info=True)
+                logger.warning("紫卡条件订阅失败：%s", key, exc_info=True)
                 for sub in group:
-                    self.store.set_status(sub.id, "Market 暂不可用")
+                    self.store.set_status(sub.id, "紫卡市场暂不可用")
 
     def _notification_card(self, delivery, now: datetime) -> Card:
         subscriptions = self.store.list_for(
