@@ -11,6 +11,12 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .rules import CETUS_LEAD_MINUTES
+
+CETUS_RULE_JSON = json.dumps(
+    {"lead_minutes": CETUS_LEAD_MINUTES}, sort_keys=True, separators=(",", ":")
+)
+
 UTC = timezone.utc
 
 
@@ -21,7 +27,6 @@ class Subscription:
     group_id: str
     user_id: str
     kind: str
-    lead_minutes: int
     created_at: datetime
 
 
@@ -32,7 +37,6 @@ class Delivery:
     bot_id: str
     group_id: str
     user_id: str
-    lead_minutes: int
     event_at: datetime
     attempts: int
 
@@ -77,6 +81,33 @@ class SubscriptionStore:
             CREATE INDEX IF NOT EXISTS idx_subscription_due
                 ON subscription_deliveries(status, next_attempt_at, due_at);
         """)
+        # 兼容早期 Draft：将用户自定义提醒时间归并为固定 15 分钟。
+        # 仅在存在旧规则时执行，避免正常重启丢失仍在等待的通知。
+        with self.db:
+            legacy = self.db.execute(
+                "SELECT 1 FROM subscriptions "
+                "WHERE kind='cetus_night' AND rule_json<>? LIMIT 1",
+                (CETUS_RULE_JSON,),
+            ).fetchone()
+            if legacy:
+                self.db.execute("""
+                    DELETE FROM subscriptions WHERE kind='cetus_night'
+                      AND id NOT IN (
+                        SELECT MIN(id) FROM subscriptions WHERE kind='cetus_night'
+                        GROUP BY bot_id, group_id, user_id
+                      )
+                """)
+                self.db.execute(
+                    "UPDATE subscriptions SET rule_json=? WHERE kind='cetus_night'",
+                    (CETUS_RULE_JSON,),
+                )
+                self.db.execute("""
+                    DELETE FROM subscription_deliveries
+                    WHERE status IN ('pending', 'sending')
+                      AND subscription_id IN (
+                        SELECT id FROM subscriptions WHERE kind='cetus_night'
+                      )
+                """)
         path.chmod(0o600)
 
     @staticmethod
@@ -87,18 +118,13 @@ class SubscriptionStore:
             group_id=row["group_id"],
             user_id=row["user_id"],
             kind=row["kind"],
-            lead_minutes=json.loads(row["rule_json"])["lead_minutes"],
             created_at=_utc(row["created_at"]),
         )
 
     def subscribe(
-        self, bot_id: str, group_id: str, user_id: str, lead_minutes: int
+        self, bot_id: str, group_id: str, user_id: str
     ) -> tuple[Subscription, bool]:
-        if not 1 <= lead_minutes <= 90:
-            raise ValueError("提醒提前量无效")
-        rule_json = json.dumps(
-            {"lead_minutes": lead_minutes}, sort_keys=True, separators=(",", ":")
-        )
+        rule_json = CETUS_RULE_JSON
         with self.lock, self.db:
             existing = self.db.execute(
                 """SELECT COUNT(*) FROM subscriptions
@@ -227,8 +253,7 @@ class SubscriptionStore:
                 bot_id=row["bot_id"],
                 group_id=row["group_id"],
                 user_id=row["user_id"],
-                lead_minutes=json.loads(row["rule_json"])["lead_minutes"],
-                event_at=_utc(row["event_at"]),
+                    event_at=_utc(row["event_at"]),
                 attempts=row["attempts"] + 1,
             )
             for row in rows

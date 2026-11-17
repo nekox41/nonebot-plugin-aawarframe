@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 from nonebot import get_bots
@@ -11,7 +11,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from ..models.errors import UserInputError
 from ..providers.worldstate import WorldStateProvider
 from ..worldstate.parsers.cycles import cetus_cycle
-from .rules import next_cetus_occurrence, parse_cetus_rule
+from .rules import CETUS_LEAD_MINUTES, next_cetus_occurrence, parse_cetus_rule
 from .store import SubscriptionStore
 
 logger = logging.getLogger(__name__)
@@ -32,19 +32,22 @@ class SubscriptionService:
         bot_id, group_id, user_id = scope
         if feature == "subscribe":
             try:
-                lead = parse_cetus_rule(arguments)
-                subscription, created = self.store.subscribe(bot_id, group_id, user_id, lead)
+                parse_cetus_rule(arguments)
+                subscription, created = self.store.subscribe(bot_id, group_id, user_id)
             except ValueError as exc:
                 raise UserInputError(str(exc)) from exc
             prefix = "订阅成功" if created else "该订阅已存在"
-            message = f"{prefix}（编号 {subscription.id}）：夜灵平野黑夜前 {lead} 分钟提醒。"
+            message = (
+                f"{prefix}（编号 {subscription.id}）："
+                f"夜灵平野黑夜前 {CETUS_LEAD_MINUTES} 分钟提醒。"
+            )
             try:
                 snapshot = await self.provider.fetch()
                 if not snapshot.stale:
                     now = datetime.now(timezone.utc)
                     cycle, _ = cetus_cycle(snapshot.data, now)
                     occurrence = next_cetus_occurrence(
-                        cycle, now, subscription.created_at, lead
+                        cycle, now, subscription.created_at
                     )
                     local = occurrence.due_at.astimezone(BEIJING)
                     message += f"\n预计下次提醒：北京时间 {local:%m-%d %H:%M}。"
@@ -60,7 +63,7 @@ class SubscriptionService:
                 return "你在本群暂无订阅。"
             lines = ["你在本群的订阅："]
             lines.extend(
-                f"#{sub.id} 夜灵平野黑夜前 {sub.lead_minutes} 分钟提醒"
+                f"#{sub.id} 夜灵平野黑夜前 {CETUS_LEAD_MINUTES} 分钟提醒"
                 for sub in subscriptions
             )
             lines.append("取消方式：取消订阅 <编号>")
@@ -105,7 +108,7 @@ class SubscriptionService:
             if subscription.kind != "cetus_night":
                 continue
             occurrence = next_cetus_occurrence(
-                cycle, now, subscription.created_at, subscription.lead_minutes
+                cycle, now, subscription.created_at
             )
             self.store.enqueue(
                 subscription.id, occurrence.key, occurrence.due_at, occurrence.event_at
@@ -126,7 +129,7 @@ class SubscriptionService:
                 [
                     MessageSegment.at(delivery.user_id),
                     MessageSegment.text(
-                        f" 夜灵平野预计将在约 {delivery.lead_minutes} 分钟后进入黑夜"
+                        f" 夜灵平野预计将在约 {CETUS_LEAD_MINUTES} 分钟后进入黑夜"
                         f"（北京时间 {local:%m-%d %H:%M}）。"
                     ),
                 ]
