@@ -32,12 +32,20 @@ def _key(prefix: str, *values: object) -> str:
 
 
 def fissure_events(data: dict, now: datetime, rule: dict) -> tuple[list[Event], str]:
-    missions, _ = records(data, "ActiveMissions", Fissure)
+    """区分普通、钢铁、九重天，支持地区/任务/纪元交叉筛选。"""
+    from ..models.worldstate import VoidStorm
+
+    mode = rule.get("mode", "steel" if rule.get("hard") else "normal")
+    if mode == "railjack":
+        missions, _ = records(data, "VoidStorms", VoidStorm)
+    elif mode in {"normal", "steel"}:
+        raw, _ = records(data, "ActiveMissions", Fissure)
+        missions = [m for m in raw if m.hard == (mode == "steel")]
+    else:
+        raise ValueError("无效裂缝分类")
     matched = []
     for mission in missions:
         if not mission.activation <= now < mission.expiry:
-            continue
-        if mission.hard != rule.get("hard", False):
             continue
         tier = TIERS.get(mission.modifier, mission.modifier)
         if rule.get("tier") and tier != rule["tier"]:
@@ -53,14 +61,15 @@ def fissure_events(data: dict, now: datetime, rule: dict) -> tuple[list[Event], 
             f"{tier} · {planet} / {node.get('name', mission.node)} · {mission_type}"
             f" · 北京时间 {mission.expiry.astimezone(BEIJING):%H:%M} 结束"
         )
+        title = {"normal": "发现普通虚空裂缝", "steel": "发现钢铁裂缝",
+                 "railjack": "发现九重天虚空风暴"}[mode]
         matched.append(Event(
-            key=_key("fissure", mission.node, mission.modifier,
-                     mission.activation.isoformat(), mission.expiry.isoformat(), mission.hard),
-            title="发现新钢铁裂缝" if mission.hard else "发现新虚空裂缝",
-            detail=detail, due_at=now, event_at=mission.activation,
+            key=_key("fissure", mode, mission.node, mission.modifier,
+                     mission.activation.isoformat(), mission.expiry.isoformat()),
+            title=title, detail=detail, due_at=now, event_at=mission.activation,
         ))
-    return matched, f"当前符合 {len(matched)} 项裂缝" if matched else "当前暂无符合条件的裂缝"
-
+    label = {"normal": "普通裂缝", "steel": "钢铁裂缝", "railjack": "九重天"}[mode]
+    return matched, f"{label}符合 {len(matched)} 项" if matched else f"{label}暂无匹配"
 
 def bounty_events(data: dict, now: datetime, rule: dict) -> tuple[list[Event], str]:
     missions, _ = records(data, "SyndicateMissions", SyndicateMission)
@@ -89,9 +98,10 @@ def bounty_events(data: dict, now: datetime, rule: dict) -> tuple[list[Event], s
 
 
 def arbitration_events(
-    schedule: list, nodes: dict, now: datetime, created_at: datetime, rule: dict
+    schedule: list, nodes: dict, now: datetime, created_at: datetime, rule: dict,
+    stats=None,
 ) -> tuple[list[Event], str]:
-    """只排程未来 24h 的场次，绝不为已错过的预告追发。"""
+    """仅 S 级仲裁，在开场前 15 分钟提示（排期必须已知）。"""
     starts = [r[0] for r in schedule]
     index = bisect.bisect_left(starts, int((now - timedelta(minutes=16)).timestamp()))
     matches = []
@@ -101,9 +111,10 @@ def arbitration_events(
         if at > now + timedelta(hours=24):
             break
         node = nodes.get(node_id)
-        if not node or rule["mission"] not in {
-            node.get("missionName"), node.get("missionType"),
-        }:
+        if not node:
+            continue
+        grade = stats(node_id) if stats is not None else node.get("arbitration") or {}
+        if not grade or grade.get("grade") != "S":
             continue
         if at <= now:
             continue
@@ -113,21 +124,20 @@ def arbitration_events(
         if due < created_at or due < now - timedelta(seconds=90):
             continue
         detail = (
-            f"{node.get('missionName', rule['mission'])} · "
+            f"S 级 · {node.get('missionName', '仲裁')} · "
             f"{node.get('systemName', '')} / {node.get('name', node_id)} · "
             f"北京时间 {at.astimezone(BEIJING):%m-%d %H:%M} 开始"
         )
         matches.append(Event(
-            key=_key("arbitration", start, node_id),
-            title="仲裁将在15分钟后开始", detail=detail,
+            key=_key("arbitration-s", start, node_id),
+            title="S 级仲裁将在15分钟后开始", detail=detail,
             due_at=due, event_at=at,
         ))
     status = (
-        f"下场 {next_time.astimezone(BEIJING):%m-%d %H:%M}"
-        if next_time else "未来24小时无匹配场次"
+        f"下场 S 级 {next_time.astimezone(BEIJING):%m-%d %H:%M}"
+        if next_time else "未来24小时暂无 S 级仲裁"
     )
     return matches, status
-
 
 def market_events(top, now: datetime, rule: dict) -> tuple[list[Event], str]:
     query = MarketQuery(
