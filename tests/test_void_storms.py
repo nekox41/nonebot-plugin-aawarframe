@@ -88,7 +88,7 @@ def test_railjack_command_alias(monkeypatch):
     registered = []
     monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
     router.setup()
-    assert ("九重天", {"九重天裂缝"}, "railjack_fissures") in registered
+    assert ("九重天", set(), "railjack_fissures") in registered
 
 
 async def test_recorded_official_void_storms(monkeypatch):

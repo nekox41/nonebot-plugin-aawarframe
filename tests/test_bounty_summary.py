@@ -23,8 +23,11 @@ def test_commands_and_aliases(monkeypatch):
     assert "夜灵" not in registered and "王境" not in registered
     assert registered["平原"] == "plains"
     assert registered["赏金"] == "bounty_summary"
-    for name in ("地球", "金星", "火卫二"):
-        assert registered[name] == registered[name + "赏金"]
+    assert registered["地球"] == "bounties"
+    assert registered["金星"] == "venus_bounties"
+    assert registered["火卫二"] == "deimos_bounties"
+    # 第二版管理命令表使用短命令作为默认名称；别名由管理台自定义。
+    assert "地球赏金" not in registered
 
 
 def test_summary_selection():

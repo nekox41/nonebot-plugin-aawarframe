@@ -119,6 +119,9 @@ DEFAULT_COMMANDS = [
     ("zk已洗", set(), "rolled_riven_ranking"),
     ("数值", set(), "riven_values"),
     ("分析", set(), "riven_analysis"),
+    ("订阅", set(), "subscribe"),
+    ("我的订阅", set(), "list_subscriptions"),
+    ("取消订阅", set(), "unsubscribe"),
 ]
 
 

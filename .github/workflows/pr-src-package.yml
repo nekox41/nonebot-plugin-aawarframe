@@ -1,0 +1,170 @@
+name: PR Source Package (NoneBot2 src)
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-package:
+    name: Build deployable src/plugins artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: python -m pip install -e '.[dev]'
+
+      - name: Check subscription tests
+        run: python -m pytest -q tests/test_subscriptions.py tests/test_subscription_extensions.py
+
+      - name: Prepare directly extractable src artifact
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number || 'manual' }}
+          SOURCE_REF: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          python - <<'PY'
+          import os
+          import shutil
+          import tomllib
+          from pathlib import Path
+
+          source = Path("nonebot_plugin_aawarframe")
+          stage = Path("dist/nonebot2-src")
+          dest = stage / "plugins" / "nonebot_plugin_aawarframe"
+          shutil.copytree(
+              source,
+              dest,
+              ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo", ".DS_Store"),
+          )
+          required = [
+              "__init__.py",
+              "subscriptions/service.py",
+              "assets/offline.tar.gz",
+              "assets/grq/items.json.gz",
+              "assets/arbitrations.csv.gz",
+              "assets/riven_stats.json",
+              "rendering/templates/card.html",
+              "rendering/assets/css/base.css",
+              "admin/static/index.html",
+          ]
+          missing = [name for name in required if not (dest / name).is_file()]
+          if missing:
+              raise SystemExit(f"Source package is missing files: {missing}")
+
+          with Path("pyproject.toml").open("rb") as stream:
+              project = tomllib.load(stream)["project"]
+          requirements = project["dependencies"]
+          (stage / "aawarframe-pr-requirements.txt").write_text(
+              "\n".join(requirements) + "\n", encoding="utf-8"
+          )
+          note = (
+              "# AAWarframe PR source test package\n\n"
+              f"PR: {os.environ['PR_NUMBER']}\n"
+              f"Source commit: {os.environ['SOURCE_REF']}\n"
+              f"Package version: {project['version']} (source snapshot; not a PyPI release)\n\n"
+              "The GitHub Actions artifact is a ZIP. Its root directly contains\n"
+              "plugins/nonebot_plugin_aawarframe and two helper files.\n"
+              "Extract the downloaded ZIP into your NoneBot2 project's src/\n"
+              "directory (NOT into src/plugins/):\n\n"
+              "  unzip <downloaded-artifact>.zip -d src/\n"
+              "  python -m pip install -r src/aawarframe-pr-requirements.txt\n\n"
+              "Ensure your NoneBot2 pyproject.toml [tool.nonebot] section includes:\n\n"
+              "  plugin_dirs = [\"src/plugins\"]\n\n"
+              "Then restart your bot. If an old PyPI edition is installed, remove\n"
+              "it first to avoid importing the wrong version:\n"
+              "  python -m pip uninstall nonebot-plugin-aawarframe\n"
+              "Do not uninstall dependencies; install the requirements above.\n\n"
+              "Python 3.12 and OneBot V11 are required. For image rendering,\n"
+              "install Playwright Chromium and Chinese fonts separately.\n"
+              "This package is for source testing only; it does not publish to PyPI.\n"
+          )
+          (stage / "AAWarframe-PR-README.txt").write_text(note, encoding="utf-8")
+          print(f"Staged {sum(f.is_file() for f in dest.rglob('*'))} plugin files")
+          print(note)
+          PY
+
+      - name: Smoke-test plugin from extracted src layout
+        run: |
+          python - <<'PY'
+          import os
+          import shutil
+          import subprocess
+          import sys
+          import tempfile
+          from pathlib import Path
+
+          with tempfile.TemporaryDirectory() as temp:
+              sandbox = Path(temp)
+              shutil.copytree("dist/nonebot2-src", sandbox / "src")
+              check = """
+          from pathlib import Path
+          from importlib import metadata
+          original_version = metadata.version
+
+          def version_without_plugin_metadata(name):
+              if name == "nonebot-plugin-aawarframe":
+                  raise metadata.PackageNotFoundError(name)
+              return original_version(name)
+
+          metadata.version = version_without_plugin_metadata
+          import nonebot
+          nonebot.init(driver="~none", render={"provider": "playwright", "startup": "off"})
+          loaded = nonebot.load_plugins("src/plugins")
+          assert any(p.name == "nonebot_plugin_aawarframe" for p in loaded), loaded
+          import importlib
+          plugin = importlib.import_module("src.plugins.nonebot_plugin_aawarframe")
+          src_plugins = (Path.cwd() / "src" / "plugins").resolve()
+          assert Path(plugin.__file__).resolve().is_relative_to(src_plugins), plugin.__file__
+          from src.plugins.nonebot_plugin_aawarframe.infrastructure.wiki_http import WIKI_HEADERS
+          assert WIKI_HEADERS["User-Agent"].startswith("AAWarframe/dev "), WIKI_HEADERS
+          print("OK: plugin loaded from extracted src/plugins without distribution metadata:", plugin.__file__)
+          """
+              env = os.environ.copy()
+              env.pop("PYTHONPATH", None)
+              subprocess.run(
+                  [sys.executable, "-c", check],
+                  cwd=sandbox,
+                  env=env,
+                  check=True,
+              )
+          PY
+
+      - name: Upload source ZIP for server testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: aawarframe-pr-${{ github.event.pull_request.number || 'manual' }}-src-${{ github.run_number }}
+          path: dist/nonebot2-src/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 1
+
+      - name: Show download and extraction steps
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number || 'manual' }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          {
+            echo '### NoneBot2 source test package'
+            echo ''
+            echo "Download artifact: `aawarframe-pr-${PR_NUMBER}-src-${RUN_NUMBER}`"
+            echo ''
+            echo 'The downloaded artifact ZIP is directly extractable into **src/**:'
+            echo ''
+            echo '```bash'
+            echo 'unzip aawarframe-pr-*.zip -d src/'
+            echo 'python -m pip install -r src/aawarframe-pr-requirements.txt'
+            echo '```'
+            echo ''
+            echo 'Confirm that `[tool.nonebot]` has `plugin_dirs = ["src/plugins"]`.'
+            echo 'The artifact includes the full offline snapshot and rendering assets.'
+          } >> "$GITHUB_STEP_SUMMARY"

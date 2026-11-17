@@ -92,8 +92,8 @@ async def test_world_query_and_commands(monkeypatch, feature):
     registered = []
     monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
     router.setup()
-    assert ("氏族", {"氏族奖励"}, "clan") in registered
-    assert ("午夜电波", {"电波"}, "nightwave") in registered
+    assert ("氏族", set(), "clan") in registered
+    assert ("电波", set(), "nightwave") in registered
     for name in ("日历", "钢精", "回廊", "灵化"):
         assert any(row[0] == name for row in registered)
 

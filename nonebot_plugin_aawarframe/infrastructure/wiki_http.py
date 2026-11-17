@@ -3,7 +3,7 @@
 # 作者：Aameow
 
 import asyncio
-from importlib.metadata import version
+from importlib.metadata import PackageNotFoundError, version
 from time import monotonic
 from typing import Any
 from urllib.parse import urlsplit
@@ -14,9 +14,19 @@ from ..models.errors import WikiChallengeError
 from .http import retry_after
 from .wiki_transport import WikiCurlTransport
 
+def _package_version(name: str) -> str:
+    """源码部署时不要求安装发行包元数据。"""
+    try:
+        return version(name)
+    except PackageNotFoundError:
+        if name == "nonebot-plugin-aawarframe":
+            return "dev"
+        raise
+
+
 WIKI_HEADERS = {
     "User-Agent": (
-        f"AAWarframe/{version('nonebot-plugin-aawarframe')} "
+        f"AAWarframe/{_package_version('nonebot-plugin-aawarframe')} "
         "(https://github.com/nekox41/nonebot-plugin-aawarframe) "
         f"curl-cffi/{version('curl-cffi')}"
     ),

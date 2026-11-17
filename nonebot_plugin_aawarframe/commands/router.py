@@ -5,7 +5,13 @@
 import logging
 
 from nonebot import get_driver, on_message
-from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11 import (
+    Bot,
+    GroupMessageEvent,
+    Message,
+    MessageEvent,
+    MessageSegment,
+)
 from nonebot.matcher import Matcher
 from nonebot.typing import T_State
 
@@ -41,9 +47,18 @@ async def response(card: Card, runtime) -> Message:
         return Message(MessageSegment.text(fallback_text(card)))
 
 
-async def dispatch(feature: str, arguments: str = "", image: bytes | None = None) -> Message:
+async def dispatch(
+    feature: str,
+    arguments: str = "",
+    image: bytes | None = None,
+    *,
+    subscriber: tuple[str, str, str] | None = None,
+) -> Message:
     runtime = get_runtime()
     try:
+        if feature in {"subscribe", "list_subscriptions", "unsubscribe"}:
+            text = await runtime.subscriptions.handle(feature, arguments, subscriber)
+            return Message(MessageSegment.text(text))
         if feature == "riven_analysis":
             if image is None:
                 raise UserInputError("请附上或引用一张紫卡图片。")
@@ -137,7 +152,14 @@ def register(name: str, aliases: set[str], feature: str) -> None:
             except Exception:
                 logger.exception("下载紫卡图片失败")
                 await matcher.finish("无法下载图片，请重新上传。")
-        result = await dispatch(feature, state["aawarframe_arguments"], image)
+        subscriber = (
+            (str(bot.self_id), str(event.group_id), str(event.user_id))
+            if isinstance(event, GroupMessageEvent)
+            else None
+        )
+        result = await dispatch(
+            feature, state["aawarframe_arguments"], image, subscriber=subscriber
+        )
         await matcher.finish(result)
 
 

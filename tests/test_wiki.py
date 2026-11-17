@@ -125,7 +125,7 @@ def test_command_and_alias_registration(monkeypatch):
     registrations = []
     monkeypatch.setattr(router, "register", lambda *args: registrations.append(args))
     router.setup()
-    assert ("wk", {"wiki"}, "wiki") in registrations
+    assert ("wk", set(), "wiki") in registrations
 
 
 def test_response_is_limited_to_three_even_if_upstream_returns_more(wiki_response):

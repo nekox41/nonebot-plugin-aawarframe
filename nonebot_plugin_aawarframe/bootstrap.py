@@ -34,6 +34,7 @@ from .services.trend import TrendService
 from .services.wiki import WikiService
 from .services.worldstate import WorldStateService
 from .services.void_trader import VoidTraderService
+from .subscriptions import SubscriptionService
 
 
 class Runtime:
@@ -83,6 +84,11 @@ class Runtime:
         self.wiki_provider = WikiProvider(self.wiki_http)
         self.wiki = WikiService(self.wiki_provider)
         self.renderer = CardRenderer(config.aawarframe_render_concurrency, config.aawarframe_theme)
+        self.subscriptions = SubscriptionService(
+            config.aawarframe_cache_dir, self.world_provider,
+            arbitration=self.arbitration, market=self.market,
+            riven_market=self.riven_market, renderer=self.renderer,
+        )
         self.control.apply = self.apply_options
         self.apply_options(self.control.settings.options)
 
@@ -101,10 +107,12 @@ class Runtime:
                 self.admin.start()
             except Exception:
                 logging.getLogger(__name__).exception("管理台启动失败")
+        self.subscriptions.start()
         if self.riven_task is None or self.riven_task.done():
             self.riven_task = asyncio.create_task(self.riven_provider.run_daily())
 
     async def close(self) -> None:
+        await self.subscriptions.close()
         if self.admin:
             await self.admin.close()
         if self.riven_task is not None:

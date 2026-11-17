@@ -84,7 +84,13 @@ async def test_new_bounty_commands_dispatch_index_and_render_errors(monkeypatch)
         query=AsyncMock(return_value=build_bounties(snapshot, now, region="hex"))
     )
     monkeypatch.setattr(
-        router, "get_runtime", lambda: SimpleNamespace(world=world, renderer=renderer)
+        router, "get_runtime", lambda: SimpleNamespace(
+            world=world, renderer=renderer,
+            control=SimpleNamespace(settings=SimpleNamespace(commands=[
+                SimpleNamespace(feature=feature, name=name)
+                for name, _, feature in router.DEFAULT_COMMANDS
+            ])),
+        )
     )
     for feature in ["sanctum_bounties", "zariman_bounties", "hex_bounties"]:
         result = await router.dispatch(feature, "2")
@@ -95,9 +101,9 @@ async def test_new_bounty_commands_dispatch_index_and_render_errors(monkeypatch)
     registered = []
     monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
     router.setup()
-    assert ("圣所赏金", set(), "sanctum_bounties") in registered
-    assert ("扎里曼赏金", set(), "zariman_bounties") in registered
-    assert ("1999赏金", set(), "hex_bounties") in registered
+    assert ("圣所", set(), "sanctum_bounties") in registered
+    assert ("扎里曼", set(), "zariman_bounties") in registered
+    assert ("1999", set(), "hex_bounties") in registered
 
 
 def test_single_candidate_does_not_advance_random_state():
