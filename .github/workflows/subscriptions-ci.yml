@@ -9,6 +9,11 @@ on:
       - "tests/test_subscriptions.py"
       - "tests/test_subscription_extensions.py"
       - "tests/test_subscription_numbers.py"
+      - "nonebot_plugin_aawarframe/replies.py"
+      - "nonebot_plugin_aawarframe/replies.toml"
+      - "nonebot_plugin_aawarframe/config.py"
+      - "nonebot_plugin_aawarframe/rendering/**"
+      - "tests/test_replies.py"
   workflow_dispatch:
 
 jobs:
@@ -24,8 +29,8 @@ jobs:
       - name: Compile source
         run: python -m compileall -q nonebot_plugin_aawarframe
       - name: Verify subscription MVP
-        run: python -m pytest -q tests/test_subscriptions.py tests/test_subscription_extensions.py tests/test_subscription_numbers.py
+        run: python -m pytest -q tests/test_subscriptions.py tests/test_subscription_extensions.py tests/test_subscription_numbers.py tests/test_replies.py
       - name: Lint subscription modules
-        run: python -m ruff check nonebot_plugin_aawarframe/subscriptions tests/test_subscription_extensions.py tests/test_subscription_numbers.py
+        run: python -m ruff check nonebot_plugin_aawarframe/subscriptions nonebot_plugin_aawarframe/replies.py nonebot_plugin_aawarframe/commands/router.py tests/test_subscription_extensions.py tests/test_subscription_numbers.py tests/test_replies.py
       - name: Run full regression suite
         run: python -m pytest -q
