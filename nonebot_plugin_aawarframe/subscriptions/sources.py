@@ -64,7 +64,12 @@ def fissure_events(data: dict, now: datetime, rule: dict) -> tuple[list[Event], 
         planet = str(node.get("systemName", "未知星球"))
         if rule.get("mission") and rule["mission"] != mission_type:
             continue
-        if rule.get("planet") and rule["planet"] != planet:
+        wanted_planet = rule.get("planet")
+        if wanted_planet and not (
+            wanted_planet == planet or (
+                mode == "railjack" and planet.startswith(wanted_planet)
+            )
+        ):
             continue
         detail = (
             f"{tier} · {planet} / {node.get('name', mission.node)} · {mission_type}"
