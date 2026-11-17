@@ -1,13 +1,13 @@
 """可编辑回复目录：变量、消息段、戳一戳、卡片短句和损坏配置回退。"""
 
+import json
 import os
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
-import pytest
-
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
+import pytest
 
 from nonebot_plugin_aawarframe.replies import ReplyCatalog
 
@@ -126,7 +126,7 @@ def test_phrase_escaping_and_error_tolerant_reload(tmp_path):
     # 自动替换文字；HTML 内容必须被转义，不能变成可执行 DOM。
     edit(
         path,
-        f'{key} = {__import__("json").dumps(source, ensure_ascii=False)}',
+        f'{key} = {json.dumps(source, ensure_ascii=False)}',
         f'{key} = "<script>不可信</script>"',
     )
     assert catalog.localize(source) == "<script>不可信</script>"
