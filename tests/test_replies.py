@@ -6,8 +6,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
 import pytest
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
 from nonebot_plugin_aawarframe.replies import ReplyCatalog
 
