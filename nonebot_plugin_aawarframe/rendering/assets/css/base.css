@@ -248,3 +248,27 @@ body.arbitration-page { width: 800px; }
 .arbitrations--current .arbitration-details b { font-size: var(--data-font,30px); }
 .arbitration-remaining { margin-top: 14px; font-size: 18px; color: var(--muted); }
 .arbitration-empty { text-align: center; font-size: 23px; padding: 32px; }
+
+/* 订阅提醒：强调本次事件，并保持其他订阅概览紧凑。 */
+.subscription-page { background: #e8eff5; }
+.subscription-page .card {
+  border-top: 5px solid var(--accent);
+  box-shadow: 0 8px 30px rgba(29, 52, 79, .07);
+}
+.subscription-page .card__header { margin-bottom: 18px; }
+.subscription-page .header-label {
+  background: #e7f1f9;
+  color: #365e7f;
+  font-weight: 700;
+}
+.subscription-page .card__content > .section:first-child {
+  padding: 18px;
+  border: 1px solid #c8d9e9;
+  border-radius: 15px;
+  background: #f2f7fc;
+}
+.subscription-page .section:first-child .section__title { color: #365e7f; }
+.subscription-page .section:first-child table tr { background: transparent; }
+.subscription-page .section:first-child td { font-weight: 600; }
+.subscription-page td:first-child { width: 43%; }
+.subscription-page .note { color: var(--muted); }
