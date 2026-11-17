@@ -3,6 +3,7 @@
 # Author: Aameow
 
 from ..models.common import Card, Section
+from ..replies import replies
 from ..models.wiki import WikiSearchResult
 
 
@@ -86,11 +87,11 @@ def paginate(card: Card, *, max_rows: int = 12, max_characters: int = 1000) -> l
 
 
 def fallback_text(card: Card, limit: int = 1800) -> str:
-    text = card.text()
+    text = replies.localize(card.text())
     if len(text) <= limit:
         return text
     body, source, timestamp = text.rsplit("\n", 2)
-    notice = "内容较长，仅显示部分结果；请稍后重新查询完整图片。"
+    notice = replies.text("FALLBACK_TOO_LONG")
     budget = max(0, limit - len(source) - len(timestamp) - len(notice) - 4)
     excerpt = body[:budget]
     if "\n" in excerpt:
@@ -100,7 +101,7 @@ def fallback_text(card: Card, limit: int = 1800) -> str:
 
 def wiki_text(result: WikiSearchResult) -> str:
     if not result.entries:
-        return f"未找到与“{result.query}”相关的 Wiki 条目。"
-    return "\n\n".join(
+        return replies.text("WIKI_NOT_FOUND", QUERY=result.query)
+    return replies.localize("\n\n".join(
         f"{entry.title}\n{entry.description}\n{entry.url}" for entry in result.entries
-    )
+    ))
