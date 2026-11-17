@@ -12,6 +12,7 @@ from ..services.bounties import bounty_kind
 from ..services.fissures import TIERS
 from ..services.market import MarketService
 from ..worldstate.parsers.common import records
+
 # 保留旧版赏金解析辅助函数的映射，不再开放这些命令。
 REGIONS = {
     "地球": "CetusSyndicate",
