@@ -10,6 +10,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
 from ..models.common import Card, Section
 from ..models.errors import UserInputError
+from ..commands.parsing import parse_market_query
 from ..models.market import MarketQuery
 from ..providers.worldstate import WorldStateProvider
 from ..rendering.viewmodels import fallback_text
@@ -67,12 +68,16 @@ class SubscriptionService:
                     }
                     if rule["mission"] not in known:
                         raise ValueError("未知仲裁任务类型，例如：生存、防御、中断。")
+                if spec.kind == "bounty" and rule["region"] in {
+                    "圣所", "扎里曼", "1999"
+                } and rule.get("type"):
+                    raise ValueError("此地区赏金暂不支持按类型筛选，请仅订阅地区。")
                 if spec.kind == "market":
                     if self.market is None:
                         raise ValueError("Market 订阅数据源暂不可用。")
                     # 订阅时只解析一次物品名称，后台全部用规范化的 slug 查询。
                     catalog, details, effective = await self.market.resolve_item(
-                        MarketQuery(name=rule["name"])
+                        parse_market_query(rule["name"])
                     )
                     if catalog.stale or details.stale:
                         raise ValueError("Market 目录暂不可用，请稍后再订阅。")
@@ -224,7 +229,14 @@ class SubscriptionService:
             rule = sub.rule
             key = (rule["slug"], rule.get("rank"), rule.get("subtype"))
             grouped.setdefault(key, []).append(sub)
-        for key, group in grouped.items():
+        # 最久未检查的组合优先，避免订阅超过上限后排在末尾的物品一直饥饿。
+        groups = sorted(
+            grouped.items(),
+            key=lambda item: self._market_checked.get(
+                item[0], datetime.min.replace(tzinfo=UTC)
+            ),
+        )
+        for key, group in groups:
             if self._market_count >= MARKET_MAX_QUERIES_PER_WINDOW:
                 break
             if now - self._market_checked.get(key, now - MARKET_INTERVAL) < MARKET_INTERVAL:
