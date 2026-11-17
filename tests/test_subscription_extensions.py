@@ -305,3 +305,20 @@ async def test_market_late_keys_get_checked_in_later_window(tmp_path, monkeypatc
     queried = {call.args[0] for call in provider.orders.await_args_list}
     assert queried == {f"item{i}" for i in range(9)}
     await service.close()
+
+
+def test_subscription_card_renders_with_notification_header(tmp_path):
+    """模板层完整渲染，不需要启动 Chromium 浏览器。"""
+    from nonebot_plugin_aawarframe.models.common import Card, Section
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+
+    renderer = CardRenderer()
+    card = Card(
+        title="发现新虚空裂缝", source="AAWarframe · 订阅提醒",
+        sections=[Section(title="本次触发", rows=[["古纪生存", "虚空"]])],
+    )
+    rendered = renderer.html(card)
+    assert "subscription-page" in rendered
+    assert "订阅提醒" in rendered
+    assert "古纪生存" in rendered
+    assert "本次触发" in rendered
