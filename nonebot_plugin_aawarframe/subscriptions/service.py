@@ -111,6 +111,14 @@ class SubscriptionService:
                 "SUB_CREATED" if created else "SUB_EXISTS",
                 CODE=subscription.number,
                 TYPE=subscription.label,
+                KIND=spec.kind,
+                WEAPON=rule.get("weapon", ""),
+                LIMIT=rule.get("price", ""),
+                REGION=rule.get("region", ""),
+                PLANET=rule.get("planet", ""),
+                MISSION=rule.get("mission", ""),
+                TIER=rule.get("tier", ""),
+                MARKET_USER=rule.get("user", ""),
             )
             if spec.kind == "cetus_night":
                 try:
