@@ -96,6 +96,12 @@ class SubscriptionStore:
             );
             CREATE INDEX IF NOT EXISTS idx_subscription_seen_age
                 ON subscription_seen(seen_at);
+            CREATE TABLE IF NOT EXISTS subscription_active (
+                subscription_id INTEGER NOT NULL
+                    REFERENCES subscriptions(id) ON DELETE CASCADE,
+                event_key TEXT NOT NULL,
+                PRIMARY KEY(subscription_id, event_key)
+            );
         """)
         with self.lock, self.db:
             poll_columns = {row["name"] for row in self.db.execute(
@@ -124,6 +130,27 @@ class SubscriptionStore:
                     "ALTER TABLE subscription_deliveries "
                     "ADD COLUMN event_detail TEXT NOT NULL DEFAULT ''"
                 )
+            # 旧版按任务类型订阅的仲裁，统一升级为 S 级仲裁。
+            if self.db.execute(
+                "SELECT 1 FROM subscriptions WHERE kind='arbitration' "
+                "AND rule_json<>'{}' LIMIT 1"
+            ).fetchone():
+                self.db.execute("""
+                    DELETE FROM subscriptions WHERE kind='arbitration'
+                    AND id NOT IN (
+                        SELECT MIN(id) FROM subscriptions WHERE kind='arbitration'
+                        GROUP BY bot_id,group_id,user_id
+                    )
+                """)
+                self.db.execute(
+                    "UPDATE subscriptions SET rule_json='{}' WHERE kind='arbitration'"
+                )
+                self.db.execute("""
+                    DELETE FROM subscription_deliveries
+                    WHERE subscription_id IN
+                      (SELECT id FROM subscriptions WHERE kind='arbitration')
+                    AND status IN ('pending','sending')
+                """)
             # 兼容第一版 Draft 中允许任意提前量的夜灵订阅。
             old = self.db.execute(
                 "SELECT 1 FROM subscriptions WHERE kind='cetus_night' "
@@ -285,6 +312,63 @@ class SubscriptionStore:
                      event.title[:120], event.detail[:420]),
                 )
                 queued += 1
+        return queued
+
+    def observe_changes(
+        self, subscription_id: int, events: list, now: datetime,
+        *, notify_initial: bool = False,
+    ) -> int:
+        """当状态从合格→不合格→合格变化时重新提醒一次，避免每分钟刷屏。"""
+        queued = 0
+        with self.lock, self.db:
+            state = self.db.execute(
+                "SELECT initialized FROM subscription_poll_state WHERE subscription_id=?",
+                (subscription_id,),
+            ).fetchone()
+            first = state is None or not state["initialized"]
+            self.db.execute(
+                "INSERT INTO subscription_poll_state(subscription_id,last_status,initialized) "
+                "SELECT id,'监控中',1 FROM subscriptions WHERE id=? "
+                "ON CONFLICT(subscription_id) DO UPDATE SET initialized=1",
+                (subscription_id,),
+            )
+            previous = {
+                row["event_key"] for row in self.db.execute(
+                    "SELECT event_key FROM subscription_active WHERE subscription_id=?",
+                    (subscription_id,),
+                )
+            }
+            current = {event.key for event in events}
+            for event in events:
+                if event.key in previous or (first and not notify_initial) or queued >= 5:
+                    continue
+                if event.due_at < now - timedelta(seconds=90):
+                    continue
+                # 每次重新跌出第一名使用独立的转换编号，恢复后也不会重复发送。
+                count = self.db.execute(
+                    "SELECT COALESCE(COUNT(*),0) FROM subscription_deliveries "
+                    "WHERE subscription_id=? AND event_key LIKE ?",
+                    (subscription_id, event.key + ":%"),
+                ).fetchone()[0]
+                event_key = f"{event.key}:{count + 1}"
+                self.db.execute(
+                    "INSERT OR IGNORE INTO subscription_deliveries "
+                    "(subscription_id,event_key,due_at,event_at,next_attempt_at,"
+                    "event_title,event_detail) VALUES (?,?,?,?,?,?,?)",
+                    (subscription_id, event_key, event.due_at.timestamp(),
+                     event.event_at.timestamp(), event.due_at.timestamp(),
+                     event.title[:120], event.detail[:420]),
+                )
+                queued += 1
+            self.db.execute(
+                "DELETE FROM subscription_active WHERE subscription_id=?",
+                (subscription_id,),
+            )
+            self.db.executemany(
+                "INSERT OR IGNORE INTO subscription_active(subscription_id,event_key) "
+                "VALUES (?,?)",
+                [(subscription_id, key) for key in current],
+            )
         return queued
 
     def recover(self, now: datetime) -> None:
