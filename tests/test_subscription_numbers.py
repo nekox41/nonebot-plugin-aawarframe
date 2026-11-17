@@ -108,7 +108,7 @@ async def test_public_numbers_commands_and_three_column_list(tmp_path):
     second = await service.handle("subscribe", "仲裁", scope)
     third = await service.handle("subscribe", "阿耶", scope)
     assert "编号 1" in first and "编号 2" in second and "编号 3" in third
-    assert "已取消订阅 #2" == await service.handle("unsubscribe", "2", scope)
+    assert "已取消订阅 #2。" == await service.handle("unsubscribe", "2", scope)
     new = await service.handle("subscribe", "九重天", scope)
     assert "编号 2" in new
     listed = await service.handle("list_subscriptions", "", scope)
