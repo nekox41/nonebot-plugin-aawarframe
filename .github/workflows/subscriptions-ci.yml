@@ -24,3 +24,7 @@ jobs:
         run: python -m compileall -q nonebot_plugin_aawarframe
       - name: Verify subscription MVP
         run: python -m pytest -q tests/test_subscriptions.py tests/test_subscription_extensions.py
+      - name: Lint subscription modules
+        run: python -m ruff check nonebot_plugin_aawarframe/subscriptions tests/test_subscription_extensions.py
+      - name: Run full regression suite
+        run: python -m pytest -q
