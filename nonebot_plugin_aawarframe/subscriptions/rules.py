@@ -88,7 +88,7 @@ def parse_rule(arguments: str) -> RuleSpec:
 
 def describe(kind: str, rule: dict) -> str:
     if kind == "cetus_night":
-        return "夜灵平野 · 黑夜前15分钟"
+        return "夜灵平野 · 黑夜前 15 分钟"
     if kind == "fissure":
         return "裂缝 · " + " ".join(filter(None, (
             "钢铁" if rule.get("hard") else "", rule.get("tier", ""),
