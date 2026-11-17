@@ -5,7 +5,13 @@
 import logging
 
 from nonebot import get_driver, on_message
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11 import (
+    Bot,
+    GroupMessageEvent,
+    Message,
+    MessageEvent,
+    MessageSegment,
+)
 from nonebot.matcher import Matcher
 from nonebot.typing import T_State
 

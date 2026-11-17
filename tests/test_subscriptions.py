@@ -79,7 +79,9 @@ async def test_scheduler_sends_once_and_restarts(tmp_path, monkeypatch):
         expiry=now + timedelta(minutes=15),
         basis="test",
     )
-    provider = SimpleNamespace(fetch=AsyncMock(return_value=Snapshot(data={"test": True}, source="test")))
+    provider = SimpleNamespace(
+        fetch=AsyncMock(return_value=Snapshot(data={"test": True}, source="test"))
+    )
     fake_bot = SimpleNamespace(send_group_msg=AsyncMock(return_value={"message_id": 123}))
     monkeypatch.setattr(
         "nonebot_plugin_aawarframe.subscriptions.service.cetus_cycle",
@@ -124,4 +126,23 @@ async def test_commands_and_cancel(tmp_path):
     assert "暂无订阅" in await service.handle(
         "list_subscriptions", "", ("bot", "100", "200")
     )
+    await service.close()
+
+
+@pytest.mark.asyncio
+async def test_stale_snapshot_suppresses_notifications(tmp_path, monkeypatch):
+    provider = SimpleNamespace(
+        fetch=AsyncMock(
+            return_value=Snapshot(data={"test": True}, source="test", stale=True)
+        )
+    )
+    fake_bot = SimpleNamespace(send_group_msg=AsyncMock())
+    monkeypatch.setattr(
+        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
+        lambda: {"bot": fake_bot},
+    )
+    service = SubscriptionService(tmp_path, provider)
+    service.store.subscribe("bot", "100", "200", 15)
+    await service._tick()
+    fake_bot.send_group_msg.assert_not_awaited()
     await service.close()

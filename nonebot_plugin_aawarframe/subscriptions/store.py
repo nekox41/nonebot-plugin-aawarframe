@@ -96,7 +96,9 @@ class SubscriptionStore:
     ) -> tuple[Subscription, bool]:
         if not 1 <= lead_minutes <= 90:
             raise ValueError("提醒提前量无效")
-        rule_json = json.dumps({"lead_minutes": lead_minutes}, sort_keys=True, separators=(",", ":"))
+        rule_json = json.dumps(
+            {"lead_minutes": lead_minutes}, sort_keys=True, separators=(",", ":")
+        )
         with self.lock, self.db:
             existing = self.db.execute(
                 """SELECT COUNT(*) FROM subscriptions
