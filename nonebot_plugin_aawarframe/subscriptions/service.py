@@ -8,16 +8,15 @@ from pathlib import Path
 from nonebot import get_bots
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
+from ..commands.parsing import parse_market_query
 from ..models.common import Card, Section
 from ..models.errors import UserInputError
-from ..commands.parsing import parse_market_query
 from ..models.market import MarketQuery
 from ..providers.worldstate import WorldStateProvider
 from ..rendering.viewmodels import fallback_text
 from ..worldstate.parsers.cycles import cetus_cycle
 from .rules import (
     CETUS_LEAD_MINUTES,
-    describe,
     next_cetus_occurrence,
     parse_rule,
 )
