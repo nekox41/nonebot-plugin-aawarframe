@@ -16,6 +16,7 @@ CETUS_RULE_JSON = '{"lead_minutes":15}'
 @dataclass(frozen=True)
 class Subscription:
     id: int
+    number: int  # 用户在指定 Bot/群/QQ 范围内看到的可回收小编号
     bot_id: str
     group_id: str
     user_id: str
@@ -57,6 +58,7 @@ class SubscriptionStore:
         self.db.executescript("""
             CREATE TABLE IF NOT EXISTS subscriptions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                display_id INTEGER,
                 bot_id TEXT NOT NULL,
                 group_id TEXT NOT NULL,
                 user_id TEXT NOT NULL,
@@ -173,12 +175,45 @@ class SubscriptionStore:
                     WHERE status IN ('pending','sending') AND subscription_id IN
                       (SELECT id FROM subscriptions WHERE kind='cetus_night')
                 """)
+        # 数据库内部 id 始终为自增主键，仍供发件箱/关联表引用。
+        # 将用户可见编号迁移为各 Bot/群/用户内的 1..N；后续删除可回收空位，
+        # 无需重排其他记录，也不会让通知/去重指向错误的订阅。
+        with self.lock, self.db:
+            cols = {row["name"] for row in self.db.execute(
+                "PRAGMA table_info(subscriptions)"
+            )}
+            if "display_id" not in cols:
+                self.db.execute(
+                    "ALTER TABLE subscriptions ADD COLUMN display_id INTEGER"
+                )
+            occupied: dict[tuple[str, str, str], set[int]] = {}
+            for row in self.db.execute(
+                "SELECT id,bot_id,group_id,user_id,display_id "
+                "FROM subscriptions ORDER BY id"
+            ).fetchall():
+                scope = (row["bot_id"], row["group_id"], row["user_id"])
+                used = occupied.setdefault(scope, set())
+                number = row["display_id"]
+                if not isinstance(number, int) or number < 1 or number in used:
+                    number = 1
+                    while number in used:
+                        number += 1
+                    self.db.execute(
+                        "UPDATE subscriptions SET display_id=? WHERE id=?",
+                        (number, row["id"]),
+                    )
+                used.add(number)
+            self.db.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_subscription_display_id "
+                "ON subscriptions(bot_id,group_id,user_id,display_id)"
+            )
         path.chmod(0o600)
 
     @staticmethod
     def _subscription(row: sqlite3.Row) -> Subscription:
         return Subscription(
-            id=row["id"], bot_id=row["bot_id"], group_id=row["group_id"],
+            id=row["id"], number=row["display_id"],
+            bot_id=row["bot_id"], group_id=row["group_id"],
             user_id=row["user_id"], kind=row["kind"],
             created_at=_utc(row["created_at"]), rule=json.loads(row["rule_json"]),
         )
@@ -206,11 +241,20 @@ class SubscriptionStore:
             ).fetchone()[0]
             if count >= 10:
                 raise ValueError("每个群最多创建 10 条个人订阅。")
+            occupied = {
+                row[0] for row in self.db.execute(
+                    "SELECT display_id FROM subscriptions WHERE bot_id=? "
+                    "AND group_id=? AND user_id=?",
+                    (bot_id, group_id, user_id),
+                )
+            }
+            number = next(candidate for candidate in range(1, 11) if candidate not in occupied)
             stamp = datetime.now(UTC).timestamp()
             cursor = self.db.execute(
-                "INSERT INTO subscriptions (bot_id,group_id,user_id,kind,rule_json,created_at) "
-                "VALUES (?,?,?,?,?,?)",
-                (bot_id, group_id, user_id, kind, encoded, stamp),
+                "INSERT INTO subscriptions "
+                "(display_id,bot_id,group_id,user_id,kind,rule_json,created_at) "
+                "VALUES (?,?,?,?,?,?,?)",
+                (number, bot_id, group_id, user_id, kind, encoded, stamp),
             )
             row = self.db.execute(
                 "SELECT * FROM subscriptions WHERE id=?", (cursor.lastrowid,)
@@ -221,7 +265,7 @@ class SubscriptionStore:
         with self.lock:
             rows = self.db.execute(
                 "SELECT * FROM subscriptions WHERE bot_id=? AND group_id=? "
-                "AND user_id=? ORDER BY id", (bot_id, group_id, user_id),
+                "AND user_id=? ORDER BY display_id", (bot_id, group_id, user_id),
             ).fetchall()
         return [self._subscription(row) for row in rows]
 
@@ -235,6 +279,17 @@ class SubscriptionStore:
             return bool(self.db.execute(
                 "DELETE FROM subscriptions WHERE id=? AND bot_id=? AND group_id=? AND user_id=?",
                 (subscription_id, bot_id, group_id, user_id),
+            ).rowcount)
+
+    def remove_number(
+        self, number: int, bot_id: str, group_id: str, user_id: str
+    ) -> bool:
+        """用户侧仅使用局部编号取消；不能跨 Bot/群/用户删除。"""
+        with self.lock, self.db:
+            return bool(self.db.execute(
+                "DELETE FROM subscriptions WHERE display_id=? "
+                "AND bot_id=? AND group_id=? AND user_id=?",
+                (number, bot_id, group_id, user_id),
             ).rowcount)
 
     def has_subscription(self, subscription_id: int) -> bool:
