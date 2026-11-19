@@ -27,7 +27,7 @@ jobs:
       - name: Install QQ adapter without OneBot
         run: python -m pip install -e '.[dev,qq]'
       - name: Install independent QQ entrypoint
-        run: python -m pip install -e distributions/qq
+        run: python -m pip install distributions/qq
       - name: Verify QQ-only runtime really has no OneBot dependency
         run: |
           python - <<'PY'
@@ -45,7 +45,7 @@ jobs:
         run: python -m pip install -e '.[onebot]'
       - name: Install and load OneBot entrypoint
         run: |
-          python -m pip install -e distributions/onebot
+          python -m pip install distributions/onebot
           python - <<'PY'
           import nonebot
           nonebot.init(driver="~none", render={"provider":"playwright","startup":"off"})
