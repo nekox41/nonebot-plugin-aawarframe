@@ -466,6 +466,12 @@ class SubscriptionStore:
         else:
             raise ValueError("不支持的订阅协议")
         with self.lock, self.db:
+            # 协议进程中途退出时，超过 60 秒的发送租约可重新领取。
+            self.db.execute(
+                "UPDATE subscription_deliveries SET status='pending' "
+                "WHERE status='sending' AND next_attempt_at<=?",
+                (now.timestamp(),),
+            )
             rows = self.db.execute(
                 f"SELECT d.*,s.bot_id,s.group_id,s.user_id,s.kind "
                 f"FROM subscription_deliveries d "
@@ -478,7 +484,8 @@ class SubscriptionStore:
             for row in rows:
                 self.db.execute(
                     "UPDATE subscription_deliveries SET status='sending', "
-                    "attempts=attempts+1 WHERE id=?", (row["id"],),
+                    "next_attempt_at=?, attempts=attempts+1 WHERE id=?",
+                    (now.timestamp() + 60, row["id"]),
                 )
         return [
             Delivery(
