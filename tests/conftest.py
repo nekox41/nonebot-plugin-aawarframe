@@ -11,6 +11,7 @@ import pytest
 
 nonebot.init(driver="~none", render={"provider": "playwright", "startup": "off"})
 assert nonebot.load_plugin("nonebot_plugin_aawfcore") is not None
+assert nonebot.load_plugin("nonebot_plugin_aawarframe") is not None
 
 # The production wheel ships an offline archive, not unpacked JSON files.
 # Restore the resource layout as the backend does on startup.
