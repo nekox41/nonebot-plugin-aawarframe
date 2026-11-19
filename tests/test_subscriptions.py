@@ -89,30 +89,28 @@ async def test_scheduler_sends_once_and_restarts(tmp_path, monkeypatch):
     provider = SimpleNamespace(
         fetch=AsyncMock(return_value=Snapshot(data={"test": True}, source="test"))
     )
-    fake_bot = SimpleNamespace(send_group_msg=AsyncMock(return_value={"message_id": 123}))
     monkeypatch.setattr(
         "nonebot_plugin_aawfcore.subscriptions.service.cetus_cycle",
         lambda data, stamp: (cycle, []),
-    )
-    monkeypatch.setattr(
-        "nonebot_plugin_aawfcore.subscriptions.service.get_bots",
-        lambda: {"bot": fake_bot},
     )
     service = SubscriptionService(tmp_path, provider)
     sub, _ = service.store.subscribe("bot", "10001", "20002")
     await service._tick(now)
     await service._tick(now)
-    assert fake_bot.send_group_msg.await_count == 1
-    sent = fake_bot.send_group_msg.await_args.kwargs
-    assert sent["group_id"] == 10001
-    assert "[CQ:at,qq=20002]" in str(sent["message"])
+    pending = service.store.claim_due(now, {"bot"}, protocol="onebot")
+    assert len(pending) == 1
+    assert pending[0].group_id == "10001"
+    notification = await service.prepare_delivery(pending[0], now)
+    assert [segment.type for segment in notification] == ["at", "text"]
+    assert notification[0].data["qq"] == "20002"
+    service.store.mark_sent(pending[0].id, now)
     assert sub.id > 0
     await service.close()
 
-    # 已发送事件的唯一键能在进程重启后继续防重。
+    # 核心发送状态写入数据库，重启后绝不重新领取已发送提醒。
     restarted = SubscriptionService(tmp_path, provider)
     await restarted._tick(now)
-    assert fake_bot.send_group_msg.await_count == 1
+    assert restarted.store.claim_due(now, {"bot"}, protocol="onebot") == []
     await restarted.close()
 
 
@@ -148,15 +146,10 @@ async def test_stale_snapshot_suppresses_notifications(tmp_path, monkeypatch):
             return_value=Snapshot(data={"test": True}, source="test", stale=True)
         )
     )
-    fake_bot = SimpleNamespace(send_group_msg=AsyncMock())
-    monkeypatch.setattr(
-        "nonebot_plugin_aawfcore.subscriptions.service.get_bots",
-        lambda: {"bot": fake_bot},
-    )
     service = SubscriptionService(tmp_path, provider)
     service.store.subscribe("bot", "100", "200")
     await service._tick()
-    fake_bot.send_group_msg.assert_not_awaited()
+    assert service.store.claim_due(datetime.now(UTC), {"bot"}, protocol="onebot") == []
     await service.close()
 
 def test_migrate_previously_configurable_night_rules(tmp_path):
