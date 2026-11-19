@@ -27,7 +27,7 @@ def merge_market(items, market):
     for row in sorted(market, key=lambda r: (r.id.endswith("_set"), r.id)):
         ref = row.identifiers.get("game.ref", "").replace("/StoreItems/", "/")
         target = refs.get(ref.casefold())
-            if not target or target in claimed:
+        if not target or target in claimed:
             target = "market:" + row.id
         claimed.add(target)
         base = result.get(target)
