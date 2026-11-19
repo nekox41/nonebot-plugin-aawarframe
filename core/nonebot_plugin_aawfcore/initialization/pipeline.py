@@ -187,6 +187,10 @@ def export_archive(directory, output, resource_root=None):
             for name in tables - {
                 "item_catalog",
                 "item_aliases",
+                "items",
+                "aliases",
+                "market_products",
+                "market_aliases",
                 "item_overrides",
                 "catalog_meta",
                 "settings",
