@@ -172,7 +172,7 @@ async def test_render_cache_uses_stable_data_and_ten_second_time_buckets(monkeyp
 
     monkeypatch.setattr(nonebot_plugin_htmlrender, "render_html", render)
 
-    async def fit(document):
+    async def fit(self, document):
         return document, 800, 100
 
     monkeypatch.setattr(CardRenderer, "_fit_document", fit)
