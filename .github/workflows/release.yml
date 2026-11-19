@@ -2,8 +2,6 @@ name: Release — Core, QQ and OneBot Together
 
 on:
   push:
-    tags:
-      - 'v*'
     branches:
       - master
     paths:
@@ -14,8 +12,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to build, e.g. 0.23.0 (manual runs do not publish)"
+        description: "Version to build, e.g. 0.23.1"
         required: true
+      publish_pypi:
+        description: "Publish all three distributions to PyPI (use for retries)"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -93,10 +96,10 @@ jobs:
         run: |
           TAG="v$AAWF_VERSION"
           if gh api "repos/$GH_REPO/git/ref/tags/$TAG" >/dev/null 2>&1; then
-            echo "::error::Release tag $TAG already exists; refusing to republish a version"
-            exit 1
+            echo "::notice::Release tag $TAG already exists; keeping the existing immutable tag"
+          else
+            gh api -X POST "repos/$GH_REPO/git/refs" -f ref="refs/tags/$TAG" -f sha="$GITHUB_SHA"
           fi
-          gh api -X POST "repos/$GH_REPO/git/refs" -f ref="refs/tags/$TAG" -f sha="$GITHUB_SHA"
       - name: Keep release artifacts for inspection
         uses: actions/upload-artifact@v4
         with:
@@ -110,9 +113,18 @@ jobs:
           if-no-files-found: error
 
   publish-core:
-    if: github.event_name == 'push'
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'workflow_dispatch' && inputs.publish_pypi)
     needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/nonebot-plugin-aawfcore
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -121,12 +133,20 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/core
-          password: ${{ secrets.PYPI_API_TOKEN_CORE }}
 
   publish-qq:
-    if: github.event_name == 'push'
-    needs: publish-core
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'workflow_dispatch' && inputs.publish_pypi)
+    needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: pypi-qq
+      url: https://pypi.org/p/nonebot-plugin-aawfqq
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -135,12 +155,20 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/qq
-          password: ${{ secrets.PYPI_API_TOKEN_QQ }}
 
   publish-onebot:
-    if: github.event_name == 'push'
-    needs: publish-core
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'workflow_dispatch' && inputs.publish_pypi)
+    needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: pypi-onebot
+      url: https://pypi.org/p/nonebot-plugin-aawfonebot
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -149,10 +177,9 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/onebot
-          password: ${{ secrets.PYPI_API_TOKEN_ONEBOT }}
 
   release-github:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -166,6 +193,10 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: v${{ needs.build.outputs.version }}
         run: |
-          gh release create "$TAG" dist/core/* dist/qq/* dist/onebot/* dist/manual/* \
-            --title "AAWarframe $TAG — Core + QQ + OneBot" \
-            --generate-notes
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::notice::GitHub Release $TAG already exists; keeping its existing assets"
+          else
+            gh release create "$TAG" dist/core/* dist/qq/* dist/onebot/* dist/manual/* \
+              --title "AAWarframe $TAG — Core + QQ + OneBot" \
+              --generate-notes
+          fi
