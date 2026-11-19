@@ -136,6 +136,7 @@ async def test_official_group_notification_uses_openid_and_file_image(tmp_path):
 @pytest.mark.asyncio
 async def test_official_notification_scheduler_and_db_scope(tmp_path, monkeypatch):
     from datetime import datetime, timedelta, timezone
+
     from nonebot_plugin_aawarframe.models.common import Snapshot
     from nonebot_plugin_aawarframe.models.worldstate import CycleState
 
@@ -196,6 +197,7 @@ async def test_qq_official_attachment_and_reply_image():
 @pytest.mark.asyncio
 async def test_official_notification_failure_does_not_mark_sent(tmp_path, monkeypatch):
     from datetime import datetime, timedelta, timezone
+
     from nonebot_plugin_aawarframe.models.common import Snapshot
     from nonebot_plugin_aawarframe.models.worldstate import CycleState
 
