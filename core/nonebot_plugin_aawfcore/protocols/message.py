@@ -69,25 +69,3 @@ class Message(list[MessageSegment]):
 
     def __str__(self) -> str:
         return "".join(str(segment) for segment in self)
-
-
-def to_onebot(message):
-    """OneBot 仅在真正需要发送时导入；QQ 官方环境可以完全不安装它。"""
-    from nonebot.adapters.onebot.v11 import Message as OBMessage
-    from nonebot.adapters.onebot.v11 import MessageSegment as OBSegment
-
-    if isinstance(message, OBMessage):
-        return message
-    outgoing = OBMessage()
-    for segment in message:
-        if segment.type == "text":
-            outgoing += OBSegment.text(segment.data["text"])
-        elif segment.type == "image":
-            outgoing += OBSegment.image(segment.data["file"])
-        elif segment.type == "at":
-            outgoing += OBSegment.at(segment.data["qq"])
-        elif segment.type == "reply":
-            outgoing += OBSegment.reply(int(segment.data["id"]))
-        else:
-            raise ValueError(f"不支持的 OneBot 消息段: {segment.type}")
-    return outgoing
