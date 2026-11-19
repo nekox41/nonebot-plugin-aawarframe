@@ -7,7 +7,7 @@ from struct import pack, unpack
 
 from ..grq import get_grq
 from ..grq.links import PREFIXES, SUFFIXES
-from ..localization.resources import PACKAGED
+from ..localization.resources import ASSETS
 from ..localization.rivens import resolve_riven_weapon
 from ..models.common import Card
 from ..models.errors import UserInputError
@@ -58,7 +58,7 @@ def value_range(attribute, weapon_class, multiplier, disposition):
 
 class RivenValuesService:
     def __init__(self):
-        self.rules = json.loads((PACKAGED / "riven_stats.json").read_text(encoding="utf-8"))
+        self.rules = json.loads((ASSETS / "riven_stats.json").read_text(encoding="utf-8"))
         self._version = -1
         self._families = {}
 
