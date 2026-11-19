@@ -8,6 +8,8 @@ import json
 import logging
 import sys
 from collections import deque
+from contextlib import asynccontextmanager
+from contextvars import ContextVar
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
@@ -17,6 +19,9 @@ from nonebot.adapters.onebot.v11 import Message
 from ..models.errors import UserInputError
 
 LIMIT = 12 * 1024 * 1024
+MAX_ANALYSES = 8
+MAX_DOWNLOADS = 4
+DOWNLOAD_TIMEOUT = 30
 
 
 def image_segments(message):
@@ -58,8 +63,11 @@ async def message_image(bot, event, http):
             if len(url) > LIMIT * 4 // 3 + 20:
                 raise UserInputError("图片超过 12 MB，请裁剪后发送。")
             try:
-                return base64.b64decode(url[9:], validate=True)
-            except ValueError:
+                data = base64.b64decode(url[9:], validate=True)
+                if len(data) > LIMIT:
+                    raise UserInputError("图片超过 12 MB，请裁剪后发送。")
+                return data
+            except (ValueError, base64.binascii.Error):
                 continue
         try:
             data = await download_image(url, http)
@@ -81,6 +89,14 @@ async def download_image(url, http):
                 url = urljoin(url, response.headers.get("location", ""))
                 continue
             response.raise_for_status()
+            # 响应头仅用于提前拒绝；缺失或谎报时仍依靠下面的流式限制。
+            declared_length = response.headers.get("content-length")
+            if declared_length is not None:
+                try:
+                    if int(declared_length) > LIMIT:
+                        raise UserInputError("图片超过 12 MB，请裁剪后发送。")
+                except ValueError:
+                    pass
             data = bytearray()
             async for chunk in response.aiter_bytes():
                 data.extend(chunk)
@@ -96,8 +112,45 @@ class RivenOCR:
         self.process = None
         self.lock = asyncio.Lock()
         self.pending = 0
+        self.download_slots = asyncio.Semaphore(MAX_DOWNLOADS)
+        # 仅当前 asyncio Task 能复用已取得的准入资格；子任务不能绕过限制。
+        self._admitted_task: ContextVar[asyncio.Task | None] = ContextVar(
+            f"riven_ocr_admission_{id(self)}", default=None
+        )
         self.log_task = None
         self.errors = deque(maxlen=30)
+
+    @asynccontextmanager
+    async def admission(self):
+        """端到端任务准入：在读取引用消息、下载和识别前取得名额。
+
+        无 await 的检查及计数在单一事件循环内是原子的。嵌套的 recognize()
+        复用当前任务的名额；其他任务（包括继承 contextvars 的子任务）仍需排队。
+        """
+        task = asyncio.current_task()
+        if task is not None and self._admitted_task.get() is task:
+            yield
+            return
+        if self.pending >= MAX_ANALYSES:
+            raise UserInputError("分析队列已满，请稍后再发。")
+        self.pending += 1
+        token = self._admitted_task.set(task)
+        try:
+            yield
+        finally:
+            self._admitted_task.reset(token)
+            self.pending -= 1
+
+    async def fetch_message_image(self, bot, event, http):
+        """最多四路下载，等待准入/引用消息查询/下载共受同一超时约束。"""
+        async def fetch():
+            async with self.download_slots:
+                return await message_image(bot, event, http)
+
+        try:
+            return await asyncio.wait_for(fetch(), timeout=DOWNLOAD_TIMEOUT)
+        except TimeoutError:
+            raise UserInputError("图片下载超时，请稍后重试。") from None
 
     async def read(self):
         while True:
@@ -131,10 +184,9 @@ class RivenOCR:
             raise RuntimeError("OCR 初始化失败")
 
     async def recognize(self, image, analyze):
-        if self.pending >= 8:
-            raise UserInputError("分析队列已满，请稍后再发。")
-        self.pending += 1
-        try:
+        # 直接调用 OCR 的调用方也必须遵守同一个名额；来自 router 的
+        # 请求已在下载前入场，嵌套调用不再重复计数。
+        async with self.admission():
             async with self.lock:
                 try:
                     await self.start()
@@ -164,8 +216,6 @@ class RivenOCR:
                     await self.close()
                     logging.getLogger(__name__).exception("紫卡 OCR 不可用")
                     raise UserInputError("识别服务暂不可用，请稍后重试。") from None
-        finally:
-            self.pending -= 1
 
     async def close(self):
         if self.process:
