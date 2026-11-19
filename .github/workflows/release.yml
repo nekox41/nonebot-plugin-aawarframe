@@ -61,6 +61,8 @@ jobs:
               )
           with open(os.environ["GITHUB_ENV"], "a") as env:
               env.write(f"AAWF_VERSION={expected}\n")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"version={expected}\n")
           PY
       - name: Fetch fresh data and validate generated archive
         run: python scripts/build_resources.py --build
