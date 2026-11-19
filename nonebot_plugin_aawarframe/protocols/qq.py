@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 import httpx
 
 from ..models.errors import UserInputError
+from .message import to_onebot
 
 logger = logging.getLogger(__name__)
 GROUP_PREFIX = "qq-group:"
@@ -102,7 +103,7 @@ def qq_messages(message):
 async def send_reply(bot, event, message, matcher) -> None:
     """普通命令走原 OneBot 输出，QQ 官方命令走 bot.send() 的事件回复。"""
     if not is_qq_bot(bot):
-        await matcher.finish(message)
+        await matcher.finish(to_onebot(message))
         return
 
     pages = qq_messages(message)
