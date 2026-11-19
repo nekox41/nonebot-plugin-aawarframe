@@ -17,7 +17,6 @@ from nonebot.typing import T_State
 
 from ..admin.control import DEFAULT_COMMANDS
 from ..bootstrap import get_runtime
-from ..infrastructure.riven_ocr import message_image
 from ..localization.riven_attributes import attributes
 from ..models.common import Card
 from ..models.errors import UserInputError, WikiChallengeError
@@ -128,6 +127,16 @@ async def dispatch(
     return await response(card, runtime)
 
 
+async def analyze_riven_message(bot, event, arguments, subscriber=None) -> Message:
+    """获取准入名额后再解析/下载图片，并一直持有到 OCR 分析及渲染完成。"""
+    runtime = get_runtime()
+    async with runtime.ocr.admission():
+        image = await runtime.ocr.fetch_message_image(bot, event, runtime.http)
+        return await dispatch(
+            "riven_analysis", arguments, image, subscriber=subscriber
+        )
+
+
 def register(name: str, aliases: set[str], feature: str) -> None:
     async def rule(event: MessageEvent, state: T_State) -> bool:
         if "aawarframe_route" not in state:
@@ -147,23 +156,27 @@ def register(name: str, aliases: set[str], feature: str) -> None:
 
     @command.handle()
     async def handle(bot: Bot, event: MessageEvent, matcher: Matcher, state: T_State):
-        image = None
-        if feature == "riven_analysis":
-            try:
-                image = await message_image(bot, event, get_runtime().http)
-            except UserInputError as exc:
-                await matcher.finish(str(exc))
-            except Exception:
-                logger.exception("下载紫卡图片失败")
-                await matcher.finish("无法下载图片，请重新上传。")
         subscriber = (
             (str(bot.self_id), str(event.group_id), str(event.user_id))
             if isinstance(event, GroupMessageEvent)
             else None
         )
-        result = await dispatch(
-            feature, state["aawarframe_arguments"], image, subscriber=subscriber
-        )
+        if feature == "riven_analysis":
+            try:
+                result = await analyze_riven_message(
+                    bot, event, state["aawarframe_arguments"], subscriber=subscriber
+                )
+            except UserInputError as exc:
+                await matcher.finish(str(exc))
+                return
+            except Exception:
+                logger.exception("下载紫卡图片失败")
+                await matcher.finish("无法下载图片，请重新上传。")
+                return
+        else:
+            result = await dispatch(
+                feature, state["aawarframe_arguments"], subscriber=subscriber
+            )
         await matcher.finish(result)
 
 
