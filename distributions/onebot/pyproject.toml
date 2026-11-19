@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nonebot-plugin-aawfonebot"
+version = "0.1.0"
+description = "OneBot V11 adapter entrypoint for the shared AAWarframe core"
+requires-python = "==3.12.*"
+dependencies = [
+  "nonebot-plugin-aawarframe>=0.22.5",
+  "nonebot-adapter-onebot>=2.4.6,<3",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nonebot_plugin_aawfonebot*"]
