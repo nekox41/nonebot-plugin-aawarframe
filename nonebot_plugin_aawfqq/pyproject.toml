@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nonebot-plugin-aawfqq"
-version = "0.23.0"
+version = "0.23.1"
 description = "QQ official adapter entrypoint for the shared AAWarframe core"
 requires-python = "==3.12.*"
 dependencies = [
-  "nonebot-plugin-aawfcore==0.23.0",
+  "nonebot-plugin-aawfcore==0.23.1",
   "nonebot-adapter-qq>=1.7.4,<2",
 ]
 
