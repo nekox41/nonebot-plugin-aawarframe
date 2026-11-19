@@ -43,8 +43,10 @@ def test_unified_items_and_shared_aliases(grq):
     assert product.identifiers["market.slug"] == "saryn_prime_set"
     assert product.metadata["market_tradable"]
     assert grq.get("Items", "saryn_prime_set", "market.slug").id == product.id
-    family = {grq.get("Items", item).names.get("en") for item in grq.item_family("burston")}
-    assert {"Burston", "Burston Prime", "MK1-Burston"} <= family
+    burston = {grq.get("Items", item).names.get("en") for item in grq.item_family("burston")}
+    assert {"Burston", "Burston Prime"} <= burston
+    braton = {grq.get("Items", item).names.get("en") for item in grq.item_family("braton")}
+    assert {"Braton", "Braton Prime", "MK1-Braton"} <= braton
     grq.add_alias(BURSTON, "统一武器别名")
     assert grq.search("Riven", "统一武器别名").resource.id == "burston"
     assert (
