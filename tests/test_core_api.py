@@ -145,3 +145,28 @@ async def test_two_adapters_consume_core_segments_without_native_cross_dependenc
     onebot = outbound(payload["segments"])
     assert [s.type for s in qq[0]] == ["text", "file_image", "mention_user"]
     assert [s.type for s in onebot] == ["text", "image", "at"]
+
+
+def test_delivery_claim_lease_and_protocol_isolation(tmp_path):
+    from datetime import timedelta
+    from nonebot_plugin_aawfcore.subscriptions.store import SubscriptionStore
+
+    store = SubscriptionStore(tmp_path / "subs.sqlite3")
+    now = datetime.now(timezone.utc)
+    official, _ = store.subscribe("bot", "qq-group:group", "member")
+    legacy, _ = store.subscribe("bot", "12345", "12345")
+    store.enqueue(official.id, "official-new", now, now)
+    store.enqueue(legacy.id, "legacy-new", now, now)
+    with pytest.raises(ValueError, match="协议"):
+        store.claim_due(now, {"bot"}, protocol="invalid")
+    first = store.claim_due(now, {"bot"}, protocol="qq")
+    second = store.claim_due(now, {"bot"}, protocol="onebot")
+    assert [item.subscription_id for item in first] == [official.id]
+    assert [item.subscription_id for item in second] == [legacy.id]
+    assert store.claim_due(now + timedelta(seconds=30), {"bot"}, protocol="qq") == []
+    recovered = store.claim_due(now + timedelta(seconds=61), {"bot"}, protocol="qq")
+    assert len(recovered) == 1
+    assert recovered[0].id == first[0].id and recovered[0].attempts == 2
+    store.mark_sent(recovered[0].id, now + timedelta(seconds=61))
+    assert store.claim_due(now + timedelta(seconds=70), {"bot"}, protocol="qq") == []
+    store.close()
