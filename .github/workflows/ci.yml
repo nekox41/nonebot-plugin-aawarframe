@@ -1,0 +1,98 @@
+name: CI — Core API and Protocol Packages
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  core-and-packages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install all test dependencies
+        run: |
+          python -m pip install -e './core[dev]'
+          python -m pip install nonebot-adapter-qq nonebot-adapter-onebot
+          python -m pip install --no-deps ./nonebot_plugin_aawfqq ./nonebot_plugin_aawfonebot
+      - name: Build fresh verified game resources (not stored in Git)
+        run: python scripts/build_resources.py --build
+      - name: Verify new backend and frontend imports
+        run: |
+          python -m compileall -q core/nonebot_plugin_aawfcore nonebot_plugin_aawfqq nonebot_plugin_aawfonebot
+          python -c "import nonebot_plugin_aawfcore.api as a; assert a.app"
+      - name: Lint new boundaries
+        run: |
+          python -m ruff check core/nonebot_plugin_aawfcore/api.py core/nonebot_plugin_aawfcore/client.py nonebot_plugin_aawfqq/nonebot_plugin_aawfqq nonebot_plugin_aawfonebot/nonebot_plugin_aawfonebot scripts/build_resources.py scripts/package_release.py
+      - name: Run complete test suite
+        run: python -m pytest -q
+      - name: Build three independent distributions
+        run: |
+          python -m build --sdist --wheel core --outdir dist/pypi
+          python -m build --sdist --wheel nonebot_plugin_aawfqq --outdir dist/pypi
+          python -m build --sdist --wheel nonebot_plugin_aawfonebot --outdir dist/pypi
+      - name: Build three manual-install release archives
+        run: |
+          python - <<'PY'
+          import tomllib
+          from pathlib import Path
+          with Path('core/pyproject.toml').open('rb') as file:
+              version = tomllib.load(file)['project']['version']
+          import subprocess
+          subprocess.run(['python', 'scripts/package_release.py', '--version', version], check=True)
+          PY
+      - name: Upload wheels, source packages and manual archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: aawf-three-packages-${{ github.run_number }}
+          path: |
+            dist/pypi/*
+            dist/manual/*
+          retention-days: 14
+          if-no-files-found: error
+
+  qq-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install ./core ./nonebot_plugin_aawfqq
+      - name: Prove QQ-only install does not install OneBot
+        run: |
+          python - <<'PY'
+          from importlib.util import find_spec
+          assert find_spec('nonebot.adapters.onebot') is None
+          import nonebot
+          nonebot.init(driver='~none', render={'provider':'playwright','startup':'off'})
+          assert nonebot.load_plugin('nonebot_plugin_aawfqq') is not None
+          print('QQ-only frontend and backend initialized with no OneBot adapter')
+          PY
+
+  onebot-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install ./core ./nonebot_plugin_aawfonebot
+      - name: Prove OneBot-only install does not install QQ official adapter
+        run: |
+          python - <<'PY'
+          from importlib.util import find_spec
+          assert find_spec('nonebot.adapters.qq') is None
+          import nonebot
+          nonebot.init(driver='~none', render={'provider':'playwright','startup':'off'})
+          assert nonebot.load_plugin('nonebot_plugin_aawfonebot') is not None
+          print('OneBot-only frontend and backend initialized with no QQ adapter')
+          PY
