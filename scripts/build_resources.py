@@ -65,11 +65,8 @@ async def main() -> None:
 
     nonebot.init(driver="~none", render={"provider": "playwright", "startup": "off"})
     from nonebot_plugin_aawfcore.grq import GameResourceQuery
-    from nonebot_plugin_aawfcore.initialization.pipeline import (
-        export_archive,
-        initialize,
-        validate,
-    )
+    from nonebot_plugin_aawfcore.initialization.build import initialize
+    from nonebot_plugin_aawfcore.initialization.pipeline import export_archive, validate
 
     validate(ASSETS)
     riven_rules = json.loads((ASSETS / "riven_stats.json").read_text(encoding="utf-8"))
