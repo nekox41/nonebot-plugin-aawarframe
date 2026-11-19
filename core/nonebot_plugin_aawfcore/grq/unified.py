@@ -42,8 +42,8 @@ def persist_catalog(
             continue
         name = row.names.get("en", "")
         alternatives = [name]
-        alternatives += [name[len(p):] for p in PREFIXES if name.startswith(p)]
-        alternatives += [name[:-len(s)] for s in SUFFIXES if name.endswith(s)]
+        alternatives += [name[len(p):] for p in PREFIXES if name.casefold().startswith(p.casefold())]
+        alternatives += [name[:-len(s)] for s in SUFFIXES if name.casefold().endswith(s.casefold())]
         for option in alternatives:
             normalized = normalize_name(option)
             if normalized in known:
