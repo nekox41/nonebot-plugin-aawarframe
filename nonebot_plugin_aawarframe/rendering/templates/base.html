@@ -18,7 +18,7 @@
   {% if card.notes %}<aside class="notes">{% for note in card.notes %}<p class="note">{{ note }}</p>{% endfor %}</aside>{% endif %}
   </div>
   {% block footer %}<footer class="card__footer">
-    <div class="footer-meta">{% if not card.bounty_mode %}<span>更新于 {{ (card.fetched_at | beijing).strftime('%m-%d %H:%M:%S') }}</span>{% endif %}<span>北京时间{% if total > 1 %} · {{ page }} / {{ total }} 页{% endif %}</span></div>
+    <div class="footer-meta">{% if not card.bounty_mode %}<span>更新于 {{ (card.fetched_at | beijing).strftime('%m-%d %H:%M') }}</span>{% endif %}<span>北京时间{% if total > 1 %} · {{ page }} / {{ total }} 页{% endif %}</span></div>
     <strong class="signature">By. Aameow</strong>
   </footer>{% endblock %}
 </main>

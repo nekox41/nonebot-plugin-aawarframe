@@ -87,6 +87,7 @@ class Card(BaseModel):
     fetched_at: datetime = Field(default_factory=utcnow)
     status: DataStatus = DataStatus.OK
     stale: bool = False
+    render_cache_until: datetime | None = Field(default=None, exclude=True)
     sections: list[Section] = Field(default_factory=list)
     operation_board: OperationBoard | None = None
     cycle_items: list[CycleDisplay] = Field(default_factory=list)

@@ -107,3 +107,28 @@ async def test_shutdown_cancels_inflight_loads():
         await waiter
     assert cancelled.is_set()
     assert not cache.pending
+
+
+
+async def test_per_call_ttl_and_cache_metrics():
+    time = [0.0]
+    cache = AsyncTTLCache(30, 60, clock=lambda: time[0])
+    calls = 0
+
+    async def load():
+        nonlocal calls
+        calls += 1
+        return Snapshot(data=calls, source="fixture")
+
+    first = await cache.get("short", load, ttl=5)
+    time[0] = 4.9
+    cached = await cache.get("short", load, ttl=5)
+    assert cached.data == first.data
+    time[0] = 5.1
+    refreshed = await cache.get("short", load, ttl=5)
+    assert refreshed.data != first.data
+    assert calls == 2
+    assert cache.hits == 1
+    assert cache.misses == 2
+    assert cache.loads == 2
+    await cache.close()

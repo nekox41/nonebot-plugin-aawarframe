@@ -149,3 +149,125 @@ def test_worldstate_proxy_rejects_invalid_protocol():
 
     with pytest.raises(ValidationError):
         Config(aawarframe_worldstate_proxy="file:///tmp/proxy")
+
+
+
+async def test_render_cache_uses_stable_data_and_ten_second_time_buckets(monkeypatch):
+    from datetime import datetime, timedelta, timezone
+
+    import asyncio
+    import nonebot_plugin_htmlrender
+
+    from nonebot_plugin_aawarframe.models.common import CycleDisplay
+    from nonebot_plugin_aawarframe.services.cycles import remaining_clock
+
+    now = [datetime(2026, 11, 19, 12, 0, 0, tzinfo=timezone.utc)]
+    calls = 0
+
+    async def render(html, **kwargs):
+        nonlocal calls
+        calls += 1
+        await asyncio.sleep(0.001)
+        return b"png"
+
+    monkeypatch.setattr(nonebot_plugin_htmlrender, "render_html", render)
+
+    async def fit(document):
+        return document, 800, 100
+
+    monkeypatch.setattr(CardRenderer, "_fit_document", fit)
+    monkeypatch.setattr(CardRenderer, "_encode_webp", AsyncMock(return_value=b"webp"))
+    expiry = now[0] + timedelta(minutes=5)
+
+    def make_card():
+        return Card(
+            title="周期",
+            source="fixture",
+            fetched_at=now[0],
+            cycle_items=[
+                CycleDisplay(
+                    name="地球",
+                    state="白天",
+                    next_state="黑夜",
+                    remaining_short=remaining_clock(expiry, now[0]),
+                    expiry=expiry,
+                )
+            ],
+            render_cache_until=expiry,
+        )
+
+    renderer = CardRenderer(now_provider=lambda: now[0])
+    await renderer.render(make_card())
+    now[0] += timedelta(seconds=2)
+    await renderer.render(make_card())
+    assert calls == 1
+    assert renderer.metrics["cache_hits"] == 1
+
+    now[0] += timedelta(seconds=10)
+    await renderer.render(make_card())
+    assert calls == 2
+    assert renderer.metrics["render_count"] == 2
+    assert renderer.metrics["cache_misses"] == 2
+    assert renderer.metrics["cache_hit_rate"] == 1 / 3
+    assert renderer.metrics["average_render_seconds"] > 0
+    assert renderer.metrics["p95_render_seconds"] > 0
+    assert renderer.metrics["max_concurrent_renders"] == 1
+    await renderer.close()
+
+
+async def test_render_cache_ttl_never_crosses_card_transition(monkeypatch):
+    from datetime import datetime, timedelta, timezone
+
+    import nonebot_plugin_htmlrender
+
+    now = datetime(2026, 11, 19, 12, 0, 0, tzinfo=timezone.utc)
+    monotonic_time = [100.0]
+
+    async def render(html, **kwargs):
+        return b"png"
+
+    monkeypatch.setattr(nonebot_plugin_htmlrender, "render_html", render)
+    monkeypatch.setattr(CardRenderer, "_encode_webp", AsyncMock(return_value=b"webp"))
+    expiry = now + timedelta(seconds=4)
+    renderer = CardRenderer(
+        now_provider=lambda: now,
+        cache_clock=lambda: monotonic_time[0],
+    )
+    card = Card(
+        title="即将切换",
+        source="fixture",
+        fetched_at=now,
+        render_cache_until=expiry,
+    )
+    await renderer.render(card)
+    cached = next(iter(renderer.cache.entries.values()))
+    assert cached[1] == 104.0
+    await renderer.close()
+
+
+
+async def test_render_does_not_cache_when_transition_passes_during_screenshot(monkeypatch):
+    from datetime import datetime, timedelta, timezone
+
+    import nonebot_plugin_htmlrender
+
+    now = [datetime(2026, 11, 19, 12, 0, 0, tzinfo=timezone.utc)]
+    expiry = now[0] + timedelta(seconds=4)
+
+    async def render(html, **kwargs):
+        now[0] += timedelta(seconds=5)
+        return b"png"
+
+    monkeypatch.setattr(nonebot_plugin_htmlrender, "render_html", render)
+    monkeypatch.setattr(CardRenderer, "_encode_webp", AsyncMock(return_value=b"webp"))
+    renderer = CardRenderer(now_provider=lambda: now[0])
+    await renderer.render(
+        Card(
+            title="即将切换",
+            source="fixture",
+            fetched_at=now[0],
+            render_cache_until=expiry,
+        )
+    )
+    assert not renderer.cache.entries
+    await renderer.close()
