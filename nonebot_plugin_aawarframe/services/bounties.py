@@ -88,7 +88,11 @@ def build_bounties(
         if mission.tag == config.syndicate and mission.activation <= now < mission.expiry
     ]
     if not active:
-        future = [mission.activation for mission in missions if mission.activation > now]
+        future = [
+            mission.activation
+            for mission in missions
+            if mission.tag == config.syndicate and mission.activation > now
+        ]
         if future:
             card.render_cache_until = min(future)
         card.status = DataStatus.EMPTY
@@ -99,7 +103,11 @@ def build_bounties(
         card.notes.append("部分任务暂时无法显示。")
     card.bounty_expiry = current.expiry
     transitions = [current.expiry]
-    transitions.extend(mission.activation for mission in missions if mission.activation > now)
+    transitions.extend(
+        mission.activation
+        for mission in missions
+        if mission.tag == config.syndicate and mission.activation > now
+    )
     card.render_cache_until = min(transitions)
     card.bounty_remaining = remaining_clock(current.expiry, now)
     ordered = sorted(
