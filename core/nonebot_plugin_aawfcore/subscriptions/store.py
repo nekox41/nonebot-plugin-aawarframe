@@ -448,18 +448,30 @@ class SubscriptionStore:
                 "DELETE FROM subscription_seen WHERE seen_at<?", (now.timestamp()-30*86400,)
             )
 
-    def claim_due(self, now: datetime, connected_bots: set[str]) -> list[Delivery]:
+    def claim_due(
+        self, now: datetime, connected_bots: set[str],
+        protocol: str | None = None,
+    ) -> list[Delivery]:
         if not connected_bots:
             return []
         bots = sorted(connected_bots)
         placeholders = ",".join("?" for _ in bots)
+        # QQ 的群/频道 OpenID 与 OneBot 数字群号始终隔离。
+        if protocol == "qq":
+            scope = " AND (s.group_id LIKE 'qq-group:%' OR s.group_id LIKE 'qq-channel:%')"
+        elif protocol == "onebot":
+            scope = " AND s.group_id NOT LIKE 'qq-%:%'"
+        elif protocol is None:
+            scope = ""
+        else:
+            raise ValueError("不支持的订阅协议")
         with self.lock, self.db:
             rows = self.db.execute(
                 f"SELECT d.*,s.bot_id,s.group_id,s.user_id,s.kind "
                 f"FROM subscription_deliveries d "
                 f"JOIN subscriptions s ON s.id=d.subscription_id "
                 f"WHERE d.status='pending' AND s.bot_id IN ({placeholders}) "
-                f"AND d.next_attempt_at<=? AND d.due_at<=? "
+                f"{scope} AND d.next_attempt_at<=? AND d.due_at<=? "
                 f"ORDER BY d.due_at,d.id LIMIT 20",
                 (*bots, now.timestamp(), now.timestamp()),
             ).fetchall()
@@ -476,6 +488,16 @@ class SubscriptionStore:
                 kind=row["kind"], title=row["event_title"], detail=row["event_detail"],
             ) for row in rows
         ]
+
+    def delivery_attempts(self, delivery_id: int) -> int:
+        with self.lock:
+            row = self.db.execute(
+                "SELECT attempts FROM subscription_deliveries WHERE id=?",
+                (delivery_id,),
+            ).fetchone()
+        if row is None:
+            raise ValueError("订阅发件记录不存在")
+        return int(row["attempts"])
 
     def mark_sent(self, delivery_id: int, now: datetime) -> None:
         with self.lock, self.db:
