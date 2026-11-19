@@ -43,6 +43,11 @@ def test_unified_items_and_shared_aliases(grq):
     assert product.identifiers["market.slug"] == "saryn_prime_set"
     assert product.metadata["market_tradable"]
     assert grq.get("Items", "saryn_prime_set", "market.slug").id == product.id
+    burston = {grq.get("Items", item).names.get("en") for item in grq.item_family("burston")}
+    assert {"Burston", "Burston Prime"} <= burston
+    braton = {grq.get("Items", item).names.get("en", "").casefold()
+              for item in grq.item_family("braton")}
+    assert {"braton", "braton prime", "mk1-braton"} <= braton
     grq.add_alias(BURSTON, "统一武器别名")
     assert grq.search("Riven", "统一武器别名").resource.id == "burston"
     assert (
@@ -83,7 +88,10 @@ def test_json_mappings_and_queries_use_no_sql(grq):
     grq.db.set_trace_callback(None)
     assert queries == []
     tables = {r[0] for r in grq.db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-    assert tables == {"item_catalog", "item_aliases", "item_overrides", "catalog_meta", "settings"}
+    assert tables == {
+        "item_catalog", "item_aliases", "item_overrides", "catalog_meta", "settings",
+        "items", "aliases", "market_products", "market_aliases",
+    }
 
 
 async def test_alias_api_and_removed_admin_endpoints(grq):

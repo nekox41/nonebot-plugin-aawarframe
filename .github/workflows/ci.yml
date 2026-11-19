@@ -42,9 +42,11 @@ jobs:
           PY
       - name: Lint new boundaries
         run: |
-          python -m ruff check core/nonebot_plugin_aawfcore/api.py core/nonebot_plugin_aawfcore/client.py core/nonebot_plugin_aawfcore/infrastructure/riven_ocr.py nonebot_plugin_aawfqq/nonebot_plugin_aawfqq nonebot_plugin_aawfonebot/nonebot_plugin_aawfonebot scripts/build_resources.py scripts/package_release.py
+          python -m ruff check core/nonebot_plugin_aawfcore/api.py core/nonebot_plugin_aawfcore/client.py core/nonebot_plugin_aawfcore/infrastructure/riven_ocr.py nonebot_plugin_aawfqq/nonebot_plugin_aawfqq nonebot_plugin_aawfonebot/nonebot_plugin_aawfonebot scripts/build_resources.py scripts/package_release.py scripts/benchmark_grq.py
       - name: Run complete test suite
         run: python -m pytest -q
+      - name: Benchmark normalized GRQ startup and queries
+        run: python scripts/benchmark_grq.py --repetitions 50
       - name: Build three independent distributions
         run: |
           python -m build --sdist --wheel core --outdir dist/core

@@ -6,7 +6,6 @@ import json
 from struct import pack, unpack
 
 from ..grq import get_grq
-from ..grq.links import PREFIXES, SUFFIXES
 from ..localization.resources import PACKAGED
 from ..localization.rivens import resolve_riven_weapon
 from ..models.common import Card
@@ -16,19 +15,6 @@ from ..models.riven_values import RivenAttribute, RivenValuesBoard
 CLASS_NAMES = {"rifle": "步枪", "shotgun": "霰弹枪", "pistol": "手枪", "archgun": "Arch 枪械", "melee": "近战"}
 VINTAGE = {"Hera", "Zeti", "Ampi", "Tempi", "Pleci", "Exi", "Forti", "Para", "GainCombo"}
 PHYSICAL = {"Magna": "impact", "Insi": "puncture", "Sci": "slash"}
-VARIANT_BASES = {"Dex Furis": "Afuris", "Dex Sybaris": "Sybaris"}
-
-
-def family_names(name):
-    if name in VARIANT_BASES:
-        return {VARIANT_BASES[name]}
-    return {
-        name,
-        *(name[len(p):] for p in (*PREFIXES, "Mara ", "Coda ", "Carmine ") if name.startswith(p)),
-        *(name[:-len(s)] for s in SUFFIXES if name.endswith(s)),
-    }
-
-
 def f32(value):
     return unpack("f", pack("f", value))[0]
 
@@ -59,37 +45,16 @@ def value_range(attribute, weapon_class, multiplier, disposition):
 class RivenValuesService:
     def __init__(self):
         self.rules = json.loads((PACKAGED / "riven_stats.json").read_text(encoding="utf-8"))
-        self._version = -1
-        self._families = {}
 
     def family(self, riven):
         grq = get_grq()
-        if self._version != grq.version:
-            self._families = {}
-            for row in grq.links:
-                if row["source_domain"] == "Items" and row["target_domain"] == "Riven":
-                    self._families.setdefault(row["target_id"], set()).add(row["source_id"])
-            self._version = grq.version
-        ids = set(self._families.get(riven.id, ()))
-        base = grq.get("Items", riven.identifiers.get("game.ref", ""), "game.ref")
-        if base:
-            ids.add(base.id)
-            # 补充旧快照尚未建立兼容链接的版本，排除蓝图、零件和市场套装。
-            names = family_names(riven.names.get("en", ""))
-            for item in grq.domains["Items"].resources.values():
-                if item.metadata.get("category") == base.metadata.get("category") and names & family_names(item.names.get("en", "")):
-                    ids.add(item.id)
+        ids = grq.item_family(riven.id)
         weapons = [grq.get("Items", key) for key in ids]
-        owned = {
-            r.identifiers.get("game.ref"): r.id
-            for r in grq.domains["Riven"].resources.values()
-        }
-        weapons = [
-            w for w in weapons
-            if w and w.enabled and "omegaAttenuation" in w.metadata
-            and owned.get(w.identifiers.get("game.ref"), riven.id) == riven.id
-        ]
-        return sorted(weapons, key=lambda w: (w.id != (base.id if base else ""), w.names.get("en", "")))
+        base = grq.get("Items", riven.identifiers.get("game.ref", ""), "game.ref")
+        return sorted(
+            [item for item in weapons if item is not None and item.enabled],
+            key=lambda item: (item.id != (base.id if base else ""), item.names.get("en", "")),
+        )
 
     def attributes(self, weapon, riven, family, layout, weapon_class):
         metadata = weapon.metadata

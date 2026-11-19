@@ -21,6 +21,7 @@ from .normalizer import normalize_name, normalize_ref, qualifiers
 from .patches import merge
 from .search import search
 from .storage import connect
+from .unified import load_catalog, persist_catalog, report_unmatched
 
 
 class GameResourceQuery:
@@ -40,7 +41,18 @@ class GameResourceQuery:
             )
         ).hexdigest()
         old = self.db.execute("SELECT value FROM catalog_meta WHERE key='seed'").fetchone()
-        if not old or old[0] != signature:
+        has_items = self.db.execute("SELECT EXISTS(SELECT 1 FROM items)").fetchone()[0]
+        if not old or old[0] != signature or not has_items:
+            if path and path.exists() and not has_items:
+                legacy = self.db.execute(
+                    "SELECT EXISTS(SELECT 1 FROM item_catalog)"
+                ).fetchone()[0]
+                if legacy:
+                    backup = path.with_name(path.stem + ".pre-items-v2.sqlite3")
+                    if not backup.exists():
+                        with sqlite3.connect(backup) as target:
+                            self.db.backup(target)
+                        backup.chmod(0o600)
             items, slugs = seed_catalog()
             self._migrate(path, items, slugs)
             for row in self.db.execute("SELECT * FROM item_overrides"):
@@ -48,16 +60,11 @@ class GameResourceQuery:
                     items[row["id"]] = Resource.model_validate(
                         merge(items[row["id"]].model_dump(), json.loads(row["patch"]))
                     )
+            persist_catalog(self.db, items, self.links, self.rivens)
             with self.db:
-                self.db.execute("DELETE FROM item_catalog")
-                self.db.executemany(
-                    "INSERT INTO item_catalog VALUES(?,?)",
-                    [(r.id, r.model_dump_json()) for r in items.values()],
-                )
                 self.db.execute(
                     "INSERT OR REPLACE INTO catalog_meta VALUES('seed',?)", (signature,)
                 )
-            del items
         self._load_items()
         self._refresh()
 
@@ -225,8 +232,7 @@ class GameResourceQuery:
 
     def _load_items(self):
         self._base, self._packed = {}, {}
-        for row in self.db.execute("SELECT payload FROM item_catalog"):
-            resource = Resource.model_validate_json(row[0])
+        for resource in load_catalog(self.db).values():
             self._packed[resource.id] = zlib.compress(
                 json.dumps(resource.metadata, ensure_ascii=False).encode(), 1
             )
@@ -254,14 +260,20 @@ class GameResourceQuery:
 
     def _refresh(self):
         aliases = defaultdict(list)
-        for row in self.db.execute("SELECT * FROM item_aliases"):
+        for row in self.db.execute("SELECT item_id,name FROM aliases"):
             if row["item_id"] in self._base:
                 aliases[row["item_id"]].append(row["name"])
+        for row in self.db.execute("SELECT slug,name FROM market_aliases"):
+            market_id = "market:" + row["slug"]
+            if market_id in self._base:
+                aliases[market_id].append(row["name"])
         items = {
             key: r.model_copy(update={"aliases": list(dict.fromkeys([*r.aliases, *aliases[key]]))})
             for key, r in self._base.items()
         }
-        item_index = build(Domain(name="Items", title="物品目录"), items, self._packed)
+        # Market-only offers must not be represented as game items.
+        game_items = {key: row for key, row in items.items() if not key.startswith("market:")}
+        item_index = build(Domain(name="Items", title="物品目录"), game_items, self._packed)
         tradable = {
             key: r for key, r in items.items() if r.enabled and r.metadata.get("market_tradable")
         }
@@ -290,15 +302,15 @@ class GameResourceQuery:
         market = self._add_names(market, words)
         riven = build(Domain(name="Riven", title="紫卡兼容", semantic_guard=True), self.rivens)
         words = []
-        for row in self.links:
-            if row["source_domain"] == "Items" and row["target_domain"] == "Riven":
-                source = items.get(row["source_id"])
-                if source and source.enabled:
-                    words.extend(
-                        (word, row["target_id"])
-                        for word in [*source.aliases, *source.names.values()]
-                    )
-        # 兼容市场别名迁移到对应 Prime 物品后的紫卡查询。
+        for row in self.db.execute(
+            "SELECT id,riven_key FROM items WHERE enabled=1 AND riven_key IS NOT NULL"
+        ):
+            source = items.get(row["id"])
+            if source and row["riven_key"] in self.rivens:
+                words.extend(
+                    (word, row["riven_key"])
+                    for word in [*source.aliases, *source.names.values()]
+                )
         riven = self._add_names(riven, words)
         self.domains = MappingProxyType({"Items": item_index, "Riven": riven, **self.json.indexes})
         self.market_index = market
@@ -339,6 +351,11 @@ class GameResourceQuery:
     def search_market(self, query, allowed_ids=None):
         return search(self.market_index, query, allowed_ids)
 
+    def market_product(self, slug: str):
+        """Resolve a verified game-linked or Market-only offer from the Market index."""
+        matched = self.market_index.identifiers.get(("market.slug", slug), frozenset())
+        return self.market_index.resources[next(iter(matched))] if len(matched) == 1 else None
+
     def translate(self, domain, key, lang="zh-hans"):
         resource = self.get(domain, key)
         return resource.name(lang) if resource else key
@@ -360,17 +377,32 @@ class GameResourceQuery:
             conflicts = self.domains["Items"].names.get(key, frozenset()) - {item_id}
             if conflicts:
                 raise ValueError("此名称已对应其他物品，请使用不同别名")
-            self.db.execute(
-                "INSERT OR REPLACE INTO item_aliases VALUES(?,?,?)", (item_id, alias, key)
-            )
+            if item_id.startswith("market:"):
+                self.db.execute(
+                    "INSERT INTO market_aliases(slug,name,normalized_name) VALUES(?,?,?) "
+                    "ON CONFLICT(slug,normalized_name) DO UPDATE SET name=excluded.name",
+                    (item_id.removeprefix("market:"), alias, key),
+                )
+            else:
+                self.db.execute(
+                    "INSERT INTO aliases(item_id,name,normalized_name) VALUES(?,?,?) "
+                    "ON CONFLICT(item_id,normalized_name) DO UPDATE SET name=excluded.name",
+                    (item_id, alias, key),
+                )
             self._refresh()
 
     def delete_alias(self, item_id, alias):
         with self.lock, self.db:
-            self.db.execute(
-                "DELETE FROM item_aliases WHERE item_id=? AND key=?",
-                (item_id, normalize_name(alias)),
-            )
+            if item_id.startswith("market:"):
+                self.db.execute(
+                    "DELETE FROM market_aliases WHERE slug=? AND normalized_name=?",
+                    (item_id.removeprefix("market:"), normalize_name(alias)),
+                )
+            else:
+                self.db.execute(
+                    "DELETE FROM aliases WHERE item_id=? AND normalized_name=?",
+                    (item_id, normalize_name(alias)),
+                )
             self._refresh()
 
     def list_aliases(self):
@@ -383,17 +415,27 @@ class GameResourceQuery:
                     "name_en": self._base[r["item_id"]].names.get("en", ""),
                     "tradable": self._base[r["item_id"]].metadata.get("market_tradable", False),
                 }
-                for r in self.db.execute("SELECT * FROM item_aliases ORDER BY key,item_id")
+                for r in self.db.execute(
+                    "SELECT item_id,name FROM aliases UNION ALL "
+                    "SELECT 'market:'||slug AS item_id,name FROM market_aliases"
+                )
                 if r["item_id"] in self._base
             ]
 
     def sync_market(self, items, version=None):
-        signature = version or tuple(
-            (i.id, i.slug, i.tradable, i.game_ref, tuple((k, v.name) for k, v in i.i18n.items()))
-            for i in items
-        )
+        # A content signature persists across process restarts. Identical Market
+        # snapshots never trigger full catalog writes or index rebuilding.
+        signature = hashlib.sha256(json.dumps(
+            [(i.id, i.slug, i.tradable, i.game_ref,
+              sorted((k, v.name) for k, v in i.i18n.items())) for i in items],
+            ensure_ascii=False, separators=(",", ":")
+        ).encode()).hexdigest()
         with self.lock:
-            if signature == self._catalog_key:
+            previous = self.db.execute(
+                "SELECT value FROM catalog_meta WHERE key='market_signature'"
+            ).fetchone()
+            if signature == self._catalog_key or (previous and previous[0] == signature):
+                self._catalog_key = signature
                 return
             if (
                 not items
@@ -403,21 +445,36 @@ class GameResourceQuery:
                 raise ValueError("市场目录为空或存在重复标识")
             from .sources import market_resources
 
-            current = {r.id: self.get("Items", r.id) for r in self._base.values()}
+            current = {
+                r.id: self.get("Items", r.id)
+                for r in self._base.values() if not r.id.startswith("market:")
+            }
             # 移除已下架商品的交易标记；物品本身和人工别名继续保留。
             for key, r in list(current.items()):
                 meta = {**r.metadata, "market_tradable": False}
                 ids = {k: v for k, v in r.identifiers.items() if not k.startswith("market.")}
                 current[key] = r.model_copy(update={"metadata": meta, "identifiers": ids})
             merged, _ = merge_market(current, market_resources(items, {}))
+            persist_catalog(self.db, merged, self.links, self.rivens)
             with self.db:
-                self.db.executemany(
-                    "INSERT OR REPLACE INTO item_catalog VALUES(?,?)",
-                    [(r.id, r.model_dump_json()) for r in merged.values()],
+                self.db.execute(
+                    "INSERT OR REPLACE INTO catalog_meta VALUES('market_signature',?)",
+                    (signature,),
                 )
             self._load_items()
             self._refresh()
             self._catalog_key = signature
+
+    def item_family(self, riven_key: str) -> list[str]:
+        return [
+            row["id"] for row in self.db.execute(
+                "SELECT id FROM items WHERE riven_key=? AND enabled=1 ORDER BY en_name",
+                (riven_key,),
+            )
+        ]
+
+    def market_match_report(self) -> dict:
+        return report_unmatched(self.db)
 
     def ensure_rivens(self, available):
         known = {r.identifiers["riven.compatibility"] for r in self.rivens.values()}

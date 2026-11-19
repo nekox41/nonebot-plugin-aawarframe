@@ -39,7 +39,7 @@ class ItemResolver:
             resource.id
             for item in items
             if item.tradable
-            if (resource := self.grq.get("Items", item.slug, "market.slug"))
+            if (resource := self.grq.market_product(item.slug))
         }
 
     def resolve_result(self, value):
