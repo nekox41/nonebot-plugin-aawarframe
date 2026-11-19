@@ -6,8 +6,8 @@ import asyncio
 
 import pytest
 
-from nonebot_plugin_aawarframe.infrastructure.cache import AsyncTTLCache
-from nonebot_plugin_aawarframe.models.common import Snapshot
+from nonebot_plugin_aawfcore.infrastructure.cache import AsyncTTLCache
+from nonebot_plugin_aawfcore.models.common import Snapshot
 
 
 async def test_concurrent_requests_share_result_and_copy():

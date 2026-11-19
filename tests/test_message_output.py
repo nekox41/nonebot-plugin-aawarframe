@@ -1,29 +1,21 @@
-# 作用：验证命令直接发送结果，不附加消息引用。
-# 编写日期：2026-11-07
-# 作者：Aameow
+"""命令响应类型不与某个平台的 MessageSegment 耦合。"""
 
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from nonebot_plugin_aawfcore.api import pack
+from nonebot_plugin_aawfcore.commands import router
 
-from nonebot_plugin_aawarframe.commands import router
 
+async def test_command_image_is_returned_as_protocol_neutral_response():
+    runtime = SimpleNamespace(renderer=SimpleNamespace(
+        render=AsyncMock(return_value=[b"webp-fixture"])
+    ))
+    from nonebot_plugin_aawfcore.models.common import Card
 
-async def test_command_sends_result_without_reply_segment(monkeypatch):
-    handlers = []
-    command = SimpleNamespace(handle=lambda: lambda function: handlers.append(function))
-    monkeypatch.setattr(router, "on_message", lambda *args, **kwargs: command)
-    result = Message(MessageSegment.image(b"webp-fixture"))
-    monkeypatch.setattr(router, "dispatch", AsyncMock(return_value=result))
-    router.register("裂缝", set(), "fissures")
-    matcher = SimpleNamespace(finish=AsyncMock())
-    await handlers[0](
-        SimpleNamespace(self_id="bot"),
-        SimpleNamespace(user_id=10001),
-        matcher,
-        {"aawarframe_arguments": ""},
-    )
-    sent = matcher.finish.await_args.args[0]
-    assert sent == result
-    assert [segment.type for segment in sent] == ["image"]
+    result = await router.response(Card(title="裂缝", source="test"), runtime)
+    assert [s.type for s in result] == ["image"]
+    packed = pack(result)
+    assert packed["message_type"] == "image"
+    assert packed["segments"][0]["type"] == "image"
+    assert "reply" not in [s["type"] for s in packed["segments"]]

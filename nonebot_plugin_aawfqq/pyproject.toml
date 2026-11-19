@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nonebot-plugin-aawfqq"
+version = "0.23.0"
+description = "QQ official adapter entrypoint for the shared AAWarframe core"
+requires-python = "==3.12.*"
+dependencies = [
+  "nonebot-plugin-aawfcore==0.23.0",
+  "nonebot-adapter-qq>=1.7.4,<2",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nonebot_plugin_aawfqq*"]

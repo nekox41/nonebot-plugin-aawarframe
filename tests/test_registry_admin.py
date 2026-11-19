@@ -10,10 +10,10 @@ from unittest.mock import AsyncMock
 import httpx
 import pytest
 
-from nonebot_plugin_aawarframe.admin.server import create_app
-from nonebot_plugin_aawarframe.grq import GameResourceQuery, configure_grq
-from nonebot_plugin_aawarframe.models.common import Snapshot
-from nonebot_plugin_aawarframe.services.wiki import WikiService
+from nonebot_plugin_aawfcore.admin.server import create_app
+from nonebot_plugin_aawfcore.grq import GameResourceQuery, configure_grq
+from nonebot_plugin_aawfcore.models.common import Snapshot
+from nonebot_plugin_aawfcore.services.wiki import WikiService
 
 BURSTON = "/Lotus/Weapons/Tenno/Rifle/BurstRifle"
 

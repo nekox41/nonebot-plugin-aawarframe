@@ -11,13 +11,13 @@ from unittest.mock import AsyncMock
 import httpx
 import pytest
 
-from nonebot_plugin_aawarframe.commands import router
-from nonebot_plugin_aawarframe.commands.parsing import parse_wiki_query
-from nonebot_plugin_aawarframe.models.errors import UserInputError
-from nonebot_plugin_aawarframe.models.wiki import OpenSearchResponse
-from nonebot_plugin_aawarframe.providers.wiki import WikiProvider
-from nonebot_plugin_aawarframe.rendering.viewmodels import wiki_text
-from nonebot_plugin_aawarframe.services.wiki import WikiService
+from nonebot_plugin_aawfcore.commands import router
+from nonebot_plugin_aawfcore.commands.parsing import parse_wiki_query
+from nonebot_plugin_aawfcore.models.errors import UserInputError
+from nonebot_plugin_aawfcore.models.wiki import OpenSearchResponse
+from nonebot_plugin_aawfcore.providers.wiki import WikiProvider
+from nonebot_plugin_aawfcore.rendering.viewmodels import wiki_text
+from nonebot_plugin_aawfcore.services.wiki import WikiService
 
 
 @pytest.fixture

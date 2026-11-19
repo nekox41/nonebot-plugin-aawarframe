@@ -10,8 +10,8 @@ import tarfile
 
 import pytest
 
-from nonebot_plugin_aawarframe.initialization import pipeline
-from nonebot_plugin_aawarframe.localization.resources import PACKAGED, configure_resources
+from nonebot_plugin_aawfcore.initialization import pipeline
+from nonebot_plugin_aawfcore.localization.resources import PACKAGED, configure_resources
 
 
 @pytest.fixture(autouse=True)

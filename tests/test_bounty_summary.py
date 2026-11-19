@@ -5,9 +5,9 @@
 from datetime import datetime, timezone
 from pathlib import Path
 
-from nonebot_plugin_aawarframe.commands import router
-from nonebot_plugin_aawarframe.models.common import Snapshot
-from nonebot_plugin_aawarframe.services.bounties import build_bounties, build_bounty_summary
+from nonebot_plugin_aawfcore.commands import router
+from nonebot_plugin_aawfcore.models.common import Snapshot
+from nonebot_plugin_aawfcore.services.bounties import build_bounties, build_bounty_summary
 
 
 def test_commands_and_aliases(monkeypatch):
