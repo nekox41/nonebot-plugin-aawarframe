@@ -47,7 +47,6 @@ class CoreClient:
     async def ocr_admission(self):
         # One in-process Core runtime: both QQ and OneBot share the same quota.
         from .bootstrap import get_runtime
-
         from .models.errors import UserInputError
 
         try:
