@@ -413,6 +413,18 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
             total_resources += count
             domains.append({"name": name, "title": getattr(domain, "title", name),
                             "count": count, "enabled": enabled})
+        market_index = getattr(grq, "market_index", None)
+        if market_index is not None:
+            market_resources = getattr(market_index, "resources", {})
+            market_count = len(market_resources)
+            market_enabled = sum(
+                1 for item in market_resources.values() if getattr(item, "enabled", True)
+            )
+            domains.append({
+                "name": "Market", "title": "可交易物品",
+                "count": market_count, "enabled": market_enabled,
+            })
+            total_resources += market_count
         aliases_count = len(await asyncio.to_thread(grq.list_aliases))
         subscriptions = getattr(runtime, "subscriptions", None)
         store = getattr(subscriptions, "store", None)
