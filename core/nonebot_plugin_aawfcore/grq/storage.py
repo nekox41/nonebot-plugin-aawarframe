@@ -35,7 +35,7 @@ def connect(path: Path | None):
         CREATE INDEX IF NOT EXISTS idx_items_cn ON items(cn_name);
         CREATE INDEX IF NOT EXISTS idx_items_en ON items(en_name);
         CREATE TABLE IF NOT EXISTS aliases(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY,
             item_id TEXT NOT NULL REFERENCES items(id) ON DELETE CASCADE,
             name TEXT NOT NULL,
             normalized_name TEXT NOT NULL,
