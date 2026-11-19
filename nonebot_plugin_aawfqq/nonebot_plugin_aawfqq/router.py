@@ -4,7 +4,6 @@ import asyncio
 import base64
 import logging
 
-import httpx
 from nonebot import get_bots, get_driver, on_message
 from nonebot.adapters import Bot, Event
 from nonebot.adapters.qq import Message, MessageSegment
@@ -12,7 +11,7 @@ from nonebot.matcher import Matcher
 from nonebot.typing import T_State
 
 from nonebot_plugin_aawfcore.client import CoreClient, decode_image
-from nonebot_plugin_aawfcore.infrastructure.riven_ocr import download_image
+from .media import download_image
 
 logger = logging.getLogger(__name__)
 client = CoreClient()
@@ -40,8 +39,7 @@ async def event_image(event: Event) -> bytes:
     url = images[0].data.get("url")
     if not isinstance(url, str):
         raise ValueError("图片地址不可用，请重新发送。")
-    async with httpx.AsyncClient(timeout=25.0) as http:
-        content = await download_image(url, type("HTTP", (), {"client": http})())
+    content = await download_image(url)
     if not content:
         raise ValueError("无法下载紫卡图片，请重新发送。")
     return content
