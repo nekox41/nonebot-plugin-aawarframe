@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - run: python -m pip install ".[dev,qq,onebot]"
+      - run: python -m pip install -e ".[dev,qq,onebot]"
       - name: Prepare verified offline resource snapshot
         run: python scripts/build_resources.py --build
       - run: python -m compileall -q core scripts tests

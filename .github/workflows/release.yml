@@ -18,7 +18,7 @@ jobs:
           python-version: "3.12"
           cache: pip
       - name: Install tooling
-        run: python -m pip install ".[dev,qq,onebot]"
+        run: python -m pip install -e ".[dev,qq,onebot]"
       - name: Validate release version
         if: startsWith(github.ref, 'refs/tags/v')
         env:
