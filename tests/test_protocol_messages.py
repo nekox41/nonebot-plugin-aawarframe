@@ -1,35 +1,19 @@
-"""同一个核心消息载体可以被 QQ 官方和 OneBot 两个平台转换。"""
-
-import base64
-
-from nonebot_plugin_aawfcore.api import pack
+"""Unified single-distribution protocol conversion regression."""
 from nonebot_plugin_aawfcore.protocols.message import Message, MessageSegment
+from nonebot_plugin_aawarframe.router import convert
 
-
-def test_neutral_message_pack_and_plaintext():
-    content = Message(MessageSegment.text("hello"))
-    content += MessageSegment.image(b"webp")
-    content += MessageSegment.at("openid")
+def test_neutral_message_and_plaintext():
+    content = Message([MessageSegment.text("hello"), MessageSegment.image(b"webp")])
     assert content.extract_plain_text() == "hello"
-    assert [s.type for s in content["image"]] == ["image"]
-    data = pack(content)
-    assert data["message_type"] == "mixed"
-    assert base64.b64decode(data["segments"][1]["data_base64"]) == b"webp"
-    assert data["segments"][2] == {"type": "at", "user_id": "openid"}
+    assert [segment.type for segment in content["image"]] == ["image"]
 
+def test_onebot_and_qq_conversion():
+    message = Message([MessageSegment.text("ok"), MessageSegment.image(b"image"), MessageSegment.reply(122)])
+    qq = convert(message, "qq")
+    ob = convert(message, "onebot")
+    assert [segment.type for segment in qq[0]] == ["text", "file_image", "reference"]
+    assert [segment.type for segment in ob[0]] == ["text", "image", "reply"]
 
-def test_onebot_and_qq_convert_only_in_protocol_packages():
-    import nonebot
-
-    assert (nonebot.get_plugin("nonebot_plugin_aawfqq") or nonebot.load_plugin("nonebot_plugin_aawfqq")) is not None
-    assert (nonebot.get_plugin("nonebot_plugin_aawfonebot") or nonebot.load_plugin("nonebot_plugin_aawfonebot")) is not None
-    from nonebot_plugin_aawfqq.router import pages
-    from nonebot_plugin_aawfonebot.router import outbound
-
-    payload = pack(Message([
-        MessageSegment.text("ok"),
-        MessageSegment.image(b"image"),
-        MessageSegment.reply(122),
-    ]))["segments"]
-    assert [s.type for s in pages(payload)[0]] == ["text", "file_image", "reference"]
-    assert [s.type for s in outbound(payload)] == ["text", "image", "reply"]
+def test_multiple_images_become_multiple_qq_messages():
+    result = convert(Message([MessageSegment.image(b"a"), MessageSegment.image(b"b")]), "qq")
+    assert len(result) == 2
