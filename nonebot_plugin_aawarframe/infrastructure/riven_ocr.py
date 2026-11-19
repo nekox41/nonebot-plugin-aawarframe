@@ -12,7 +12,6 @@ from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
 import httpx
-from nonebot.adapters.onebot.v11 import Message
 
 from ..models.errors import UserInputError
 
@@ -20,6 +19,8 @@ LIMIT = 12 * 1024 * 1024
 
 
 def image_segments(message):
+    from nonebot.adapters.onebot.v11 import Message
+
     return [segment for segment in Message(message) if segment.type == "image"]
 
 
