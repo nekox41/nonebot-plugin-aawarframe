@@ -47,7 +47,10 @@ def build(version: str) -> None:
                 "1. unzip <archive>.zip -d <NoneBot2 project>/\n"
                 "2. python -m pip install -r AAWF-REQUIREMENTS.txt\n"
                 "3. In pyproject.toml [tool.nonebot] set plugin_dirs = ['src/plugins'];\n"
-                f"   keep only nonebot_plugin_aawf{name} as the frontend plugin.\n"
+                ("   load nonebot_plugin_aawfcore for a core-only install.\n"
+                 if name == "core" else
+                 f"   load only nonebot_plugin_aawf{name} as the frontend plugin;\n"
+                 "   it automatically loads nonebot_plugin_aawfcore.\n")
                 "4. Register the selected NoneBot adapter in your bot.py.\n"
                 "The core uses data/aawarframe as the persistent shared data folder.\n"
             )
