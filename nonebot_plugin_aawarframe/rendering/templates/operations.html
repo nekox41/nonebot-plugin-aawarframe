@@ -18,7 +18,7 @@
 <div class="invasion-panel">
 {% for item in group %}
 <section class="invasion-card">
-  <div class="invasion-head"><h2>{{ item.node }}{% if item.planet %} · {{ item.planet }}{% endif %}</h2><span>{% if item.infestation %}清除 {{ '%.1f%%' | format(item.defender_percent) }}{% else %}阵营对抗{% endif %}</span></div>
+  <div class="invasion-head"><h2>{{ item.node }}{% if item.planet %} · {{ item.planet }}{% endif %}</h2><span>节点基础任务：{{ item.mission_type or '暂缺' }} · {% if item.infestation %}清除 {{ '%.1f%%' | format(item.defender_percent) }}{% else %}阵营对抗{% endif %}</span></div>
   <progress class="invasion-progress" max="100" value="{{ item.defender_percent if item.infestation else item.attacker_percent }}"></progress>
   <div class="invasion-sides">
     {% if item.infestation %}
