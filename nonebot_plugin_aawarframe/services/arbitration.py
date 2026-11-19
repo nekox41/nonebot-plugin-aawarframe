@@ -131,7 +131,8 @@ class ArbitrationService:
         for i, (start, key) in enumerate(rows):
             node = self.nodes[key]
             end = datetime.fromtimestamp(start + 3600, timezone.utc)
-            remaining = max(0, int((end - now).total_seconds()))
+            remaining = max(0, math.ceil((end - now).total_seconds()))
+            remaining = math.ceil(remaining / 10) * 10
             board.entries.append(
                 ArbitrationEntry(
                     node_id=key,
@@ -149,13 +150,16 @@ class ArbitrationService:
         notes = []
         if not board.current and feature != "today_arbitration" and len(rows) < 10:
             notes.append(f"时间表剩余符合条件的任务只有 {len(rows)} 个。")
-        return Card(
+        card = Card(
             title=title,
             source="https://browse.wf/arbys.txt",
             fetched_at=now,
             arbitration_board=board,
             notes=notes,
         )
+        if board.current and rows:
+            card.render_cache_until = datetime.fromtimestamp(rows[0][0] + 3600, timezone.utc)
+        return card
 
     def stats_for(self, key):
         node = self.nodes[key]

@@ -44,6 +44,14 @@ def _build_card(
 ) -> Card:
     card = card_for(snapshot, title)
     card.fissure_mode = mode
+    transitions = [
+        moment
+        for mission in missions
+        for moment in (mission.activation, mission.expiry)
+        if moment > now
+    ]
+    if transitions:
+        card.render_cache_until = min(transitions)
     # 解析细节留在日志中，卡片只提示用户需要知道的信息。
     if warnings:
         card.notes = ["部分任务暂时无法显示。"]

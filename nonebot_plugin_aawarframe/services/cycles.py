@@ -51,6 +51,7 @@ def remaining_time(expiry: datetime, now: datetime) -> str:
 
 def remaining_clock(expiry: datetime, now: datetime) -> str:
     seconds = max(0, ceil((expiry - now).total_seconds()))
+    seconds = ceil(seconds / 10) * 10
     hours, rest = divmod(seconds, 3600)
     minutes, seconds = divmod(rest, 60)
     return f"{hours:02}:{minutes:02}:{seconds:02}" if hours else f"{minutes:02}:{seconds:02}"
@@ -84,6 +85,7 @@ def build_cycle(snapshot: Snapshot, now: datetime, feature: str) -> Card:
     try:
         cycle = parse_cycle(feature, snapshot, now)
         card.cycle_items = [cycle_display(feature, cycle, now)]
+        card.render_cache_until = cycle.expiry
     except (ParseError, ValueError, KeyError, TypeError):
         logger.exception("%s 周期解析失败", name)
         card.status = DataStatus.PARSE_ERROR
@@ -122,4 +124,8 @@ def build_plains(snapshot: Snapshot, now: datetime) -> Card:
             card.cycle_items.append(CycleDisplay(name=name, state="暂时无法获取", available=False))
     if not any(cycle.available for cycle in card.cycle_items):
         card.status = DataStatus.PARSE_ERROR
+    else:
+        card.render_cache_until = min(
+            cycle.expiry for cycle in card.cycle_items if cycle.available
+        )
     return card

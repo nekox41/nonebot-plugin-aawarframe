@@ -50,6 +50,13 @@ def build_challenge_bounties(
     missions, _ = records(snapshot.data, "SyndicateMissions", SyndicateMission)
     active = [m for m in missions if m.tag == config.syndicate and m.activation <= now < m.expiry]
     if not active:
+        future = [
+            mission.activation
+            for mission in missions
+            if mission.tag == config.syndicate and mission.activation > now
+        ]
+        if future:
+            card.render_cache_until = min(future)
         card.status = DataStatus.EMPTY
         return card
     current = max(active, key=lambda m: m.activation)
@@ -58,6 +65,13 @@ def build_challenge_bounties(
         card.notes.append("当前赏金轮换数据暂缺。")
         return card
     card.bounty_expiry = current.expiry
+    transitions = [current.expiry]
+    transitions.extend(
+        mission.activation
+        for mission in missions
+        if mission.tag == config.syndicate and mission.activation > now
+    )
+    card.render_cache_until = min(transitions)
     card.bounty_remaining = remaining_clock(current.expiry, now)
     data = load_mapping("challenge_bounties.json")
     manifest = data["manifests"][region]

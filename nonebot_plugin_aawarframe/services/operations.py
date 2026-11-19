@@ -26,6 +26,9 @@ def build_sortie(snapshot: Snapshot, now: datetime, *, archon: bool = False) -> 
     sorties, warnings = records(snapshot.data, "LiteSorties" if archon else "Sorties", Sortie)
     active = [item for item in sorties if item.activation <= now < item.expiry]
     if not active:
+        future = [item.activation for item in sorties if item.activation > now]
+        if future:
+            card.render_cache_until = min(future)
         card.status = DataStatus.EMPTY
         return card
     current = max(active, key=lambda item: item.activation)
@@ -34,6 +37,9 @@ def build_sortie(snapshot: Snapshot, now: datetime, *, archon: bool = False) -> 
     board.boss = boss.get("name", current.boss)
     board.faction = faction_name(boss.get("faction", ""))
     board.expiry = current.expiry
+    transitions = [current.expiry]
+    transitions.extend(item.activation for item in sorties if item.activation > now)
+    card.render_cache_until = min(transitions)
     delta = current.expiry - now
     board.remaining = (
         f"{delta.days}天 {delta.seconds // 3600:02}:{delta.seconds // 60 % 60:02}"

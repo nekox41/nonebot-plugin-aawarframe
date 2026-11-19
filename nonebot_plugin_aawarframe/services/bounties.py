@@ -88,6 +88,13 @@ def build_bounties(
         if mission.tag == config.syndicate and mission.activation <= now < mission.expiry
     ]
     if not active:
+        future = [
+            mission.activation
+            for mission in missions
+            if mission.tag == config.syndicate and mission.activation > now
+        ]
+        if future:
+            card.render_cache_until = min(future)
         card.status = DataStatus.EMPTY
         return card
     current = max(active, key=lambda mission: mission.activation)
@@ -95,6 +102,13 @@ def build_bounties(
     if warnings or job_warnings:
         card.notes.append("部分任务暂时无法显示。")
     card.bounty_expiry = current.expiry
+    transitions = [current.expiry]
+    transitions.extend(
+        mission.activation
+        for mission in missions
+        if mission.tag == config.syndicate and mission.activation > now
+    )
+    card.render_cache_until = min(transitions)
     card.bounty_remaining = remaining_clock(current.expiry, now)
     ordered = sorted(
         jobs,
@@ -182,6 +196,7 @@ def build_bounty_summary(snapshot: Snapshot, now: datetime):
     card = card_for(snapshot, "赏金速览")
     card.page_number = card.total_pages = 1
     earth = build_bounties(snapshot, now)
+    deadlines = [earth.render_cache_until] if earth.render_cache_until else []
     card.sections.append(
         Section(
             title=f"地球 · 三个帐篷 · 剩余 {earth.bounty_remaining or '—'}",
@@ -192,6 +207,8 @@ def build_bounty_summary(snapshot: Snapshot, now: datetime):
     )
     for region in ("sanctum", "zariman", "hex"):
         source = build_bounties(snapshot, now, region=region)
+        if source.render_cache_until:
+            deadlines.append(source.render_cache_until)
         selected = [
             job
             for job in source.bounty_items
@@ -214,4 +231,6 @@ def build_bounty_summary(snapshot: Snapshot, now: datetime):
                 notes=[] if rows else ["当前赏金暂时无法获取。"],
             )
         )
+    if deadlines:
+        card.render_cache_until = min(deadlines)
     return card

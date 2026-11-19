@@ -31,6 +31,7 @@ def weekly_card(snapshot: Snapshot, title: str, now: datetime) -> Card:
     card = card_for(snapshot, title)
     card.weekly_mode = True
     card.rotation_expiry = week_bounds(now)[1]
+    card.render_cache_until = card.rotation_expiry
     return card
 
 

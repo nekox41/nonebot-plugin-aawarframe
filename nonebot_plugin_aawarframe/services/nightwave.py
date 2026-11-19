@@ -45,6 +45,8 @@ def build_nightwave(snapshot: Snapshot, now: datetime) -> Card:
     if (season.activation is not None and now < season.activation) or (
         season.expiry is not None and now >= season.expiry
     ):
+        if season.activation and season.activation > now:
+            card.render_cache_until = season.activation
         card.status = DataStatus.EMPTY
         card.notes.append("当前没有进行中的午夜电波任务。")
         return card
@@ -56,6 +58,18 @@ def build_nightwave(snapshot: Snapshot, now: datetime) -> Card:
     active = [
         challenge for challenge in challenges if challenge.activation <= now < challenge.expiry
     ]
+    transitions = [
+        moment
+        for challenge in challenges
+        for moment in (challenge.activation, challenge.expiry)
+        if moment > now
+    ]
+    if season.activation and season.activation > now:
+        transitions.append(season.activation)
+    if season.expiry and season.expiry > now:
+        transitions.append(season.expiry)
+    if transitions:
+        card.render_cache_until = min(transitions)
     translations = load_mapping("nightwave_zh.json")
     unknown = False
     today = now.astimezone(timezone.utc).date()

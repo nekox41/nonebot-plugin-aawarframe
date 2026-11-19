@@ -1,25 +1,58 @@
 # Desc: 通过 htmlrender 渲染并缓存 WebP 查询卡片。
-# Date: 2026-11-15
+# Date: 2026-11-19
 # Author: Aameow
 
 import asyncio
 import base64
-from datetime import timedelta, timezone
+import json
+from collections import deque
+from collections.abc import Callable
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
+from math import ceil
 from pathlib import Path
+from time import monotonic, perf_counter
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 
 from ..infrastructure.cache import AsyncTTLCache
-from ..models.common import Card, Snapshot
+from ..models.common import Card, Snapshot, utcnow
 from .charts import trend_chart
 from .viewmodels import paginate
 
 ROOT = Path(__file__).parent
+RENDER_CACHE_VERSION = 2
+VOLATILE_FIELDS = {
+    "fetched_at",
+    "render_cache_until",
+    "remaining",
+    "remaining_short",
+    "archimedea_remaining",
+    "bounty_remaining",
+}
+
+
+def _stable_value(value):
+    if isinstance(value, dict):
+        return {
+            key: _stable_value(item)
+            for key, item in value.items()
+            if key not in VOLATILE_FIELDS
+        }
+    if isinstance(value, list):
+        return [_stable_value(item) for item in value]
+    return value
 
 
 class CardRenderer:
-    def __init__(self, concurrency: int = 2, theme: str = "default"):
+    def __init__(
+        self,
+        concurrency: int = 2,
+        theme: str = "default",
+        *,
+        now_provider: Callable[[], datetime] = utcnow,
+        cache_clock: Callable[[], float] = monotonic,
+    ):
         self.environment = Environment(
             loader=FileSystemLoader(ROOT / "templates"),
             autoescape=select_autoescape(default=True),
@@ -32,55 +65,172 @@ class CardRenderer:
         selected = styles / "themes" / (theme + ".css")
         if selected.resolve().parent != (styles / "themes").resolve() or not selected.is_file():
             raise ValueError("未知卡片主题：" + theme)
-        self.css = "\n".join(path.read_text(encoding="utf-8") for path in [styles / "base.css", styles / "trader.css", styles / "riven_values.css", styles / "riven_market.css", styles / "trend.css", styles / "relics.css", styles / "riven_analysis.css", selected])
+        self.css = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in [
+                styles / "base.css",
+                styles / "trader.css",
+                styles / "riven_values.css",
+                styles / "riven_market.css",
+                styles / "trend.css",
+                styles / "relics.css",
+                styles / "riven_analysis.css",
+                selected,
+            ]
+        )
+        self.theme = theme
+        self.asset_fingerprint = self._asset_fingerprint()
+        self.now_provider = now_provider
         self.semaphore = asyncio.Semaphore(concurrency)
-        self.cache = AsyncTTLCache[Snapshot](30, 0, max_entries=16)
-        self.page_cache = AsyncTTLCache[Snapshot](86400, 0, max_entries=64)
+        self.cache = AsyncTTLCache[Snapshot](30, 0, max_entries=16, clock=cache_clock)
+        self.page_cache = AsyncTTLCache[Snapshot](86400, 0, max_entries=64, clock=cache_clock)
+        self.render_count = 0
+        self.active_renders = 0
+        self.max_concurrent_renders = 0
+        self.render_durations: deque[float] = deque(maxlen=512)
+
+    def _asset_fingerprint(self) -> str:
+        digest = sha256()
+        digest.update(str(RENDER_CACHE_VERSION).encode())
+        digest.update(self.theme.encode())
+        digest.update(self.css.encode())
+        for path in sorted((ROOT / "templates").rglob("*")):
+            if path.is_file():
+                digest.update(path.relative_to(ROOT).as_posix().encode())
+                digest.update(path.read_bytes())
+        return digest.hexdigest()
+
+    @property
+    def metrics(self) -> dict[str, float | int]:
+        caches = (self.cache, self.page_cache)
+        hits = sum(cache.hits for cache in caches)
+        misses = sum(cache.misses for cache in caches)
+        durations = sorted(self.render_durations)
+        count = len(durations)
+        return {
+            "cache_hits": hits,
+            "cache_misses": misses,
+            "cache_coalesced": sum(cache.coalesced for cache in caches),
+            "cache_hit_rate": hits / (hits + misses) if hits + misses else 0.0,
+            "render_count": self.render_count,
+            "average_render_seconds": sum(durations) / count if count else 0.0,
+            "p95_render_seconds": durations[max(0, ceil(count * 0.95) - 1)] if count else 0.0,
+            "max_concurrent_renders": self.max_concurrent_renders,
+        }
+
+    def _template_name(self, card: Card) -> str:
+        if card.analysis_mode:
+            return "riven_analysis.html"
+        if card.parts_board or card.relic_board:
+            return "relics.html"
+        if card.trend_board:
+            return "trend.html"
+        if card.attribute_rows:
+            return "attributes.html"
+        if card.command_names:
+            return "commands.html"
+        if card.riven_market_board:
+            return "riven_market.html"
+        if card.riven_values_board:
+            return "riven_values.html"
+        if card.trader_board:
+            return "void_trader.html"
+        if card.arbitration_board:
+            return "arbitration.html"
+        if card.market_board:
+            return "market.html"
+        if card.operation_board:
+            return "operations.html"
+        if card.weekly_mode:
+            return "weekly.html"
+        if card.nightwave_mode:
+            return "nightwave.html"
+        if card.archimedea_mode:
+            return "archimedea.html"
+        if card.bounty_challenge_mode:
+            return "challenge_bounties.html"
+        if card.bounty_mode:
+            return "bounties.html"
+        if card.fissure_mode:
+            return "fissures.html"
+        return "card.html"
 
     def html(self, card: Card, page: int | None = None, total: int | None = None) -> str:
-        if card.analysis_mode:
-            template = "riven_analysis.html"
-        elif card.parts_board or card.relic_board:
-            template = "relics.html"
-        elif card.trend_board:
-            template = "trend.html"
-        elif card.attribute_rows:
-            template = "attributes.html"
-        elif card.command_names:
-            template = "commands.html"
-        elif card.riven_market_board:
-            template = "riven_market.html"
-        elif card.riven_values_board:
-            template = "riven_values.html"
-        elif card.trader_board:
-            template = "void_trader.html"
-        elif card.arbitration_board:
-            template = "arbitration.html"
-        elif card.market_board:
-            template = "market.html"
-        elif card.operation_board:
-            template = "operations.html"
-        elif card.weekly_mode:
-            template = "weekly.html"
-        elif card.nightwave_mode:
-            template = "nightwave.html"
-        elif card.archimedea_mode:
-            template = "archimedea.html"
-        elif card.bounty_challenge_mode:
-            template = "challenge_bounties.html"
-        elif card.bounty_mode:
-            template = "bounties.html"
-        elif card.fissure_mode:
-            template = "fissures.html"
-        else:
-            template = "card.html"
+        template = self._template_name(card)
         document = self.environment.get_template(template).render(
             card=card,
             page=page or card.page_number or 1,
             total=total or card.total_pages or 1,
-            trend_charts=[(period, trend_chart(period)) for period in card.trend_board.periods] if card.trend_board else [],
+            trend_charts=[
+                (period, trend_chart(period)) for period in card.trend_board.periods
+            ] if card.trend_board else [],
         )
         return document.replace("</head>", "<style>" + self.css + "</style></head>", 1)
+
+    def _deadlines(self, card: Card) -> list[tuple[str, datetime]]:
+        deadlines: list[tuple[str, datetime]] = []
+        deadlines.extend(
+            (f"cycle:{index}", item.expiry)
+            for index, item in enumerate(card.cycle_items)
+            if item.available
+        )
+        deadlines.extend(
+            (f"fissure:{index}", item.expiry)
+            for index, item in enumerate(card.fissure_items)
+        )
+        if card.rotation_expiry:
+            deadlines.append(("rotation", card.rotation_expiry))
+        if card.archimedea_expiry:
+            deadlines.append(("archimedea", card.archimedea_expiry))
+        if card.bounty_expiry:
+            deadlines.append(("bounty", card.bounty_expiry))
+        if card.operation_board and card.operation_board.expiry:
+            deadlines.append(("operation", card.operation_board.expiry))
+        if (
+            card.arbitration_board
+            and card.arbitration_board.current
+            and card.arbitration_board.entries
+        ):
+            deadlines.append(
+                ("arbitration", card.arbitration_board.entries[0].time + timedelta(hours=1))
+            )
+        if card.render_cache_until:
+            deadlines.append(("transition", card.render_cache_until))
+        return deadlines
+
+    def _cache_key(self, card: Card, page: int, total: int, now: datetime) -> str:
+        data = _stable_value(
+            card.model_dump(
+                mode="json",
+                exclude={"fetched_at", "render_cache_until"},
+            )
+        )
+        buckets = []
+        for name, deadline in self._deadlines(card):
+            if name in {"rotation", "transition"}:
+                continue
+            seconds = max(0, ceil((deadline - now).total_seconds()))
+            buckets.append((name, ceil(seconds / 10)))
+        payload = {
+            "renderer": self.asset_fingerprint,
+            "template": self._template_name(card),
+            "page": page,
+            "total": total,
+            "fetched_at_minute": int(card.fetched_at.timestamp() // 60),
+            "time_buckets": buckets,
+            "card": data,
+        }
+        encoded = json.dumps(
+            payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+        return sha256(encoded).hexdigest()
+
+    def _cache_ttl(self, cache: AsyncTTLCache, card: Card, now: datetime) -> float:
+        deadlines = [deadline for _, deadline in self._deadlines(card)]
+        if any(deadline <= now for deadline in deadlines):
+            return 0.0
+        future = [(deadline - now).total_seconds() for deadline in deadlines]
+        return min(cache.ttl, min(future)) if future else cache.ttl
 
     async def render(self, card: Card) -> list[bytes]:
         # 显式分页和专用卡片各渲染一张图片，保留任务顺序与完整信息。
@@ -105,8 +255,11 @@ class CardRenderer:
         pages = [card] if single_page else paginate(card)
         images = []
         for index, page in enumerate(pages, 1):
-            html = self.html(page, page.page_number or index, page.total_pages or len(pages))
-            key = sha256(html.encode()).hexdigest()
+            page_number = page.page_number or index
+            total_pages = page.total_pages or len(pages)
+            html = self.html(page, page_number, total_pages)
+            now = self.now_provider()
+            key = self._cache_key(page, page_number, total_pages, now)
 
             compact = bool(
                 page.analysis_mode
@@ -129,27 +282,45 @@ class CardRenderer:
                 or page.trader_board
             )
 
-            async def load(document=html, fixed=compact):
-                # 唯一截图入口；延迟导入使解析器与业务测试无需启动浏览器。
-                from nonebot_plugin_htmlrender import render_html
-
+            async def load(document=html, fixed=compact, cache_key=key):
+                started = perf_counter()
                 async with self.semaphore:
-                    width, height = 800, None
-                    if fixed:
-                        document, width, height = await self._fit_document(document)
-                    image = await render_html(
-                        document,
-                        width=width,
-                        height=height,
-                        device_pixel_ratio=1,
-                        image_format="png",
-                        timeout_seconds=30,
+                    self.active_renders += 1
+                    self.max_concurrent_renders = max(
+                        self.max_concurrent_renders, self.active_renders
                     )
-                    webp = await self._encode_webp(bytes(image))
-                return Snapshot(data=webp, source=key)
+                    try:
+                        # 唯一截图入口；延迟导入使解析器与业务测试无需启动浏览器。
+                        from nonebot_plugin_htmlrender import render_html
+
+                        width, height = 800, None
+                        if fixed:
+                            document, width, height = await self._fit_document(document)
+                        image = await render_html(
+                            document,
+                            width=width,
+                            height=height,
+                            device_pixel_ratio=1,
+                            image_format="png",
+                            timeout_seconds=30,
+                        )
+                        webp = await self._encode_webp(bytes(image))
+                        return Snapshot(data=webp, source=cache_key)
+                    finally:
+                        self.active_renders -= 1
+                        self.render_count += 1
+                        self.render_durations.append(perf_counter() - started)
 
             cache = self.page_cache if card.page_number is not None else self.cache
-            images.append((await cache.get(key, load)).data)
+            images.append(
+                (
+                    await cache.get(
+                        key,
+                        load,
+                        ttl=lambda: self._cache_ttl(cache, page, self.now_provider()),
+                    )
+                ).data
+            )
         return images
 
     async def _fit_document(self, document: str) -> tuple[str, int, int]:
@@ -331,25 +502,15 @@ class CardRenderer:
                             for (const selector of ['.cycle__top', '.cycle__body']) {
                                 const row = cycle.querySelector(selector);
                                 const width = [...row.children].reduce((sum, child) => sum + textWidth(child), 0);
-                                needed = Math.max(needed, width + 132);
+                                needed = Math.max(needed, width + 100);
                             }
-                        }
-                        for (const table of document.querySelectorAll('table')) {
-                            const rows = [...table.rows];
-                            const count = Math.max(0, ...rows.map(row => row.cells.length));
-                            let width = 64;
-                            for (let column = 0; column < count; column++) {
-                                width += Math.max(0, ...rows.map(row => textWidth(row.cells[column]))) + 20;
-                            }
-                            needed = Math.max(needed, width);
                         }
                     }
-                    const width = Math.ceil(needed);
-                    if (width > 2000) continue;
+                    const width = Math.min(2000, Math.max(800, needed));
                     body.style.width = width + 'px';
                     const height = Math.ceil(body.getBoundingClientRect().height);
-                    const bounds = content.getBoundingClientRect();
-                    const fields = [...content.querySelectorAll('.command-name, strong, h2, td, th, time, .cycle__next, .fissure span, .task-chip, .stage-pool-label, .bounty-meta, .bounty-location span, .hub-bounty-objective, .hub-bounty-top span, .hub-bounty-meta span, .research-modifier p, .research-modifier-name, .research-period, .nightwave-task__body p, .nightwave-task__meta > span, .operation-period span, .operation-condition, .operation-task-head span, .invasion-head span, .invasion-reward')];
+                    const bounds = body.getBoundingClientRect();
+                    const fields = [...document.querySelectorAll('.cycle__top, .cycle__body, .fissure__task, .fissure__location, .fissure__time, .arbitration-time, .arbitration-node, .market-order, .trader-item, .weekly-table td, .nightwave-task__body, .nightwave-task__meta, .operation-period span, .operation-condition, .invasion-head, .invasion-reward, .bounty-refresh span, .bounty-location, .hub-bounty-top, .hub-bounty-meta, .hub-bounty-objective, .research-modifier p, .research-modifier-name, .research-period, .nightwave-task__body p, .nightwave-task__meta > span, .operation-period span, .operation-condition, .operation-task-head span, .invasion-head span, .invasion-reward')];
                     const fits = fields.every(element => {
                         const r = element.getBoundingClientRect();
                         return r.right <= bounds.right + 1 && r.left >= bounds.left - 1 &&
