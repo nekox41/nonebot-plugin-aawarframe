@@ -9,12 +9,12 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawfcore.commands import router
-from nonebot_plugin_aawfcore.models.common import DataStatus, Snapshot
-from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
-from nonebot_plugin_aawfcore.rendering.viewmodels import paginate
-from nonebot_plugin_aawfcore.services.operations import build_invasions, build_sortie
-from nonebot_plugin_aawfcore.services.worldstate import WorldStateService
+from nonebot_plugin_aawarframe.commands import router
+from nonebot_plugin_aawarframe.models.common import DataStatus, Snapshot
+from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+from nonebot_plugin_aawarframe.rendering.viewmodels import paginate
+from nonebot_plugin_aawarframe.services.operations import build_invasions, build_sortie
+from nonebot_plugin_aawarframe.services.worldstate import WorldStateService
 
 
 def recorded():
@@ -112,7 +112,7 @@ def test_many_invasions_paginate_without_losing_entries():
 @pytest.mark.parametrize('feature', ['sortie', 'archon', 'invasions'])
 async def test_service_routes_and_commands_render_images(feature, monkeypatch):
     snapshot, now = recorded()
-    monkeypatch.setattr('nonebot_plugin_aawfcore.services.worldstate.utcnow', lambda: now)
+    monkeypatch.setattr('nonebot_plugin_aawarframe.services.worldstate.utcnow', lambda: now)
     service = WorldStateService(SimpleNamespace(fetch=AsyncMock(return_value=snapshot)))
     card = await service.query(feature)
     assert card.operation_board and card.status == DataStatus.OK
@@ -120,7 +120,7 @@ async def test_service_routes_and_commands_render_images(feature, monkeypatch):
     monkeypatch.setattr(router, 'get_runtime', lambda: runtime)
     message = await router.dispatch(feature)
     assert [segment.type for segment in message] == ['image']
-    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+    from nonebot_plugin_aawarframe.admin.control import DEFAULT_COMMANDS
 
     registered = DEFAULT_COMMANDS
     for command, name in [('突击', 'sortie'), ('执刑官', 'archon'), ('入侵', 'invasions')]:

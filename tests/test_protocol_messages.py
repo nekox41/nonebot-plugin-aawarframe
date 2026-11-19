@@ -1,5 +1,5 @@
 """Unified single-distribution protocol conversion regression."""
-from nonebot_plugin_aawfcore.protocols.message import Message, MessageSegment
+from nonebot_plugin_aawarframe.protocols.message import Message, MessageSegment
 from nonebot_plugin_aawarframe.router import convert
 
 def test_neutral_message_and_plaintext():

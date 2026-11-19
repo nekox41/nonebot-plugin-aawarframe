@@ -8,10 +8,10 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawfcore.commands import router
-from nonebot_plugin_aawfcore.models.common import DataStatus, Snapshot
-from nonebot_plugin_aawfcore.services.fissures import build_fissures, build_void_storms
-from nonebot_plugin_aawfcore.services.worldstate import WorldStateService
+from nonebot_plugin_aawarframe.commands import router
+from nonebot_plugin_aawarframe.models.common import DataStatus, Snapshot
+from nonebot_plugin_aawarframe.services.fissures import build_fissures, build_void_storms
+from nonebot_plugin_aawarframe.services.worldstate import WorldStateService
 
 NOW = datetime(2026, 11, 6, tzinfo=timezone.utc)
 
@@ -65,7 +65,7 @@ def test_storm_activation_expiry_boundaries():
 
 @pytest.mark.parametrize("value", [None, {}, [{"Node": "bad"}]])
 async def test_storm_parse_failure_does_not_affect_regular_fissures(value, worldstate, monkeypatch):
-    monkeypatch.setattr("nonebot_plugin_aawfcore.services.worldstate.utcnow", lambda: NOW)
+    monkeypatch.setattr("nonebot_plugin_aawarframe.services.worldstate.utcnow", lambda: NOW)
     worldstate["VoidStorms"] = value
     provider = SimpleNamespace(
         fetch=AsyncMock(return_value=Snapshot(data=worldstate, source="official"))
@@ -85,7 +85,7 @@ async def test_missing_storm_field_is_not_reported_as_empty(worldstate):
 
 
 def test_railjack_command_alias(monkeypatch):
-    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+    from nonebot_plugin_aawarframe.admin.control import DEFAULT_COMMANDS
 
     registered = DEFAULT_COMMANDS
     assert ("九重天", set(), "railjack_fissures") in registered
@@ -98,7 +98,7 @@ async def test_recorded_official_void_storms(monkeypatch):
     recorded = json.loads((Path(__file__).parent / "fixtures/voidstorms-recorded.json").read_text())
     snapshot = Snapshot.model_validate(recorded)
     now = datetime.fromtimestamp(snapshot.data["Time"], timezone.utc)
-    monkeypatch.setattr("nonebot_plugin_aawfcore.services.worldstate.utcnow", lambda: now)
+    monkeypatch.setattr("nonebot_plugin_aawarframe.services.worldstate.utcnow", lambda: now)
     provider = SimpleNamespace(fetch=AsyncMock(return_value=snapshot))
     card = await WorldStateService(provider).query("railjack_fissures")
     assert card.status == DataStatus.OK

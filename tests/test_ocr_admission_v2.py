@@ -6,12 +6,12 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from nonebot_plugin_aawfcore.infrastructure.riven_ocr import (
+from nonebot_plugin_aawarframe.infrastructure.riven_ocr import (
     MAX_ANALYSES,
     MAX_DOWNLOADS,
     RivenOCR,
 )
-from nonebot_plugin_aawfcore.models.errors import UserInputError
+from nonebot_plugin_aawarframe.models.errors import UserInputError
 
 
 @pytest.mark.asyncio

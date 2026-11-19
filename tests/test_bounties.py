@@ -8,14 +8,14 @@ from pathlib import Path
 
 import pytest
 
-from nonebot_plugin_aawfcore.commands import router
-from nonebot_plugin_aawfcore.commands.parsing import parse_bounty_index
-from nonebot_plugin_aawfcore.models.common import DataStatus, Snapshot
-from nonebot_plugin_aawfcore.models.errors import UserInputError
-from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
-from nonebot_plugin_aawfcore.services.bounties import build_bounties
-from nonebot_plugin_aawfcore.worldstate.parsers.bounties import parse_rewards
-from nonebot_plugin_aawfcore.worldstate.parsers.location_bounties import location_bounties
+from nonebot_plugin_aawarframe.commands import router
+from nonebot_plugin_aawarframe.commands.parsing import parse_bounty_index
+from nonebot_plugin_aawarframe.models.common import DataStatus, Snapshot
+from nonebot_plugin_aawarframe.models.errors import UserInputError
+from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+from nonebot_plugin_aawarframe.services.bounties import build_bounties
+from nonebot_plugin_aawarframe.worldstate.parsers.bounties import parse_rewards
+from nonebot_plugin_aawarframe.worldstate.parsers.location_bounties import location_bounties
 
 
 def test_tents_share_seed_and_only_appear_in_overview():
@@ -110,7 +110,7 @@ def test_reward_stage_mapping_and_missing_probability():
 
 
 def test_cetus_alias_is_removed(monkeypatch):
-    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+    from nonebot_plugin_aawarframe.admin.control import DEFAULT_COMMANDS
 
     registered = DEFAULT_COMMANDS
     assert ("地球", set(), "bounties") in registered

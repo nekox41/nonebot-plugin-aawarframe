@@ -1,6 +1,6 @@
 """OCR capacity is shared across all adapters by the single Runtime."""
 import asyncio
-from nonebot_plugin_aawfcore.infrastructure.riven_ocr import MAX_ANALYSES, RivenOCR
+from nonebot_plugin_aawarframe.infrastructure.riven_ocr import MAX_ANALYSES, RivenOCR
 import pytest
 
 @pytest.mark.asyncio
@@ -19,7 +19,7 @@ async def test_admission_limit_and_recovery():
     try:
         await asyncio.wait_for(running.wait(), timeout=2)
         assert ocr.pending == MAX_ANALYSES
-        from nonebot_plugin_aawfcore.models.errors import UserInputError
+        from nonebot_plugin_aawarframe.models.errors import UserInputError
         with pytest.raises(UserInputError):
             async with ocr.admission():
                 pass

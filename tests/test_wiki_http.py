@@ -8,9 +8,9 @@ from time import monotonic
 import httpx
 import pytest
 
-from nonebot_plugin_aawfcore.infrastructure.wiki_http import WikiHttpClient
-from nonebot_plugin_aawfcore.models.errors import WikiChallengeError
-from nonebot_plugin_aawfcore.providers.wiki import WikiProvider
+from nonebot_plugin_aawarframe.infrastructure.wiki_http import WikiHttpClient
+from nonebot_plugin_aawarframe.models.errors import WikiChallengeError
+from nonebot_plugin_aawarframe.providers.wiki import WikiProvider
 
 API = 'http://warframe.huijiwiki.com/api.php?action=opensearch&search=Te'
 

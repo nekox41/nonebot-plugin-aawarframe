@@ -11,17 +11,17 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawfcore.commands import router
-from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
-from nonebot_plugin_aawfcore.localization.resolver import load_mapping
-from nonebot_plugin_aawfcore.models.common import DataStatus, Snapshot
-from nonebot_plugin_aawfcore.models.errors import UserInputError
-from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
-from nonebot_plugin_aawfcore.services.bounties import BOUNTY_REGIONS, build_bounties
-from nonebot_plugin_aawfcore.worldstate.parsers.challenge_bounties import (
+from nonebot_plugin_aawarframe.commands import router
+from nonebot_plugin_aawarframe.admin.control import DEFAULT_COMMANDS
+from nonebot_plugin_aawarframe.localization.resolver import load_mapping
+from nonebot_plugin_aawarframe.models.common import DataStatus, Snapshot
+from nonebot_plugin_aawarframe.models.errors import UserInputError
+from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+from nonebot_plugin_aawarframe.services.bounties import BOUNTY_REGIONS, build_bounties
+from nonebot_plugin_aawarframe.worldstate.parsers.challenge_bounties import (
     generate_challenge_bounties,
 )
-from nonebot_plugin_aawfcore.worldstate.seeded_random import SeededRandom
+from nonebot_plugin_aawarframe.worldstate.seeded_random import SeededRandom
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

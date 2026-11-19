@@ -48,7 +48,7 @@ def expand(data):
 def configure_resources(path):
     ASSETS.root = Path(path)
     raw_mapping.cache_clear()
-    sources = sys.modules.get("nonebot_plugin_aawfcore.grq.sources")
+    sources = sys.modules.get("nonebot_plugin_aawarframe.grq.sources")
     if sources:
         for name in ("catalog_seed", "item_identifiers"):
             getattr(sources, name).cache_clear()

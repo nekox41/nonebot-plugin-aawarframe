@@ -16,8 +16,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
-CORE = ROOT / "core"
-PACKAGE = CORE / "nonebot_plugin_aawfcore"
+PACKAGE = ROOT / "nonebot_plugin_aawarframe"
 ASSETS = PACKAGE / "assets"
 
 # 源数据来自历史公开 Git blob，并非将已生成快照永久保留在新分支；
@@ -60,13 +59,13 @@ async def main() -> None:
         print("SEED:", BASE + filename, flush=True)
         await asyncio.to_thread(download, BASE + filename, target)
 
-    sys.path.insert(0, str(CORE))
+    sys.path.insert(0, str(ROOT))
     import nonebot
 
     nonebot.init(driver="~none", render={"provider": "playwright", "startup": "off"})
-    from nonebot_plugin_aawfcore.grq import GameResourceQuery
-    from nonebot_plugin_aawfcore.initialization.build import initialize
-    from nonebot_plugin_aawfcore.initialization.pipeline import export_archive, validate
+    from nonebot_plugin_aawarframe.grq import GameResourceQuery
+    from nonebot_plugin_aawarframe.initialization.build import initialize
+    from nonebot_plugin_aawarframe.initialization.pipeline import export_archive, validate
 
     validate(ASSETS)
     riven_rules = json.loads((ASSETS / "riven_stats.json").read_text(encoding="utf-8"))

@@ -120,7 +120,7 @@ def prepare(revision=REVISION, cache=Path("/tmp/wfcd-grq-input"), output=None, s
         "license": "MIT",
         "resources": records,
     }
-    output = output or ROOT / "nonebot_plugin_aawfcore/assets/grq/items.json.gz"
+    output = output or ROOT / "nonebot_plugin_aawarframe/assets/grq/items.json.gz"
     with gzip.GzipFile(filename=str(output), mode="wb", mtime=0) as stream:
         with io.TextIOWrapper(stream, encoding="utf-8") as text:
             json.dump(payload, text, ensure_ascii=False, separators=(",", ":"))

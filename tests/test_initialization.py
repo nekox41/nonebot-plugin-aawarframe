@@ -12,8 +12,8 @@ import tarfile
 
 import pytest
 
-from nonebot_plugin_aawfcore.initialization import pipeline
-from nonebot_plugin_aawfcore.localization.resources import PACKAGED, configure_resources
+from nonebot_plugin_aawarframe.initialization import pipeline
+from nonebot_plugin_aawarframe.localization.resources import PACKAGED, configure_resources
 
 
 @pytest.fixture(autouse=True)
@@ -127,7 +127,7 @@ def test_bad_upgrade_keeps_last_good_generation(archive, tmp_path, monkeypatch):
 
 
 def test_runtime_initialization_does_not_import_network_builder():
-    from nonebot_plugin_aawfcore import bootstrap
+    from nonebot_plugin_aawarframe import bootstrap
 
     assert not hasattr(pipeline, "initialize")
     assert not hasattr(pipeline, "build_latest")

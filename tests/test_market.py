@@ -9,14 +9,14 @@ from unittest.mock import AsyncMock
 import httpx
 import pytest
 
-from nonebot_plugin_aawfcore.commands.parsing import parse_market_query
-from nonebot_plugin_aawfcore.infrastructure.http import HttpClient, RateLimiter, retry_after
-from nonebot_plugin_aawfcore.localization.resolver import ItemResolver
-from nonebot_plugin_aawfcore.models.common import DataStatus, Snapshot
-from nonebot_plugin_aawfcore.models.errors import UserInputError
-from nonebot_plugin_aawfcore.models.market import Item, MarketQuery, Order, TopOrders
-from nonebot_plugin_aawfcore.providers.market import MarketProvider
-from nonebot_plugin_aawfcore.services.market import MarketService
+from nonebot_plugin_aawarframe.commands.parsing import parse_market_query
+from nonebot_plugin_aawarframe.infrastructure.http import HttpClient, RateLimiter, retry_after
+from nonebot_plugin_aawarframe.localization.resolver import ItemResolver
+from nonebot_plugin_aawarframe.models.common import DataStatus, Snapshot
+from nonebot_plugin_aawarframe.models.errors import UserInputError
+from nonebot_plugin_aawarframe.models.market import Item, MarketQuery, Order, TopOrders
+from nonebot_plugin_aawarframe.providers.market import MarketProvider
+from nonebot_plugin_aawarframe.services.market import MarketService
 
 
 def make_order(**updates):
@@ -173,7 +173,7 @@ async def test_429_retries_and_long_retry_after_is_not_ignored(monkeypatch):
     async def sleep(seconds):
         sleeps.append(seconds)
 
-    monkeypatch.setattr("nonebot_plugin_aawfcore.infrastructure.http.asyncio.sleep", sleep)
+    monkeypatch.setattr("nonebot_plugin_aawarframe.infrastructure.http.asyncio.sleep", sleep)
     calls = 0
 
     def handle(request):
@@ -195,7 +195,7 @@ async def test_429_retries_and_long_retry_after_is_not_ignored(monkeypatch):
     with pytest.raises(httpx.HTTPStatusError):
         await http.get_json("https://fixture.test", market=True)
     assert http.market_limiter.next_request > 0
-    from nonebot_plugin_aawfcore.infrastructure.http import RateLimitError
+    from nonebot_plugin_aawarframe.infrastructure.http import RateLimitError
 
     with pytest.raises(RateLimitError):
         await http.get_json("https://fixture.test", market=True)
@@ -227,7 +227,7 @@ async def test_timeout_and_5xx_have_bounded_retries(monkeypatch):
     async def sleep(seconds):
         sleeps.append(seconds)
 
-    monkeypatch.setattr("nonebot_plugin_aawfcore.infrastructure.http.asyncio.sleep", sleep)
+    monkeypatch.setattr("nonebot_plugin_aawarframe.infrastructure.http.asyncio.sleep", sleep)
     attempts = 0
 
     def failed(request):
@@ -259,8 +259,8 @@ async def test_timeout_and_5xx_have_bounded_retries(monkeypatch):
 async def test_corrupt_catalogue_and_expired_persisted_fallback(market_items, tmp_path):
     from datetime import timedelta
 
-    from nonebot_plugin_aawfcore.infrastructure.storage import write_json
-    from nonebot_plugin_aawfcore.models.common import utcnow
+    from nonebot_plugin_aawarframe.infrastructure.storage import write_json
+    from nonebot_plugin_aawarframe.models.common import utcnow
 
     http = SimpleNamespace(get_json=AsyncMock(side_effect=OSError("offline")))
     provider = MarketProvider(http, tmp_path)
@@ -336,10 +336,10 @@ async def test_top_order_limits_and_description(market_items):
 
 
 def test_market_template_is_one_page_and_escapes_users():
-    from nonebot_plugin_aawfcore.models.common import Card
-    from nonebot_plugin_aawfcore.models.market import MarketBoard
-    from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
-    from nonebot_plugin_aawfcore.rendering.viewmodels import paginate
+    from nonebot_plugin_aawarframe.models.common import Card
+    from nonebot_plugin_aawarframe.models.market import MarketBoard
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+    from nonebot_plugin_aawarframe.rendering.viewmodels import paginate
 
     order = make_order(
         platinum=10,

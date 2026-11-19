@@ -1,7 +1,7 @@
 import json
 
-from nonebot_plugin_aawfcore.localization.resources import configure_resources
-from nonebot_plugin_aawfcore.services import riven_values
+from nonebot_plugin_aawarframe.localization.resources import configure_resources
+from nonebot_plugin_aawarframe.services import riven_values
 
 
 def test_riven_rules_are_loaded_from_immutable_package_assets(tmp_path, monkeypatch):

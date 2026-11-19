@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock
 import pytest
 pytest.importorskip("nonebot.adapters.qq")
 from nonebot.adapters.qq import GroupMessageCreateEvent, Message, MessageSegment
-from nonebot_plugin_aawfcore.protocols.message import Message as CoreMessage
-from nonebot_plugin_aawfcore.protocols.message import MessageSegment as CoreSegment
+from nonebot_plugin_aawarframe.protocols.message import Message as CoreMessage
+from nonebot_plugin_aawarframe.protocols.message import MessageSegment as CoreSegment
 from nonebot_plugin_aawarframe import router
 
 GROUP = "g_openid-example_1234"

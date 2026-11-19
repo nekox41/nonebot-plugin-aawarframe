@@ -5,10 +5,10 @@
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
-from nonebot_plugin_aawfcore.commands import router
-from nonebot_plugin_aawfcore.models.common import Card, Section
-from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
-from nonebot_plugin_aawfcore.rendering.viewmodels import paginate
+from nonebot_plugin_aawarframe.commands import router
+from nonebot_plugin_aawarframe.models.common import Card, Section
+from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+from nonebot_plugin_aawarframe.rendering.viewmodels import paginate
 
 
 def test_html_escapes_all_external_text():
@@ -85,8 +85,8 @@ async def test_command_rejects_unknown_parameters_and_isolates_upstream(monkeypa
 
 
 async def test_lifecycle_closes_http_and_resets_runtime(monkeypatch, tmp_path):
-    from nonebot_plugin_aawfcore.bootstrap import Runtime
-    from nonebot_plugin_aawfcore.config import Config
+    from nonebot_plugin_aawarframe.bootstrap import Runtime
+    from nonebot_plugin_aawarframe.config import Config
 
     runtime = Runtime(Config(aawarframe_cache_dir=tmp_path))
     await runtime.close()
@@ -98,7 +98,7 @@ async def test_lifecycle_closes_http_and_resets_runtime(monkeypatch, tmp_path):
 
 
 def test_fallback_is_concise_and_preserves_provenance():
-    from nonebot_plugin_aawfcore.rendering.viewmodels import fallback_text
+    from nonebot_plugin_aawarframe.rendering.viewmodels import fallback_text
 
     card = Card(
         title="长赏金列表",
@@ -113,8 +113,8 @@ def test_fallback_is_concise_and_preserves_provenance():
 
 
 async def test_worldstate_proxy_does_not_route_market_or_napcat(monkeypatch, tmp_path):
-    from nonebot_plugin_aawfcore import bootstrap
-    from nonebot_plugin_aawfcore.config import Config
+    from nonebot_plugin_aawarframe import bootstrap
+    from nonebot_plugin_aawarframe.config import Config
 
     clients = []
 
@@ -145,7 +145,7 @@ def test_worldstate_proxy_rejects_invalid_protocol():
     import pytest
     from pydantic import ValidationError
 
-    from nonebot_plugin_aawfcore.config import Config
+    from nonebot_plugin_aawarframe.config import Config
 
     with pytest.raises(ValidationError):
         Config(aawarframe_worldstate_proxy="file:///tmp/proxy")
