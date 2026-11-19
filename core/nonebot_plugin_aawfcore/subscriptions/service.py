@@ -6,7 +6,6 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import quote
 
-from nonebot import get_bots
 
 from ..commands.parsing import parse_riven_market
 from ..localization.riven_attributes import allowed, attributes
@@ -14,8 +13,7 @@ from ..localization.rivens import resolve_riven_weapon
 from ..models.common import Card, Section
 from ..models.errors import UserInputError
 from ..models.riven_market import RivenMarketQuery
-from ..protocols.message import Message, MessageSegment, to_onebot
-from ..protocols.qq import is_qq_bot, send_subscription
+from ..protocols.message import Message, MessageSegment
 from ..providers.worldstate import WorldStateProvider
 from ..rendering.viewmodels import fallback_text
 from ..worldstate.parsers.cycles import cetus_cycle
@@ -403,54 +401,21 @@ class SubscriptionService:
         card.page_number = card.total_pages = 1
         return card
 
-    async def _send(self, bot, delivery, now: datetime) -> None:
+    async def prepare_delivery(self, delivery, now: datetime) -> Message:
+        """核心仅生成待发送的数据，平台插件经 API 领取后发送并回执。"""
         card = self._notification_card(delivery, now)
-        # QQ 官方主动消息使用 OpenID 与官方 send_to_group，不能再调用 OneBot API。
-        is_official = is_qq_bot(bot)
-        message = None if is_official else Message([MessageSegment.at(delivery.user_id)])
-        image = None
-        fallback = None
+        message = Message(MessageSegment.at(delivery.user_id))
         if self.renderer is not None:
             try:
                 images = await self.renderer.render(card)
                 if not images:
                     raise ValueError("卡片渲染结果为空")
-                if is_official:
-                    image = images[0]
-                else:
-                    message += MessageSegment.image(images[0])
+                message += MessageSegment.image(images[0])
+                return message
             except Exception:
-                logger.exception("订阅图片生成失败，回退为文本")
-                fallback = "\n" + fallback_text(card)
-                if not is_official:
-                    message += MessageSegment.text(fallback)
-        else:
-            # 无浏览器的测试环境；正式运行时 Runtime 注入 CardRenderer。
-            fallback = "\n" + fallback_text(card)
-            if not is_official:
-                message += MessageSegment.text(fallback)
-        if is_official:
-            try:
-                await asyncio.wait_for(
-                    send_subscription(
-                        bot, delivery, image=image, fallback=fallback or ("\n" + fallback_text(card))
-                    ),
-                    timeout=20,
-                )
-            except Exception:
-                if image is None:
-                    raise
-                # 官方平台媒体上传失败时退回文字，仍由平台控制主动通知配额。
-                logger.warning("QQ 官方订阅图片发送失败，尝试文本回退", exc_info=True)
-                await asyncio.wait_for(
-                    send_subscription(bot, delivery, image=None, fallback="\n" + fallback_text(card)),
-                    timeout=20,
-                )
-        else:
-            await asyncio.wait_for(
-                bot.send_group_msg(group_id=int(delivery.group_id), message=to_onebot(message)),
-                timeout=20,
-            )
+                logger.exception("订阅图片生成失败，回退文本")
+        message += MessageSegment.text("\n" + fallback_text(card))
+        return message
 
     async def _tick(self, now: datetime | None = None) -> None:
         now = now or datetime.now(UTC)
@@ -461,29 +426,8 @@ class SubscriptionService:
         await self._world_tick(subscriptions, now)
         await self._market_tick(subscriptions, now)
         self.store.expire(now)
-        bots = get_bots()
-        for delivery in self.store.claim_due(now, set(bots)):
-            if not self.store.has_subscription(delivery.subscription_id):
-                continue
-            bot = bots.get(delivery.bot_id)
-            if bot is None:
-                self.store.mark_failed(delivery.id, delivery.attempts, now, "bot_disconnected")
-                continue
-            try:
-                await self._send(bot, delivery, now)
-            except asyncio.CancelledError:
-                raise
-            except Exception as exc:
-                logger.warning(
-                    "订阅通知发送失败：订阅 %s，尝试 %s",
-                    delivery.subscription_id, delivery.attempts, exc_info=True,
-                )
-                self.store.mark_failed(
-                    delivery.id, delivery.attempts, datetime.now(UTC),
-                    type(exc).__name__,
-                )
-            else:
-                self.store.mark_sent(delivery.id, datetime.now(UTC))
+        # 发送不在核心进行。协议插件通过 /v1/notifications/claim 取待发送消息，
+        # 向对应平台 API 发送后再调用 /v1/notifications/{id}/ack。
 
     async def close(self) -> None:
         if self.task is not None:
