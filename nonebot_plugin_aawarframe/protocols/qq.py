@@ -131,8 +131,8 @@ async def send_subscription(bot, delivery, *, image: bytes | None, fallback: str
 
     target = delivery.group_id
     message = QQMessage()
-    if target.startswith(GROUP_PREFIX):
-        message += QQSegment.mention_user(delivery.user_id)
+    # QQ 群和频道均提醒原订阅者，不把 OpenID 当数字 QQ 号处理。
+    message += QQSegment.mention_user(delivery.user_id)
     message += QQSegment.text("\n")
     if image is not None:
         message += QQSegment.file_image(image)
