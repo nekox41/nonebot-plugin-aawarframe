@@ -64,11 +64,11 @@ async def message_image(bot, event, http):
                 raise UserInputError("图片超过 12 MB，请裁剪后发送。")
             try:
                 data = base64.b64decode(url[9:], validate=True)
-                if len(data) > LIMIT:
-                    raise UserInputError("图片超过 12 MB，请裁剪后发送。")
-                return data
             except (ValueError, base64.binascii.Error):
                 continue
+            if len(data) > LIMIT:
+                raise UserInputError("图片超过 12 MB，请裁剪后发送。")
+            return data
         try:
             data = await download_image(url, http)
             if data:
@@ -93,10 +93,11 @@ async def download_image(url, http):
             declared_length = response.headers.get("content-length")
             if declared_length is not None:
                 try:
-                    if int(declared_length) > LIMIT:
-                        raise UserInputError("图片超过 12 MB，请裁剪后发送。")
+                    size = int(declared_length)
                 except ValueError:
-                    pass
+                    size = 0
+                if size > LIMIT:
+                    raise UserInputError("图片超过 12 MB，请裁剪后发送。")
             data = bytearray()
             async for chunk in response.aiter_bytes(chunk_size=64 * 1024):
                 data.extend(chunk)
