@@ -21,7 +21,7 @@ class ACL(BaseModel):
     @model_validator(mode="after")
     def validate_ids(self):
         for values in (self.allow_users, self.allow_groups, self.deny_users, self.deny_groups):
-            if any(not re.fullmatch(r"[A-Za-z0-9_-]{1,160}", v) for v in values):
+            if any(not re.fullmatch(r"(?:qq-(?:group|channel):)?[A-Za-z0-9_-]{1,160}", v) for v in values):
                 raise ValueError("用户和群组标识必须是数字或 QQ 官方 OpenID")
         return self
 
