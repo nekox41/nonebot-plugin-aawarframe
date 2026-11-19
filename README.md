@@ -1,3 +1,19 @@
+## 安装（单发行包）
+
+本项目仅发布 `nonebot-plugin-aawarframe`，业务核心与协议入口包含在同一个 wheel 中：
+
+```bash
+pip install "nonebot-plugin-aawarframe[qq]"
+# 或 OneBot V11
+pip install "nonebot-plugin-aawarframe[onebot]"
+# 同时使用两种协议
+pip install "nonebot-plugin-aawarframe[qq,onebot]"
+```
+
+在 NoneBot2 中加载 `nonebot_plugin_aawarframe`；无需加载旧 `nonebot_plugin_aawfqq` / `nonebot_plugin_aawfonebot`。
+旧的 `nonebot_plugin_aawfcore` 现在仅作为同一发行包的内部业务模块提供。
+更多说明参见 [单包跨平台架构](docs/single-package.md)。
+
 <div align="center">
   <img src="./imgs/logo.png" width="160" alt="Aa 的 Warframe 助手">
 

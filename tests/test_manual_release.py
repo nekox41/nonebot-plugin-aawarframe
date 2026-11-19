@@ -1,47 +1,21 @@
-import zipfile
+"""Single wheel replaces the old three-wheel manual archive layout."""
+from pathlib import Path
+import tomllib
 
-from scripts import package_release
+def test_one_pypi_project():
+    project = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]
+    assert project["name"] == "nonebot-plugin-aawarframe"
+    assert "nonebot-plugin-aawfcore" not in project["dependencies"]
+    assert "nonebot-adapter-onebot" not in project["dependencies"]
+    assert "nonebot-adapter-qq" not in project["dependencies"]
+    assert "qq" in project["optional-dependencies"]
+    assert "onebot" in project["optional-dependencies"]
 
-
-def create_test_wheels(root):
-    core_dir = root / "dist/core"
-    qq_dir = root / "dist/qq"
-    onebot_dir = root / "dist/onebot"
-    core_dir.mkdir(parents=True)
-    qq_dir.mkdir(parents=True)
-    onebot_dir.mkdir(parents=True)
-
-    core_wheel = core_dir / "nonebot_plugin_aawfcore-0.23.2-py3-none-any.whl"
-    with zipfile.ZipFile(core_wheel, "w") as wheel:
-        wheel.writestr("nonebot_plugin_aawfcore/assets/offline.tar.gz", b"offline")
-        wheel.writestr("nonebot_plugin_aawfcore/assets/riven_stats.json", b"{}")
-    (qq_dir / "nonebot_plugin_aawfqq-0.23.2-py3-none-any.whl").write_bytes(b"qq")
-    (onebot_dir / "nonebot_plugin_aawfonebot-0.23.2-py3-none-any.whl").write_bytes(b"onebot")
-
-
-def test_manual_qq_bundle_installs_core_as_a_python_distribution(tmp_path):
-    create_test_wheels(tmp_path)
-
-    package_release.build("0.23.2", root=tmp_path)
-
-    archive_path = tmp_path / "dist/manual/nonebot-plugin-aawfqq-manual-v0.23.2.zip"
-    with zipfile.ZipFile(archive_path) as archive:
-        names = set(archive.namelist())
-        assert "wheels/nonebot_plugin_aawfcore-0.23.2-py3-none-any.whl" in names
-        assert "wheels/nonebot_plugin_aawfqq-0.23.2-py3-none-any.whl" in names
-        assert not any(name.startswith("src/plugins/") for name in names)
-        instructions = archive.read("INSTALL.txt").decode()
-        assert 'plugins = ["nonebot_plugin_aawfqq"]' in instructions
-        assert 'adapters = ["nonebot.adapters.qq"]' in instructions
-        assert "Do not copy the installed Core package into src/plugins." in instructions
-
-
-def test_manual_core_bundle_contains_only_core_wheel(tmp_path):
-    create_test_wheels(tmp_path)
-
-    package_release.build("0.23.2", root=tmp_path)
-
-    archive_path = tmp_path / "dist/manual/nonebot-plugin-aawfcore-manual-v0.23.2.zip"
-    with zipfile.ZipFile(archive_path) as archive:
-        wheels = [name for name in archive.namelist() if name.endswith(".whl")]
-        assert wheels == ["wheels/nonebot_plugin_aawfcore-0.23.2-py3-none-any.whl"]
+def test_release_uses_pypi_oidc():
+    text = Path(".github/workflows/release.yml").read_text(encoding="utf-8")
+    assert "id-token: write" in text
+    assert "name: aawarframe" in text
+    assert "pypa/gh-action-pypi-publish@release/v1" in text
+    assert "publish-core:" not in text
+    assert "publish-qq:" not in text
+    assert "publish-onebot:" not in text

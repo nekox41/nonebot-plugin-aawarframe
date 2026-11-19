@@ -128,20 +128,18 @@ async def test_claim_delivery_and_ack_via_backend_http(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_two_adapters_consume_core_segments_without_native_cross_dependency(monkeypatch):
+async def test_unified_adapter_conversion_without_http_roundtrip(monkeypatch):
     import nonebot
-    assert (nonebot.get_plugin("nonebot_plugin_aawfqq") or nonebot.load_plugin("nonebot_plugin_aawfqq")) is not None
-    assert (nonebot.get_plugin("nonebot_plugin_aawfonebot") or nonebot.load_plugin("nonebot_plugin_aawfonebot")) is not None
+    assert (nonebot.get_plugin("nonebot_plugin_aawarframe") or
+            nonebot.load_plugin("nonebot_plugin_aawarframe")) is not None
+    from nonebot_plugin_aawarframe.router import convert
 
-    from nonebot_plugin_aawfqq.router import pages
-    from nonebot_plugin_aawfonebot.router import outbound
-
-    payload = api.pack(Message([
+    message = Message([
         MessageSegment.text("收到"),
         MessageSegment.image(b"webp"),
         MessageSegment.at("123"),
-    ]))
-    qq = pages(payload["segments"])
-    onebot = outbound(payload["segments"])
+    ])
+    qq = convert(message, "qq")
+    onebot = convert(message, "onebot")
     assert [s.type for s in qq[0]] == ["text", "file_image", "mention_user"]
-    assert [s.type for s in onebot] == ["text", "image", "at"]
+    assert [s.type for s in onebot[0]] == ["text", "image", "at"]
