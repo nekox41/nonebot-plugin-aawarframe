@@ -2,6 +2,7 @@
 # 编写日期：2026-11-07
 # 作者：Aameow
 
+from datetime import datetime, timezone
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -337,7 +338,12 @@ async def test_render_does_not_cache_when_transition_passes_during_screenshot(mo
                 title="地球周期",
                 source="fixture",
                 cycle_items=[
-                    CycleDisplay(name="地球", state="白天", next_state="黑夜")
+                    CycleDisplay(
+                        name="地球",
+                        state="白天",
+                        next_state="黑夜",
+                        expiry=datetime(2026, 11, 19, tzinfo=timezone.utc),
+                    )
                 ],
                 page_number=1,
                 total_pages=1,
