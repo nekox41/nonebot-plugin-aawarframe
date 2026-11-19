@@ -167,7 +167,8 @@ def test_old_aliases_and_mapping_changes_are_preserved(grq, tmp_path):
 
 
 @pytest.mark.parametrize("template", [
-    "card", "cycles", "fissures", "arbitration", "market", "operations", "relics",
+    "card", "cycles", "fissures", "arbitration", "market", "sortie", "archon", "invasions",
+    "parts", "relics",
     "trend", "riven_analysis", "attributes", "commands", "riven_market", "riven_values",
     "void_trader", "weekly", "nightwave", "archimedea", "bounties", "challenge_bounties",
 ])
@@ -187,7 +188,7 @@ async def test_preview_api_renders_local_sample_without_upstream_requests(grq):
     app = create_app(SimpleNamespace(grq=grq, renderer=renderer), "long-test-password-12345")
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://test") as client:
         client.headers["Authorization"] = "Bearer long-test-password-12345"
-        response = await client.post("/api/previews", json={"template": "operations"})
+        response = await client.post("/api/previews", json={"template": "sortie"})
         assert response.status_code == 200
         assert response.json()["images"] == ["d2VicHAtcHJldmlldw=="]
         renderer.render.assert_awaited_once()
