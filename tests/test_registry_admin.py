@@ -115,6 +115,7 @@ async def test_alias_api_and_removed_admin_endpoints(grq):
         dashboard = (await client.get("/api/status")).json()
         assert dashboard["ok"] and dashboard["resource_count"] >= 20000
         assert dashboard["alias_count"] >= 0
+        assert any(item["name"] == "Market" for item in dashboard["resources"])
         assert (await client.get("/api/previews")).json()["items"]
         assert (await client.post("/api/previews", json={"template": "unknown"})).status_code == 404
         for endpoint in ("domains", "resources", "settings", "review", "export"):
