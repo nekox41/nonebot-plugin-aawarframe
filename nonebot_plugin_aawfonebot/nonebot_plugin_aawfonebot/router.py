@@ -4,7 +4,6 @@ import asyncio
 import base64
 import logging
 
-import httpx
 from nonebot import get_bots, get_driver, on_message
 from nonebot.adapters import Bot, Event
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
@@ -12,7 +11,7 @@ from nonebot.matcher import Matcher
 from nonebot.typing import T_State
 
 from nonebot_plugin_aawfcore.client import CoreClient, decode_image
-from nonebot_plugin_aawfcore.infrastructure.riven_ocr import message_image
+from .media import message_image
 
 logger = logging.getLogger(__name__)
 client = CoreClient()
@@ -47,9 +46,7 @@ async def accept(bot: Bot, event: Event, matcher: Matcher, state: T_State):
     image_base64 = None
     if state["aawf_feature"] == "riven_analysis":
         try:
-            async with httpx.AsyncClient(timeout=25.0) as http:
-                wrapper = type("HTTP", (), {"client": http})()
-                data = await message_image(bot, event, wrapper)
+            data = await message_image(bot, event)
             image_base64 = base64.b64encode(data).decode("ascii")
         except Exception as exc:
             await matcher.finish(MessageSegment.text(str(exc)))
