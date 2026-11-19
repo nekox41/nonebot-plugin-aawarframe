@@ -252,23 +252,20 @@ async def test_market_account_ingame_one_minute_poll(tmp_path, monkeypatch):
         request=request,
         catalog=AsyncMock(return_value=Snapshot(data=[], source="test")),
     ))
-    bot = SimpleNamespace(send_group_msg=AsyncMock())
-    monkeypatch.setattr(
-        "nonebot_plugin_aawfcore.subscriptions.service.get_bots",
-        lambda: {"bot": bot},
-    )
     service = SubscriptionService(
         tmp_path, SimpleNamespace(fetch=AsyncMock()), market=market
     )
     service.store.subscribe("bot", "100", "200", "market_user", {"user": "alice"})
     await service._tick(now)
-    assert bot.send_group_msg.await_count == 1
+    pending = service.store.claim_due(now, {"bot"}, protocol="onebot")
+    assert len(pending) == 1
+    service.store.mark_sent(pending[0].id, now)
     assert calls.count("/orders/user/alice") == 1
     await service._tick(now + timedelta(seconds=30))
     assert calls.count("/orders/user/alice") == 1
     await service._tick(now + timedelta(minutes=1))
     assert calls.count("/orders/user/alice") == 2
-    assert bot.send_group_msg.await_count == 1
+    assert service.store.claim_due(now + timedelta(minutes=1), {"bot"}, protocol="onebot") == []
     await service.close()
 
 
@@ -290,22 +287,19 @@ async def test_riven_watcher_baseline_then_new_auction(tmp_path, monkeypatch):
         side_effect=lambda slug, query: Snapshot(data=list(rows), source="test")
     ))
     renderer = SimpleNamespace(render=AsyncMock(return_value=[b"image"]))
-    bot = SimpleNamespace(send_group_msg=AsyncMock())
-    monkeypatch.setattr(
-        "nonebot_plugin_aawfcore.subscriptions.service.get_bots",
-        lambda: {"bot": bot},
-    )
     service = SubscriptionService(
         tmp_path, SimpleNamespace(fetch=AsyncMock()),
         riven_market=SimpleNamespace(provider=provider), renderer=renderer,
     )
     service.store.subscribe("bot", "100", "200", "riven", rule)
     await service._tick(now)
-    assert bot.send_group_msg.await_count == 0
+    assert service.store.claim_due(now, {"bot"}, protocol="onebot") == []
     rows.append(listing("new"))
-    await service._tick(now + timedelta(minutes=3))
-    assert bot.send_group_msg.await_count == 1
-    message = bot.send_group_msg.await_args.kwargs["message"]
+    later = now + timedelta(minutes=3)
+    await service._tick(later)
+    deliveries = service.store.claim_due(later, {"bot"}, protocol="onebot")
+    assert len(deliveries) == 1
+    message = await service.prepare_delivery(deliveries[0], later)
     assert any(segment.type == "image" for segment in message)
     await service.close()
 
