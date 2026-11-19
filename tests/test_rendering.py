@@ -5,8 +5,12 @@
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
+import pytest
+
 from nonebot_plugin_aawarframe.commands import router
-from nonebot_plugin_aawarframe.models.common import Card, Section
+from nonebot_plugin_aawarframe.models.common import Card, CycleDisplay, Section
+from nonebot_plugin_aawarframe.models.operations import InvasionDisplay, OperationBoard
+from nonebot_plugin_aawarframe.models.relics import RelicBoard
 from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
 from nonebot_plugin_aawarframe.rendering.viewmodels import paginate
 
@@ -271,3 +275,94 @@ async def test_render_does_not_cache_when_transition_passes_during_screenshot(mo
     )
     assert not renderer.cache.entries
     await renderer.close()
+
+
+
+@pytest.mark.parametrize(
+    "card",
+    [
+        pytest.param(
+            Card(title="裂缝", source="fixture", fissure_mode="normal", page_number=1, total_pages=1),
+            id="裂缝",
+        ),
+        pytest.param(
+            Card(title="地球", source="fixture", bounty_mode=True, page_number=1, total_pages=1),
+            id="地球赏金",
+        ),
+        pytest.param(
+            Card(
+                title="词条",
+                source="fixture",
+                attribute_rows=[("CC", "暴击几率")],
+                page_number=1,
+                total_pages=1,
+            ),
+            id="词条",
+        ),
+        pytest.param(
+            Card(
+                title="遗物",
+                source="fixture",
+                relic_board=RelicBoard(name="Lith A1", vaulted=False, rewards=[]),
+                page_number=1,
+                total_pages=1,
+            ),
+            id="遗物",
+        ),
+        pytest.param(
+            Card(
+                title="入侵",
+                source="fixture",
+                operation_board=OperationBoard(
+                    kind="invasions",
+                    invasions=[
+                        InvasionDisplay(
+                            node="Cassini",
+                            planet="土星",
+                            mission_type="生存",
+                            attacker="Corpus",
+                            defender="Grineer",
+                            attacker_percent=50,
+                            defender_percent=50,
+                        )
+                    ],
+                ),
+                page_number=1,
+                total_pages=1,
+            ),
+            id="入侵",
+        ),
+        pytest.param(
+            Card(
+                title="地球周期",
+                source="fixture",
+                cycle_items=[
+                    CycleDisplay(name="地球", state="白天", next_state="黑夜")
+                ],
+                page_number=1,
+                total_pages=1,
+            ),
+            id="周期卡片",
+        ),
+    ],
+)
+async def test_compact_commands_round_fractional_viewport_dimensions(monkeypatch, card):
+    import nonebot_plugin_htmlrender
+
+    render = AsyncMock(return_value=b"png")
+    monkeypatch.setattr(nonebot_plugin_htmlrender, "render_html", render)
+    monkeypatch.setattr(CardRenderer, "_encode_webp", AsyncMock(return_value=b"webp"))
+
+    async def fit(self, document):
+        # 模拟 DOM 文本测量返回的亚像素宽高，确保截图入口始终拿到整数。
+        return document, 1245.75, 678.25
+
+    monkeypatch.setattr(CardRenderer, "_fit_document", fit)
+    renderer = CardRenderer()
+    try:
+        assert await renderer.render(card) == [b"webp"]
+        kwargs = render.await_args.kwargs
+        assert kwargs["width"] == 1246 and type(kwargs["width"]) is int
+        assert kwargs["height"] == 679 and type(kwargs["height"]) is int
+    finally:
+        await renderer.close()
