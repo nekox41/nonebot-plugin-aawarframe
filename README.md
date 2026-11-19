@@ -177,11 +177,11 @@ WM 展示物品图片、名称和描述，上方为 5 条卖单，下方为 3 �
 ```bash
 # 官方 QQ 机器人
 python -m pip install -e '.[qq]'
-python -m pip install -e distributions/qq
+python -m pip install distributions/qq
 
 # 或者，仅使用 OneBot V11
 python -m pip install -e '.[onebot]'
-python -m pip install -e distributions/onebot
+python -m pip install distributions/onebot
 ```
 
 两种安装是**二选一**的示例，不需要全部执行。两个发行包通过 NoneBot 的 `require()` 加载同一个 `nonebot_plugin_aawarframe` 核心，因此也不会重复初始化业务服务。首次启动产生的数据文件、用户修改过的资源、订阅数据库和渲染缓存不随协议入口改变而重新复制。
