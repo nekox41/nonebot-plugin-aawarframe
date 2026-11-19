@@ -82,7 +82,7 @@ class Runtime:
         self.riven_market = RivenMarketService(self.riven_market_provider)
         self.wiki_http = WikiHttpClient(config.aawarframe_http_timeout)
         self.wiki_provider = WikiProvider(self.wiki_http)
-        self.wiki = WikiService(self.wiki_provider)
+        self.wiki = WikiService(self.wiki_provider, config.aawarframe_cache_dir / "wiki.sqlite3")
         self.renderer = CardRenderer(config.aawarframe_render_concurrency, config.aawarframe_theme)
         self.subscriptions = SubscriptionService(
             config.aawarframe_cache_dir, self.world_provider,
@@ -120,6 +120,7 @@ class Runtime:
             await asyncio.gather(self.riven_task, return_exceptions=True)
             self.riven_task = None
         await self.ocr.close()
+        self.wiki.close()
         await self.wiki_provider.close()
         await self.wiki_http.close()
         await self.renderer.close()
