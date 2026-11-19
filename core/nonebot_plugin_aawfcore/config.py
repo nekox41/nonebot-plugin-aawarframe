@@ -1,4 +1,4 @@
-# Desc: 实现 nonebot_plugin_aawarframe 层的 config 功能。
+# Desc: 实现 nonebot_plugin_aawfcore 层的 config 功能。
 # Date: 2026-11-15
 # Author: Aameow
 
