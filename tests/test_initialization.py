@@ -3,9 +3,11 @@
 # 作者：Aameow
 
 import gzip
+import hashlib
 import io
 import json
 import sqlite3
+import shutil
 import tarfile
 
 import pytest
@@ -68,18 +70,69 @@ def test_restore_keeps_seed_aliases_and_never_overwrites_database(archive, tmp_p
     assert (existing / "registry.sqlite3").read_bytes() == b"keep-existing-data"
 
 
-async def test_failed_network_keeps_active_data(archive, tmp_path, monkeypatch):
-    target = tmp_path / "data"
-    old = pipeline.restore_archive(archive, target)
-
-    def fail(*args):
-        raise OSError("network unavailable")
-
-    monkeypatch.setattr(pipeline, "build_latest", fail)
-    assert await pipeline.initialize(target, force=True) == old
+def test_packaged_upgrade_replaces_generation_and_preserves_user_data(archive, tmp_path, monkeypatch):
+    packaged = tmp_path / "package"
+    packaged.mkdir()
+    installed = packaged / "offline.tar.gz"
+    shutil.copyfile(archive, installed)
+    monkeypatch.setattr(pipeline, "PACKAGED", packaged)
+    target = tmp_path / "server"
+    original = pipeline.ensure_offline(target)
+    assert original.is_dir()
     state = json.loads((target / "resources/current.json").read_text())
-    assert state["network"] is False and state["checked_at"] > 0
-    assert (target / "registry.sqlite3").exists()
+    assert state["archive_sha256"] == hashlib.sha256(installed.read_bytes()).hexdigest()
+
+    (target / "subscriptions.sqlite3").write_bytes(b"keep-subscriptions")
+    (target / "registry.sqlite3").write_bytes(b"keep-user-aliases")
+    (target / "mappings/arbitration_overrides.json").write_text(
+        '{"user_override":true}'
+    )
+
+    # Unchanged installed archive is idempotent and creates no new generation.
+    assert pipeline.ensure_offline(target) == original
+
+    # Simulate upgrading the wheel: a new, complete, valid packaged archive.
+    upgraded = tmp_path / "new-payload"
+    upgraded.mkdir()
+    with tarfile.open(archive, "r:gz") as source:
+        source.extractall(upgraded, filter="data")
+    (upgraded / "resources/descriptions.json").write_text('{"build":"v2"}')
+    with tarfile.open(installed, "w:gz") as out:
+        for name in ("resources", "registry.sqlite3", "mappings"):
+            out.add(upgraded / name, arcname=name)
+    current = pipeline.ensure_offline(target)
+    assert current != original
+    assert json.loads((current / "descriptions.json").read_text())["build"] == "v2"
+    assert (target / "registry.sqlite3").read_bytes() == b"keep-user-aliases"
+    assert (target / "subscriptions.sqlite3").read_bytes() == b"keep-subscriptions"
+    assert json.loads(
+        (target / "mappings/arbitration_overrides.json").read_text()
+    ) == {"user_override": True}
+    assert pipeline.ensure_offline(target) == current
+
+
+def test_bad_upgrade_keeps_last_good_generation(archive, tmp_path, monkeypatch):
+    packaged = tmp_path / "package"
+    packaged.mkdir()
+    installed = packaged / "offline.tar.gz"
+    shutil.copyfile(archive, installed)
+    monkeypatch.setattr(pipeline, "PACKAGED", packaged)
+    target = tmp_path / "server"
+    original = pipeline.ensure_offline(target)
+    before = (target / "resources/current.json").read_bytes()
+
+    installed.write_bytes(b"invalid-archive")
+    assert pipeline.ensure_offline(target) == original
+    assert (target / "resources/current.json").read_bytes() == before
+
+
+def test_runtime_initialization_does_not_import_network_builder():
+    from nonebot_plugin_aawfcore import bootstrap
+
+    assert not hasattr(pipeline, "initialize")
+    assert not hasattr(pipeline, "build_latest")
+    assert not hasattr(pipeline, "fetch")
+    assert "initialize(" not in bootstrap.setup.__code__.co_names
 
 
 def test_archive_rejects_path_traversal(tmp_path):
