@@ -50,6 +50,33 @@ def fake_event(group=GROUP, user=MEMBER):
     )
 
 
+def test_real_qq_official_group_event_model_and_command_route(monkeypatch):
+    """使用官方适配器的真实事件模型，而不只是 SimpleNamespace。"""
+    from nonebot.adapters.qq import GroupMessageCreateEvent
+
+    event = GroupMessageCreateEvent.model_validate({
+        "id": "official-message-id",
+        "content": "订阅 夜灵",
+        "timestamp": "2026-11-19T09:00:00+08:00",
+        "author": {
+            "id": "official-sender",
+            "username": "player",
+            "bot": False,
+            "member_openid": MEMBER,
+            "member_role": "member",
+        },
+        "group_id": "legacy-group-id",
+        "group_openid": GROUP,
+        "message_type": 0,
+        "mentions": [],
+        "attachments": [],
+    })
+    bot = fake_qq_bot()
+    assert group_scope(bot, event) == (QQ_BOT, GROUP_PREFIX + GROUP, MEMBER)
+    assert router.command_identity_from_event(event) == (MEMBER, GROUP_PREFIX + GROUP)
+    assert event.get_plaintext() == "订阅 夜灵"
+
+
 def test_official_openid_scope_and_separate_group_channel():
     bot = fake_qq_bot()
     event = fake_event()
