@@ -26,6 +26,8 @@ jobs:
           python-version: "3.12"
       - name: Install QQ adapter without OneBot
         run: python -m pip install -e '.[dev,qq]'
+      - name: Install independent QQ entrypoint
+        run: python -m pip install -e distributions/qq
       - name: Verify QQ-only runtime really has no OneBot dependency
         run: |
           python - <<'PY'
@@ -33,7 +35,7 @@ jobs:
           assert find_spec("nonebot.adapters.onebot") is None, "OneBot was installed unexpectedly"
           import nonebot
           nonebot.init(driver="~none", render={"provider":"playwright","startup":"off"})
-          loaded = nonebot.load_plugin("nonebot_plugin_aawarframe")
+          loaded = nonebot.load_plugin("nonebot_plugin_aawfqq")
           assert loaded is not None, "The shared core failed to load with QQ-only dependencies"
           from nonebot_plugin_aawarframe.protocols.message import Message, MessageSegment
           assert Message(MessageSegment.text("ok")).extract_plain_text() == "ok"
@@ -41,6 +43,15 @@ jobs:
           PY
       - name: Install OneBot separately for legacy compatibility tests
         run: python -m pip install -e '.[onebot]'
+      - name: Install and load OneBot entrypoint
+        run: |
+          python -m pip install -e distributions/onebot
+          python - <<'PY'
+          import nonebot
+          nonebot.init(driver="~none", render={"provider":"playwright","startup":"off"})
+          assert nonebot.load_plugin("nonebot_plugin_aawfonebot") is not None
+          print("OneBot entrypoint loads the same core successfully")
+          PY
       - name: Check independent distribution wheels
         run: |
           python -m build --wheel distributions/qq --outdir dist/qq
