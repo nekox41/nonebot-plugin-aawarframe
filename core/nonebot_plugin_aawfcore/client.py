@@ -4,6 +4,9 @@
 消息格式。未来远程部署时可替换为带鉴权的真实 HTTP transport。
 """
 
+import asyncio
+from contextlib import asynccontextmanager
+
 import httpx
 
 from .api import app
@@ -39,6 +42,27 @@ class CoreClient:
             f"/v1/notifications/{delivery_id}/ack",
             {"ok": ok, "error": error[:200]},
         )
+
+    @asynccontextmanager
+    async def ocr_admission(self):
+        # One in-process Core runtime: both QQ and OneBot share the same quota.
+        from .bootstrap import get_runtime
+
+        async with get_runtime().ocr.admission():
+            yield
+
+    @asynccontextmanager
+    async def ocr_download(self):
+        from .bootstrap import get_runtime
+        from .infrastructure.riven_ocr import DOWNLOAD_TIMEOUT
+
+        ocr = get_runtime().ocr
+        try:
+            async with asyncio.timeout(DOWNLOAD_TIMEOUT):
+                async with ocr.download_slots:
+                    yield
+        except TimeoutError:
+            raise ValueError('图片下载超时，请稍后重试。') from None
 
     async def close(self):
         await self._client.aclose()
