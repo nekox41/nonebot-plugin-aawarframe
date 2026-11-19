@@ -37,10 +37,10 @@ def group_scope(bot, event) -> tuple[str, str, str] | None:
             )
         return None
     if hasattr(event, "group_id"):
-        return (
-            str(bot.self_id), str(event.group_id),
-            str(getattr(event, "user_id", event.get_user_id())),
-        )
+        user = getattr(event, "user_id", None)
+        if user is None:
+            user = event.get_user_id()
+        return str(bot.self_id), str(event.group_id), str(user)
     return None
 
 
