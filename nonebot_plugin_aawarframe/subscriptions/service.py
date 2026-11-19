@@ -16,6 +16,7 @@ from ..models.common import Card, Section
 from ..models.errors import UserInputError
 from ..models.riven_market import RivenMarketQuery
 from ..providers.worldstate import WorldStateProvider
+from ..protocols.qq import is_qq_bot, send_subscription
 from ..rendering.viewmodels import fallback_text
 from ..worldstate.parsers.cycles import cetus_cycle
 from .rules import (
@@ -404,23 +405,52 @@ class SubscriptionService:
 
     async def _send(self, bot, delivery, now: datetime) -> None:
         card = self._notification_card(delivery, now)
-        message = Message([MessageSegment.at(delivery.user_id)])
+        # QQ 官方主动消息使用 OpenID 与官方 send_to_group，不能再调用 OneBot API。
+        is_official = is_qq_bot(bot)
+        message = None if is_official else Message([MessageSegment.at(delivery.user_id)])
+        image = None
+        fallback = None
         if self.renderer is not None:
             try:
                 images = await self.renderer.render(card)
                 if not images:
                     raise ValueError("卡片渲染结果为空")
-                message += MessageSegment.image(images[0])
+                if is_official:
+                    image = images[0]
+                else:
+                    message += MessageSegment.image(images[0])
             except Exception:
                 logger.exception("订阅图片生成失败，回退为文本")
-                message += MessageSegment.text("\n" + fallback_text(card))
+                fallback = "\n" + fallback_text(card)
+                if not is_official:
+                    message += MessageSegment.text(fallback)
         else:
             # 无浏览器的测试环境；正式运行时 Runtime 注入 CardRenderer。
-            message += MessageSegment.text("\n" + fallback_text(card))
-        await asyncio.wait_for(
-            bot.send_group_msg(group_id=int(delivery.group_id), message=message),
-            timeout=20,
-        )
+            fallback = "\n" + fallback_text(card)
+            if not is_official:
+                message += MessageSegment.text(fallback)
+        if is_official:
+            try:
+                await asyncio.wait_for(
+                    send_subscription(
+                        bot, delivery, image=image, fallback=fallback or ("\n" + fallback_text(card))
+                    ),
+                    timeout=20,
+                )
+            except Exception:
+                if image is None:
+                    raise
+                # 官方平台媒体上传失败时退回文字，仍由平台控制主动通知配额。
+                logger.warning("QQ 官方订阅图片发送失败，尝试文本回退", exc_info=True)
+                await asyncio.wait_for(
+                    send_subscription(bot, delivery, image=None, fallback="\n" + fallback_text(card)),
+                    timeout=20,
+                )
+        else:
+            await asyncio.wait_for(
+                bot.send_group_msg(group_id=int(delivery.group_id), message=message),
+                timeout=20,
+            )
 
     async def _tick(self, now: datetime | None = None) -> None:
         now = now or datetime.now(UTC)
