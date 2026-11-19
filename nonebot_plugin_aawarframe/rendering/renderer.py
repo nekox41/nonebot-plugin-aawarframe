@@ -13,7 +13,7 @@ from math import ceil
 from pathlib import Path
 from time import monotonic, perf_counter
 
-from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+from jinja2 import ChoiceLoader, Environment, FileSystemLoader, StrictUndefined, select_autoescape
 
 from ..infrastructure.cache import AsyncTTLCache
 from ..models.common import Card, Snapshot, utcnow
@@ -53,6 +53,7 @@ class CardRenderer:
         now_provider: Callable[[], datetime] = utcnow,
         cache_clock: Callable[[], float] = monotonic,
     ):
+        self.template_override_dir: Path | None = None
         self.environment = Environment(
             loader=FileSystemLoader(ROOT / "templates"),
             autoescape=select_autoescape(default=True),
@@ -65,20 +66,12 @@ class CardRenderer:
         selected = styles / "themes" / (theme + ".css")
         if selected.resolve().parent != (styles / "themes").resolve() or not selected.is_file():
             raise ValueError("未知卡片主题：" + theme)
-        self.css = "\n".join(
-            path.read_text(encoding="utf-8")
-            for path in [
-                styles / "base.css",
-                styles / "trader.css",
-                styles / "riven_values.css",
-                styles / "riven_market.css",
-                styles / "trend.css",
-                styles / "relics.css",
-                styles / "riven_analysis.css",
-                selected,
-            ]
-        )
         self.theme = theme
+        self._css_files = [
+            "base.css", "trader.css", "riven_values.css", "riven_market.css",
+            "trend.css", "relics.css", "riven_analysis.css", f"themes/{theme}.css",
+        ]
+        self._load_css()
         self.asset_fingerprint = self._asset_fingerprint()
         self.now_provider = now_provider
         self.semaphore = asyncio.Semaphore(concurrency)
@@ -89,15 +82,44 @@ class CardRenderer:
         self.max_concurrent_renders = 0
         self.render_durations: deque[float] = deque(maxlen=512)
 
+    def _load_css(self) -> None:
+        styles = ROOT / "assets/css"
+        override = self.template_override_dir / "css" if self.template_override_dir else None
+        parts = []
+        for name in self._css_files:
+            candidate = override / name if override else None
+            if candidate is None or not candidate.is_file():
+                candidate = styles / name
+            parts.append(candidate.read_text(encoding="utf-8"))
+        self.css = "\n".join(parts)
+
+    def configure_admin_overrides(self, directory: Path) -> None:
+        """Enable persisted admin template/CSS overrides and invalidate render caches."""
+        self.template_override_dir = Path(directory)
+        template_dir = self.template_override_dir / "templates"
+        self.environment.loader = ChoiceLoader(
+            [FileSystemLoader(template_dir), FileSystemLoader(ROOT / "templates")]
+        )
+        self.environment.cache.clear()
+        self._load_css()
+        self.asset_fingerprint = self._asset_fingerprint()
+        self.cache.entries.clear()
+        self.page_cache.entries.clear()
+
     def _asset_fingerprint(self) -> str:
         digest = sha256()
         digest.update(str(RENDER_CACHE_VERSION).encode())
         digest.update(self.theme.encode())
         digest.update(self.css.encode())
-        for path in sorted((ROOT / "templates").rglob("*")):
-            if path.is_file():
-                digest.update(path.relative_to(ROOT).as_posix().encode())
-                digest.update(path.read_bytes())
+        roots = [ROOT / "templates"]
+        if self.template_override_dir:
+            roots.insert(0, self.template_override_dir / "templates")
+        for root in roots:
+            if root.exists():
+                for path in sorted(root.rglob("*")):
+                    if path.is_file():
+                        digest.update(path.relative_to(root).as_posix().encode())
+                        digest.update(path.read_bytes())
         return digest.hexdigest()
 
     @property
