@@ -207,6 +207,8 @@ class CardRenderer:
         )
         buckets = []
         for name, deadline in self._deadlines(card):
+            if name in {"rotation", "transition"}:
+                continue
             seconds = max(0, ceil((deadline - now).total_seconds()))
             buckets.append((name, ceil(seconds / 10)))
         payload = {
