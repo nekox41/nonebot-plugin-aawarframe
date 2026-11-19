@@ -185,6 +185,7 @@ def export_archive(directory, output, resource_root=None):
                 r[0] for r in target.execute("SELECT name FROM sqlite_master WHERE type='table'")
             }
             for name in tables - {
+                "sqlite_sequence",
                 "item_catalog",
                 "item_aliases",
                 "items",
