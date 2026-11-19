@@ -1,4 +1,4 @@
-# 作用：验证离线资源恢复、已有数据保护、联网失败回退和压缩包路径安全。
+# 作用：验证随包资源恢复、版本升级、用户数据保护、失败回退和压缩包路径安全。
 # 编写日期：2026-11-14
 # 作者：Aameow
 
@@ -6,8 +6,8 @@ import gzip
 import hashlib
 import io
 import json
-import sqlite3
 import shutil
+import sqlite3
 import tarfile
 
 import pytest
@@ -132,7 +132,10 @@ def test_runtime_initialization_does_not_import_network_builder():
     assert not hasattr(pipeline, "initialize")
     assert not hasattr(pipeline, "build_latest")
     assert not hasattr(pipeline, "fetch")
-    assert "initialize(" not in bootstrap.setup.__code__.co_names
+    import inspect
+
+    assert "await initialize(" not in inspect.getsource(bootstrap.setup)
+    assert "from .initialization.build" not in inspect.getsource(bootstrap)
 
 
 def test_archive_rejects_path_traversal(tmp_path):
