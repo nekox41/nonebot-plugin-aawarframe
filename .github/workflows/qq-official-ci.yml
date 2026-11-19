@@ -33,10 +33,10 @@ jobs:
           assert find_spec("nonebot.adapters.onebot") is None, "OneBot was installed unexpectedly"
           import nonebot
           nonebot.init(driver="~none", render={"provider":"playwright","startup":"off"})
-          from nonebot_plugin_aawarframe.protocols.message import Message, MessageSegment
-          assert Message(MessageSegment.text("ok")).extract_plain_text() == "ok"
           loaded = nonebot.load_plugin("nonebot_plugin_aawarframe")
           assert loaded is not None, "The shared core failed to load with QQ-only dependencies"
+          from nonebot_plugin_aawarframe.protocols.message import Message, MessageSegment
+          assert Message(MessageSegment.text("ok")).extract_plain_text() == "ok"
           print("QQ-only startup works without any OneBot installation")
           PY
       - name: Install OneBot separately for legacy compatibility tests
