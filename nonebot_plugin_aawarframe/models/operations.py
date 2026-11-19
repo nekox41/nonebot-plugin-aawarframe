@@ -19,6 +19,7 @@ class OperationTask(BaseModel):
 class InvasionDisplay(BaseModel):
     node: str
     planet: str
+    mission_type: str = ""
     attacker: str
     defender: str
     attacker_percent: float = Field(ge=0, le=100)
