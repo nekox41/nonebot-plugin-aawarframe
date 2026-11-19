@@ -192,7 +192,7 @@ async def test_preview_api_renders_local_sample_without_upstream_requests(grq):
         client.headers["Authorization"] = "Bearer long-test-password-12345"
         response = await client.post("/api/previews", json={"template": "sortie"})
         assert response.status_code == 200
-        assert response.json()["images"] == ["d2VicHAtcHJldmlldw=="]
+        assert response.json()["images"] == ["d2VicC1wcmV2aWV3"]
         renderer.render.assert_awaited_once()
 
 
