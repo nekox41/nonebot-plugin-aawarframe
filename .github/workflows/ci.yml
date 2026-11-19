@@ -28,7 +28,14 @@ jobs:
       - name: Verify new backend and frontend imports
         run: |
           python -m compileall -q core/nonebot_plugin_aawfcore nonebot_plugin_aawfqq nonebot_plugin_aawfonebot
-          python -c "import nonebot_plugin_aawfcore.api as a; assert a.app"
+          python - <<'PY'
+          import nonebot
+          nonebot.init(driver="~none", render={"provider":"playwright","startup":"off"})
+          assert nonebot.load_plugin("nonebot_plugin_aawfcore") is not None
+          from nonebot_plugin_aawfcore.api import app
+          assert app is not None
+          print("Core ASGI API registered")
+          PY
       - name: Lint new boundaries
         run: |
           python -m ruff check core/nonebot_plugin_aawfcore/api.py core/nonebot_plugin_aawfcore/client.py nonebot_plugin_aawfqq/nonebot_plugin_aawfqq nonebot_plugin_aawfonebot/nonebot_plugin_aawfonebot scripts/build_resources.py scripts/package_release.py
