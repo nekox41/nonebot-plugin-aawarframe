@@ -11,18 +11,10 @@ class RivenAttribute(BaseModel):
     negative: str
 
 
-class RivenVariantValues(BaseModel):
-    name: str
-    disposition: float
-    ordinary: list[RivenAttribute] = Field(default_factory=list)
-    spliced: list[RivenAttribute] = Field(default_factory=list)
-
-
 class RivenValuesBoard(BaseModel):
     layout: str
     name: str
     weapon_class: str
     variants: list[str] = Field(default_factory=list)
-    variant_values: list[RivenVariantValues] = Field(default_factory=list)
     ordinary: list[RivenAttribute] = Field(default_factory=list)
     spliced: list[RivenAttribute] = Field(default_factory=list)
