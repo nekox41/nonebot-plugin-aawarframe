@@ -33,7 +33,17 @@ def find_wheel(root: Path, package: str, version: str) -> Path:
         raise SystemExit(
             f"预期在 dist/{directory} 找到一个 {distribution} {version} wheel，实际找到 {len(matches)} 个"
         )
-    return matches[0]
+    wheel = matches[0]
+    if package == "core":
+        required = {
+            "nonebot_plugin_aawfcore/assets/offline.tar.gz",
+            "nonebot_plugin_aawfcore/assets/riven_stats.json",
+        }
+        with zipfile.ZipFile(wheel) as archive:
+            missing = required - set(archive.namelist())
+        if missing:
+            raise SystemExit("Core wheel 缺少运行时资源：" + ", ".join(sorted(missing)))
+    return wheel
 
 
 def build(version: str, root: Path = ROOT) -> None:
