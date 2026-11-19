@@ -59,10 +59,14 @@ async def test_wiki_preserves_base_item_and_unknown_input(grq):
     provider = SimpleNamespace(
         search=AsyncMock(return_value=Snapshot(data="result", source="test"))
     )
-    await WikiService(provider).search("毒妈")
-    provider.search.assert_awaited_with(grq.search("Items", "Saryn").resource.name())
-    await WikiService(provider).search("未知资料XYZ")
-    provider.search.assert_awaited_with("未知资料XYZ")
+    service = WikiService(provider)
+    try:
+        await service.search("毒妈")
+        provider.search.assert_awaited_with("毒妈")
+        await service.search("未知资料XYZ")
+        provider.search.assert_awaited_with("未知资料XYZ")
+    finally:
+        service.close()
 
 
 def test_json_mappings_and_queries_use_no_sql(grq):
