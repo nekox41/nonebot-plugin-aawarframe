@@ -193,7 +193,9 @@ class Card(BaseModel):
                     f"{task.number}. {task.mission} · {task.node} / {task.planet} · {task.modifier}"
                 )
             for invasion in board.invasions:
-                lines.append(f"{invasion.node} / {invasion.planet}")
+                lines.append(
+                    f"{invasion.node} / {invasion.planet} · 节点基础任务：{invasion.mission_type or '暂缺'}"
+                )
                 lines.append(
                     f"{invasion.attacker} {invasion.attacker_percent:.1f}%："
                     + "、".join(invasion.attacker_rewards)
