@@ -13,6 +13,7 @@ import pytest
 from nonebot_plugin_aawfcore.admin.server import create_app
 from nonebot_plugin_aawfcore.grq import GameResourceQuery, configure_grq
 from nonebot_plugin_aawfcore.models.common import Snapshot
+from nonebot_plugin_aawfcore.models.wiki import OpenSearchResponse
 from nonebot_plugin_aawfcore.services.wiki import WikiService
 
 BURSTON = "/Lotus/Weapons/Tenno/Rifle/BurstRifle"
@@ -57,7 +58,7 @@ def test_unified_items_and_shared_aliases(grq):
 async def test_wiki_preserves_base_item_and_unknown_input(grq):
     configure_grq(grq)
     provider = SimpleNamespace(
-        search=AsyncMock(return_value=Snapshot(data="result", source="test"))
+        search=AsyncMock(return_value=Snapshot(data=OpenSearchResponse.model_validate(["毒妈", ["毒妈"], ["简介"], ["https://warframe.huijiwiki.com/wiki/test"]]).to_result(), source="test"))
     )
     service = WikiService(provider)
     try:
