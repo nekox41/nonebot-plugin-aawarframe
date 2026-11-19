@@ -12,10 +12,7 @@ def main() -> None:
     nonebot.init()
     driver = nonebot.get_driver()
     driver.register_adapter(QQAdapter)
-    # 安装独立入口时：
-    #   nonebot.load_plugin("nonebot_plugin_aawfqq")
-    # 现阶段使用源码 PR 或核心版时：
-    nonebot.load_plugin("nonebot_plugin_aawarframe")
+    nonebot.load_plugin("nonebot_plugin_aawfqq")
     nonebot.run()
 
 
