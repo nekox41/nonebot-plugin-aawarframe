@@ -83,7 +83,10 @@ def test_json_mappings_and_queries_use_no_sql(grq):
     grq.db.set_trace_callback(None)
     assert queries == []
     tables = {r[0] for r in grq.db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-    assert tables == {"item_catalog", "item_aliases", "item_overrides", "catalog_meta", "settings"}
+    assert tables == {
+        "item_catalog", "item_aliases", "item_overrides", "catalog_meta", "settings",
+        "items", "aliases", "market_products", "market_aliases",
+    }
 
 
 async def test_alias_api_and_removed_admin_endpoints(grq):
