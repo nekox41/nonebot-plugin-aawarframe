@@ -7,12 +7,12 @@ import asyncio
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "core"))
 import nonebot
 
 nonebot.init(driver="~none", render={"startup": "off"})
-from nonebot_plugin_aawarframe.grq import GameResourceQuery  # noqa: E402
-from nonebot_plugin_aawarframe.initialization.pipeline import (  # noqa: E402
+from nonebot_plugin_aawfcore.grq import GameResourceQuery  # noqa: E402
+from nonebot_plugin_aawfcore.initialization.pipeline import (  # noqa: E402
     ensure_offline,
     export_archive,
     initialize,
