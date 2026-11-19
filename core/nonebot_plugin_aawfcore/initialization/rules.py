@@ -9,7 +9,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "nonebot_plugin_aawarframe/assets/grq"
+OUT = ROOT / "nonebot_plugin_aawfcore/assets/grq"
 
 
 def read(path):
