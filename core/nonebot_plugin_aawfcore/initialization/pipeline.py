@@ -1,45 +1,26 @@
-# 作用：首次联网初始化、原子更新资源，以及安全恢复和导出离线资源包。
+# 作用：仅用随包资源离线初始化、版本切换，以及安全恢复和导出离线资源包。
 # 编写日期：2026-11-14
 # 作者：Aameow
 
-import asyncio
 import gzip
 import json
 import logging
-import re
+import hashlib
 import shutil
 import sqlite3
 import tarfile
 import tempfile
-import threading
-import time
 import uuid
 from pathlib import Path
-from urllib.request import Request, urlopen
 
 from ..localization.resources import ASSETS, PACKAGED, configure_resources
-from .nodes import parse_schedule, prepare_nodes
+from .nodes import parse_schedule
 
 logger = logging.getLogger(__name__)
 SCHEMA = 1
 
 
-def fetch(url, text=False):
-    with urlopen(
-        Request(
-            url,
-            headers={
-                "User-Agent": "AAWarframe/0.15 (+https://github.com/nekox41/nonebot-plugin-aawarframe)",
-                "Language": "zh-hans",
-            },
-        ),
-        timeout=15,
-    ) as response:
-        body = response.read()
-    return body.decode("utf-8") if text else json.loads(body)
-
-
-def restore_archive(archive, directory):
+def restore_archive(archive, directory, *, archive_sha256=None):
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=directory, prefix=".restore-") as temporary:
@@ -76,7 +57,7 @@ def restore_archive(archive, directory):
                 if not (destination / path.name).exists():
                     json.loads(path.read_text(encoding="utf-8"))
                     shutil.copyfile(path, destination / path.name)
-        publish(directory, root, network=False, attempted=False)
+        publish(directory, root, archive_sha256=archive_sha256)
         return root
 
 
@@ -115,128 +96,75 @@ def validate(root, quick=False):
         raise ValueError("仲裁节点映射不完整")
 
 
-def publish(directory, root, network, attempted=True):
+def publish(directory, root, *, archive_sha256=None):
+    """Atomically commit a fully validated packaged generation."""
     marker = Path(directory) / "resources/current.json"
     marker.parent.mkdir(parents=True, exist_ok=True)
     temp = marker.with_suffix(".tmp")
     temp.write_text(
-        json.dumps(
-            {
-                "schema": SCHEMA,
-                "generation": root.name,
-                "network": network,
-                "checked_at": time.time() if attempted else 0,
-            }
-        ),
+        json.dumps({
+            "schema": SCHEMA,
+            "generation": root.name,
+            "archive_sha256": archive_sha256,
+            "source": "packaged",
+        }),
         encoding="utf-8",
     )
     temp.replace(marker)
     configure_resources(root)
 
 
-def ensure_offline(directory):
-    directory = Path(directory)
+def _valid_current(directory):
     marker = directory / "resources/current.json"
-    if marker.exists():
-        try:
-            state = json.loads(marker.read_text())
-            name = state["generation"]
-            if Path(name).name != name:
-                raise ValueError("无效资源目录")
-            root = directory / "resources/versions" / name
-            validate(root, quick=True)
+    if not marker.is_file():
+        return None, {}
+    try:
+        state = json.loads(marker.read_text(encoding="utf-8"))
+        name = state["generation"]
+        if not isinstance(name, str) or name in {".", ".."} or Path(name).name != name:
+            raise ValueError("无效资源目录")
+        root = directory / "resources/versions" / name
+        validate(root, quick=True)
+        return root, state
+    except (OSError, ValueError, KeyError, TypeError):
+        logger.warning("已有本地资源损坏或版本记录无效，准备从安装包恢复")
+        return None, {}
+
+
+def ensure_offline(directory):
+    """Select packaged resources only; a changed wheel archive replaces the active snapshot.
+
+    User databases/configuration remain untouched. If an upgraded archive cannot be
+    restored, the last valid generation remains active instead of switching halfway.
+    """
+    directory = Path(directory)
+    root, state = _valid_current(directory)
+    archive = PACKAGED / "offline.tar.gz"
+    if not archive.is_file():
+        # Explicitly support editable development trees with unpacked resources.
+        if root is not None:
             configure_resources(root)
             return root
-        except (OSError, ValueError, KeyError):
-            logger.warning("本地资源目录不完整，恢复随包数据")
-    archive = PACKAGED / "offline.tar.gz"
-    if archive.exists():
-        return restore_archive(archive, directory)
-    # 开发目录直接使用可编辑的源 JSON；发布包始终包含离线压缩包。
-    validate(PACKAGED)
-    configure_resources(PACKAGED)
-    return PACKAGED
+        validate(PACKAGED)
+        configure_resources(PACKAGED)
+        return PACKAGED
 
-
-def build_latest(directory, base, stop):
-    from . import market, rules, wfcd
-
-    stage = Path(tempfile.mkdtemp(prefix=".initialize-", dir=directory))
-    try:
-        resources = stage / "resources"
-        shutil.copytree(
-            base, resources, ignore=shutil.ignore_patterns("offline.tar.gz", "__pycache__")
-        )
-        try:
-            revision = fetch("https://api.github.com/repos/WFCD/warframe-items/commits/master")[
-                "sha"
-            ]
-        except Exception:
-            # 匿名 GitHub API 额度耗尽时仍可获取默认分支的最新公开文件。
-            revision = "master"
-        wfcd.prepare(revision, stage / "raw", output=resources / "grq/items.json.gz", stop=stop)
-        if stop.is_set():
-            raise TimeoutError("初始化已取消")
-        market.prepare(output=resources / "grq/market.json.gz")
-        time.sleep(0.4)
-        rules.main(output=resources / "grq")
-        schedule_text = fetch("https://browse.wf/arbys.txt", text=True)
-        schedule = parse_schedule(schedule_text)
-        regions = fetch("https://browse.wf/warframe-public-export-plus/ExportRegions.json")
-        tier_text = fetch(
-            "https://raw.githubusercontent.com/calamity-inc/browse.wf/senpai/supplemental-data/arbyTiers.js",
-            text=True,
-        )
-        tiers = dict(re.findall(r'(\w+):\s*"([SABCDF])"', tier_text))
-        if not tiers:
-            raise ValueError("仲裁评级数据为空")
-        existing = json.loads((resources / "ExportRegions_zh.json").read_text())
-        descriptions = json.loads((resources / "descriptions.json").read_text())
-        nodes = prepare_nodes(existing, regions, schedule, tiers, descriptions)
-        (resources / "ExportRegions_zh.json").write_text(
-            json.dumps(nodes, ensure_ascii=False), encoding="utf-8"
-        )
-        with gzip.open(resources / "arbitrations.csv.gz", "wt", encoding="utf-8") as stream:
-            stream.write(schedule_text)
-        validate(resources)
-        if stop.is_set():
-            raise TimeoutError("初始化已取消")
-        root = Path(directory) / "resources/versions" / ("online-" + uuid.uuid4().hex)
-        root.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(resources, root)
+    with archive.open("rb") as stream:
+        fingerprint = hashlib.file_digest(stream, "sha256").hexdigest()
+    if root is not None and state.get("archive_sha256") == fingerprint:
+        configure_resources(root)
         return root
-    finally:
-        shutil.rmtree(stage, ignore_errors=True)
 
-
-async def initialize(directory, force=False):
-    directory = Path(directory)
-    directory.mkdir(parents=True, exist_ok=True)
-    base = await asyncio.to_thread(ensure_offline, directory)
-    marker = directory / "resources/current.json"
-    state = json.loads(marker.read_text()) if marker.exists() else {}
-    if (
-        not force
-        and state.get("schema") == SCHEMA
-        and time.time() - state.get("checked_at", 0) < 86400
-    ):
-        return base
-    stop = threading.Event()
     try:
-        root = await asyncio.wait_for(
-            asyncio.to_thread(build_latest, directory, base, stop), timeout=120
-        )
-        publish(directory, root, network=True)
-        logger.info("资源初始化完成，已使用最新预处理数据")
+        restored = restore_archive(archive, directory, archive_sha256=fingerprint)
+    except Exception:
+        if root is None:
+            raise
+        logger.exception("随包资源恢复失败，继续使用上次验证通过的离线数据")
+        configure_resources(root)
         return root
-    except asyncio.CancelledError:
-        stop.set()
-        raise
-    except Exception as exc:
-        stop.set()
-        logger.warning("联网初始化未完成，继续使用本地资源：%s", exc)
-        publish(directory, base, network=False) if base != PACKAGED else None
-        return base
+    logger.info("已启用安装包携带的离线资源：%s", restored.name)
+    return restored
 
 
 def export_archive(directory, output, resource_root=None):
