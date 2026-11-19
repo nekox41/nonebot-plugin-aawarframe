@@ -8,6 +8,7 @@ import sqlite3
 from collections import Counter
 
 from .models import Resource
+from .links import PREFIXES, SUFFIXES
 from .normalizer import normalize_name
 
 
@@ -15,6 +16,7 @@ def persist_catalog(
     db: sqlite3.Connection,
     resources: dict[str, Resource],
     links: list[dict],
+    rivens: dict[str, Resource] | None = None,
 ) -> None:
     real = {key: row for key, row in resources.items() if not key.startswith("market:")}
     orphan = {key: row for key, row in resources.items() if key.startswith("market:")}
@@ -26,13 +28,52 @@ def persist_catalog(
             if source in real and source not in families:
                 families[source] = target
 
+    # Exact, category-guarded variant identity derivation happens once at import,
+    # never during each Riven values query. Names only determine a compatible
+    # family: the item ID and its own omegaAttenuation remain independent.
+    known = {
+        normalize_name(r.names.get("en", "")): r.id
+        for r in real.values()
+        if r.metadata.get("omegaAttenuation") is not None
+    }
+    variants = {}
+    for key, row in real.items():
+        if row.metadata.get("omegaAttenuation") is None:
+            continue
+        name = row.names.get("en", "")
+        alternatives = [name]
+        alternatives += [name[len(p):] for p in PREFIXES if name.startswith(p)]
+        alternatives += [name[:-len(s)] for s in SUFFIXES if name.endswith(s)]
+        for option in alternatives:
+            normalized = normalize_name(option)
+            if normalized in known:
+                variants.setdefault(known[normalized], set()).add(key)
+    for riven in (rivens or {}).values():
+        ref = riven.identifiers.get("game.ref", "").replace("/StoreItems/", "/")
+        base = real.get(ref)
+        if base is None:
+            candidates = [
+                r for r in real.values()
+                if r.metadata.get("omegaAttenuation") is not None
+                and normalize_name(r.names.get("en", "")) ==
+                normalize_name(riven.names.get("en", ""))
+            ]
+            base = candidates[0] if len(candidates) == 1 else None
+        if base is None:
+            continue
+        for item_id in variants.get(base.id, {base.id}):
+            item = real[item_id]
+            if (item.metadata.get("category") == base.metadata.get("category")
+                    and item_id not in families):
+                families[item_id] = riven.id
+        families[base.id] = riven.id
+
     wm_slugs = [r.identifiers["market.slug"] for r in real.values()
                 if "market.slug" in r.identifiers]
     if len(wm_slugs) != len(set(wm_slugs)):
         raise ValueError("一个市场商品被分配给多个游戏物品")
 
-    by_ref = {r.id.casefold()
-              for r in real.values()}
+    by_ref = {r.id.casefold() for r in real.values()}
     all_refs = Counter(
         r.metadata.get("market_source_game_ref", "").casefold()
         for r in resources.values() if "market.slug" in r.identifiers
