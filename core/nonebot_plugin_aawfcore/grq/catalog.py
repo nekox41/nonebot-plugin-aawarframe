@@ -4,7 +4,6 @@
 
 import gzip
 import json
-from collections import Counter
 
 from ..localization.resources import ASSETS
 from .models import Resource
@@ -22,18 +21,13 @@ def merge_market(items, market):
         for r in items.values()
         if not r.id.startswith("market:")
     }
-    # 两种商品可能指向同一内部物品，例如完整守护与套装，仍需保留独立商品身份。
-    counts = Counter(
-        r.identifiers.get("game.ref", "").replace("/StoreItems/", "/").casefold() for r in market
-    )
+    # Non-verifiable and duplicate Market references remain separate market-only products.
     claimed = set()
     slugs = {}
     for row in sorted(market, key=lambda r: (r.id.endswith("_set"), r.id)):
         ref = row.identifiers.get("game.ref", "").replace("/StoreItems/", "/")
         target = refs.get(ref.casefold())
-        if not target and ref.startswith("/Lotus/") and counts[ref.casefold()] == 1:
-            target = ref
-        if not target or target in claimed:
+            if not target or target in claimed:
             target = "market:" + row.id
         claimed.add(target)
         base = result.get(target)
@@ -48,7 +42,8 @@ def merge_market(items, market):
             )
         )
         identifiers = {**(base.identifiers if base else {}), **row.identifiers}
-        if target.startswith("market:") and ref.casefold() in refs:
+        # This reference is informational only; unbound products are not game items.
+        if target.startswith("market:"):
             identifiers.pop("game.ref", None)
         result[target] = Resource(
             id=target,
@@ -60,6 +55,7 @@ def merge_market(items, market):
             metadata={
                 **(base.metadata if base else {}),
                 "market_tradable": row.metadata.get("tradable", True),
+                "market_source_game_ref": ref,
                 "market": row.metadata,
             },
         )
