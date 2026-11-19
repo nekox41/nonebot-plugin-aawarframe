@@ -6,7 +6,6 @@ import logging
 
 from nonebot import get_driver, on_message
 from nonebot.adapters import Bot, Event
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.matcher import Matcher
 from nonebot.typing import T_State
 
@@ -16,6 +15,7 @@ from ..infrastructure.riven_ocr import message_image
 from ..localization.riven_attributes import attributes
 from ..models.common import Card
 from ..models.errors import UserInputError, WikiChallengeError
+from ..protocols.message import Message, MessageSegment
 from ..protocols.qq import group_scope, is_qq_bot, send_reply
 from ..protocols.qq import message_image as qq_message_image
 from ..rendering.viewmodels import fallback_text, wiki_text
