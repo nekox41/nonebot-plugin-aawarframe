@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock
 
 import httpx
 
-from nonebot_plugin_aawfcore.infrastructure.wiki_http import WIKI_HEADERS
-from nonebot_plugin_aawfcore.infrastructure.wiki_transport import WikiCurlTransport
+from nonebot_plugin_aawarframe.infrastructure.wiki_http import WIKI_HEADERS
+from nonebot_plugin_aawarframe.infrastructure.wiki_transport import WikiCurlTransport
 
 
 async def test_decompressed_body_is_not_decoded_twice_and_only_public_headers_are_forwarded(monkeypatch):
@@ -21,7 +21,7 @@ async def test_decompressed_body_is_not_decoded_twice_and_only_public_headers_ar
         )),
         close=AsyncMock(),
     )
-    monkeypatch.setattr('nonebot_plugin_aawfcore.infrastructure.wiki_transport.AsyncSession',
+    monkeypatch.setattr('nonebot_plugin_aawarframe.infrastructure.wiki_transport.AsyncSession',
                         lambda **kwargs: session)
     async with httpx.AsyncClient(transport=WikiCurlTransport()) as client:
         response = await client.get('https://warframe.huijiwiki.com/api.php',

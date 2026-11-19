@@ -8,9 +8,9 @@ from unittest.mock import AsyncMock, Mock
 import httpx
 import pytest
 
-from nonebot_plugin_aawfcore import api
-from nonebot_plugin_aawfcore.models.errors import UserInputError
-from nonebot_plugin_aawfcore.protocols.message import Message, MessageSegment
+from nonebot_plugin_aawarframe import api
+from nonebot_plugin_aawarframe.models.errors import UserInputError
+from nonebot_plugin_aawarframe.protocols.message import Message, MessageSegment
 
 
 @pytest.mark.asyncio

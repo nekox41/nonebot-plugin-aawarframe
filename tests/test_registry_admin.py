@@ -10,18 +10,18 @@ from unittest.mock import AsyncMock
 import httpx
 import pytest
 
-from nonebot_plugin_aawfcore.admin.server import create_app
-from nonebot_plugin_aawfcore.grq import GameResourceQuery, configure_grq
-from nonebot_plugin_aawfcore.models.common import Snapshot
-from nonebot_plugin_aawfcore.models.wiki import OpenSearchResponse
-from nonebot_plugin_aawfcore.services.wiki import WikiService
+from nonebot_plugin_aawarframe.admin.server import create_app
+from nonebot_plugin_aawarframe.grq import GameResourceQuery, configure_grq
+from nonebot_plugin_aawarframe.models.common import Snapshot
+from nonebot_plugin_aawarframe.models.wiki import OpenSearchResponse
+from nonebot_plugin_aawarframe.services.wiki import WikiService
 
 BURSTON = "/Lotus/Weapons/Tenno/Rifle/BurstRifle"
 
 
 @pytest.fixture(scope="module")
 def grq(tmp_path_factory, test_assets_root):
-    from nonebot_plugin_aawfcore.localization.resources import configure_resources
+    from nonebot_plugin_aawarframe.localization.resources import configure_resources
 
     if test_assets_root is not None:
         configure_resources(test_assets_root)

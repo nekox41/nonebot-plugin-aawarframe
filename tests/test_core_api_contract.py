@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock
 import httpx
 import pytest
 
-from nonebot_plugin_aawfcore import api
-from nonebot_plugin_aawfcore.protocols.message import Message, MessageSegment
+from nonebot_plugin_aawarframe import api
+from nonebot_plugin_aawarframe.protocols.message import Message, MessageSegment
 
 
 def test_response_segments_keep_order_and_image_payload():

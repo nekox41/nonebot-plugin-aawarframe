@@ -5,12 +5,12 @@ __pycache__/
 .venv/
 build/
 dist/
-*.egg-info/
+*.egg-info
 data/
-# All downloaded, transformed Warframe resources are CI outputs, never Git source.
-core/nonebot_plugin_aawfcore/assets/*.json
-core/nonebot_plugin_aawfcore/assets/*.csv.gz
-core/nonebot_plugin_aawfcore/assets/*.json.gz
-core/nonebot_plugin_aawfcore/assets/*.tar.gz
-core/nonebot_plugin_aawfcore/assets/grq/*.json.gz
-core/nonebot_plugin_aawfcore/assets/resource-sources.json
+# Downloaded and generated resources are build outputs, not source files.
+nonebot_plugin_aawarframe/assets/*.json
+nonebot_plugin_aawarframe/assets/*.csv.gz
+nonebot_plugin_aawarframe/assets/*.json.gz
+nonebot_plugin_aawarframe/assets/*.tar.gz
+nonebot_plugin_aawarframe/assets/grq/*.json.gz
+nonebot_plugin_aawarframe/assets/resource-sources.json

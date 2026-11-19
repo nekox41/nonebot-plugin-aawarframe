@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawfcore.subscriptions.service import SubscriptionService
-from nonebot_plugin_aawfcore.subscriptions.store import SubscriptionStore
+from nonebot_plugin_aawarframe.subscriptions.service import SubscriptionService
+from nonebot_plugin_aawarframe.subscriptions.store import SubscriptionStore
 
 
 def test_reuse_smallest_available_number_without_reusing_primary_key(tmp_path):
@@ -131,7 +131,7 @@ async def test_public_numbers_commands_and_three_column_list(tmp_path):
 
 @pytest.mark.asyncio
 async def test_router_my_subscriptions_sends_image_with_three_columns(tmp_path, monkeypatch):
-    from nonebot_plugin_aawfcore.commands import router
+    from nonebot_plugin_aawarframe.commands import router
 
     provider = SimpleNamespace(fetch=AsyncMock(side_effect=RuntimeError("offline")))
     service = SubscriptionService(tmp_path, provider)

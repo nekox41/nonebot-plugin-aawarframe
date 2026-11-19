@@ -7,10 +7,10 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawfcore.models.common import CycleDisplay, Snapshot
-from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
-from nonebot_plugin_aawfcore.services.cycles import build_cycle, build_plains
-from nonebot_plugin_aawfcore.worldstate.parsers.cycles import (
+from nonebot_plugin_aawarframe.models.common import CycleDisplay, Snapshot
+from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+from nonebot_plugin_aawarframe.services.cycles import build_cycle, build_plains
+from nonebot_plugin_aawarframe.worldstate.parsers.cycles import (
     VALLIS_ANCHOR,
     cetus_cycle,
     duviri_cycle,

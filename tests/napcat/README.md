@@ -8,11 +8,11 @@
 
 ```bash
 python3.12 -m venv tests/napcat/.venv
-tests/napcat/.venv/bin/python -m pip install -e '.[dev]' 'nonebot2[websockets]>=2.5.0'
+tests/napcat/.venv/bin/python -m pip install -e '.[dev,onebot]'
 cp tests/napcat/.env.example tests/napcat/.env
 ```
 
-在 `.env` 填写 Token、测试 QQ 和测试群号。可选设置 `AAWARFRAME_WORLDSTATE_PROXY`，仅代理官方世界状态，不改变市场或 NapCat 的连接。该文件已被 Git 忽略。浏览器和中文字体的安装方式见仓库 README；`PLAYWRIGHT_BROWSERS_PATH` 必须与实际安装目录相同。
+在 `.env` 填写 Token、测试 QQ 和测试群号。可选设置 `AAWARFRAME_WORLDSTATE_PROXY`，仅代理官方世界状态，不改变市场或 NapCat 的连接。该文件已被 Git 忽略。浏览器环境见[安装指南](../../docs/installation.md)。
 
 ## 运行
 

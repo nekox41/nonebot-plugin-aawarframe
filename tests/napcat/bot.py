@@ -92,9 +92,9 @@ def main() -> None:
 
     # 让 NoneBot 的模块查找器直接发现源码，而非通过可编辑安装的后置查找器。
     sys.path.insert(0, str(HERE.parents[1]))
-    if nonebot.load_plugin("nonebot_plugin_aawfcore") is None:
+    if nonebot.load_plugin("nonebot_plugin_aawarframe") is None:
         raise RuntimeError("无法加载待测试插件")
-    from nonebot_plugin_aawfcore.commands.router import dispatch
+    from nonebot_plugin_aawarframe.commands.router import dispatch
 
     sent_smoke = False
 

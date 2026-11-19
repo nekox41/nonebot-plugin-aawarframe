@@ -10,12 +10,12 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawfcore.commands import router
-from nonebot_plugin_aawfcore.models.common import DataStatus, Snapshot
-from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
-from nonebot_plugin_aawfcore.services.nightwave import build_nightwave
-from nonebot_plugin_aawfcore.services.worldstate import WorldStateService
-from nonebot_plugin_aawfcore.worldstate.parsers.common import ParseError
+from nonebot_plugin_aawarframe.commands import router
+from nonebot_plugin_aawarframe.models.common import DataStatus, Snapshot
+from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+from nonebot_plugin_aawarframe.services.nightwave import build_nightwave
+from nonebot_plugin_aawarframe.services.worldstate import WorldStateService
+from nonebot_plugin_aawarframe.worldstate.parsers.common import ParseError
 
 
 def recorded():
@@ -86,12 +86,12 @@ def test_missing_inactive_or_empty_season():
 
 
 async def test_command_registration_and_world_service(monkeypatch):
-    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+    from nonebot_plugin_aawarframe.admin.control import DEFAULT_COMMANDS
 
     registered = DEFAULT_COMMANDS
     assert ("电波", set(), "nightwave") in registered
     snapshot, now = recorded()
-    monkeypatch.setattr("nonebot_plugin_aawfcore.services.worldstate.utcnow", lambda: now)
+    monkeypatch.setattr("nonebot_plugin_aawarframe.services.worldstate.utcnow", lambda: now)
     provider = SimpleNamespace(fetch=AsyncMock(return_value=snapshot))
     card = await WorldStateService(provider).query("nightwave")
     assert card.nightwave_mode and card.status == DataStatus.OK

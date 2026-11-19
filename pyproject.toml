@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nonebot-plugin-aawarframe"
-version = "0.24.1"
-description = "Aa 的 Warframe 助手：单包支持 QQ 官方和 OneBot V11"
+version = "0.24.2"
+description = "Aa 的 Warframe 助手：支持 QQ 官方和 OneBot V11"
 readme = "README.md"
 requires-python = "==3.12.*"
 license = "MIT"
@@ -32,15 +32,12 @@ dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.9", "build>=1", "twine>=6"]
 [tool.setuptools]
 include-package-data = false
 
-[tool.setuptools.package-dir]
-"" = "core"
-
 [tool.setuptools.packages.find]
-where = ["core"]
-include = ["nonebot_plugin_aawarframe*", "nonebot_plugin_aawfcore*"]
+where = ["."]
+include = ["nonebot_plugin_aawarframe*"]
 
 [tool.setuptools.package-data]
-nonebot_plugin_aawfcore = [
+nonebot_plugin_aawarframe = [
   "assets/offline.tar.gz", "assets/riven_stats.json",
   "rendering/templates/*.html", "rendering/assets/css/*.css",
   "rendering/assets/css/themes/*.css", "admin/static/*"

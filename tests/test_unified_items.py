@@ -2,10 +2,10 @@
 
 import sqlite3
 
-from nonebot_plugin_aawfcore.grq.models import Resource
-from nonebot_plugin_aawfcore.grq.storage import connect
-from nonebot_plugin_aawfcore.grq.unified import load_catalog, persist_catalog, report_unmatched
-from nonebot_plugin_aawfcore.services.riven_values import numerical_value
+from nonebot_plugin_aawarframe.grq.models import Resource
+from nonebot_plugin_aawarframe.grq.storage import connect
+from nonebot_plugin_aawarframe.grq.unified import load_catalog, persist_catalog, report_unmatched
+from nonebot_plugin_aawarframe.services.riven_values import numerical_value
 
 BASE = "/Lotus/Weapons/Tenno/Rifle/BurstRifle"
 MK1 = "/Lotus/Weapons/Tenno/Rifle/MK1BurstRifle"

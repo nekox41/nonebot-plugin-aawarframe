@@ -12,9 +12,9 @@ from nonebot.adapters import Bot, Event
 from nonebot.matcher import Matcher
 from nonebot.typing import T_State
 
-from nonebot_plugin_aawfcore.bootstrap import get_runtime
-from nonebot_plugin_aawfcore.commands.router import dispatch
-from nonebot_plugin_aawfcore.protocols.message import Message, MessageSegment
+from nonebot_plugin_aawarframe.bootstrap import get_runtime
+from nonebot_plugin_aawarframe.commands.router import dispatch
+from nonebot_plugin_aawarframe.protocols.message import Message, MessageSegment
 
 logger = logging.getLogger(__name__)
 _task: asyncio.Task | None = None

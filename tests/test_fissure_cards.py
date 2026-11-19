@@ -6,10 +6,10 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from nonebot_plugin_aawfcore.models.common import Snapshot
-from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
-from nonebot_plugin_aawfcore.rendering.viewmodels import paginate
-from nonebot_plugin_aawfcore.services.fissures import build_fissures
+from nonebot_plugin_aawarframe.models.common import Snapshot
+from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+from nonebot_plugin_aawarframe.rendering.viewmodels import paginate
+from nonebot_plugin_aawarframe.services.fissures import build_fissures
 
 NOW = datetime(2026, 11, 7, tzinfo=timezone.utc)
 
@@ -99,7 +99,7 @@ def test_two_columns_have_requested_tier_order(hard):
 
 
 def test_railjack_has_lith_meso_left_and_neo_axi_right():
-    from nonebot_plugin_aawfcore.services.fissures import build_void_storms
+    from nonebot_plugin_aawarframe.services.fissures import build_void_storms
 
     storms = []
     for i in range(4):

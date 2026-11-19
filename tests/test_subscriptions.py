@@ -6,14 +6,14 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawfcore.models.common import Snapshot
-from nonebot_plugin_aawfcore.models.worldstate import CycleState
-from nonebot_plugin_aawfcore.subscriptions.rules import (
+from nonebot_plugin_aawarframe.models.common import Snapshot
+from nonebot_plugin_aawarframe.models.worldstate import CycleState
+from nonebot_plugin_aawarframe.subscriptions.rules import (
     next_cetus_occurrence,
     parse_cetus_rule,
 )
-from nonebot_plugin_aawfcore.subscriptions.service import SubscriptionService
-from nonebot_plugin_aawfcore.subscriptions.store import SubscriptionStore
+from nonebot_plugin_aawarframe.subscriptions.service import SubscriptionService
+from nonebot_plugin_aawarframe.subscriptions.store import SubscriptionStore
 
 UTC = timezone.utc
 
@@ -90,7 +90,7 @@ async def test_scheduler_sends_once_and_restarts(tmp_path, monkeypatch):
         fetch=AsyncMock(return_value=Snapshot(data={"test": True}, source="test"))
     )
     monkeypatch.setattr(
-        "nonebot_plugin_aawfcore.subscriptions.service.cetus_cycle",
+        "nonebot_plugin_aawarframe.subscriptions.service.cetus_cycle",
         lambda data, stamp: (cycle, []),
     )
     service = SubscriptionService(tmp_path, provider)

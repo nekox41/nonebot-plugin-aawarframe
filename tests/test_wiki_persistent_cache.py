@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawfcore.models.wiki import OpenSearchResponse
-from nonebot_plugin_aawfcore.services.wiki import WikiService
+from nonebot_plugin_aawarframe.models.wiki import OpenSearchResponse
+from nonebot_plugin_aawarframe.services.wiki import WikiService
 
 
 def reply(keyword, title, description="页面描述"):
