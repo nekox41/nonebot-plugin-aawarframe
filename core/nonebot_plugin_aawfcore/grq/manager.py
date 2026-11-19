@@ -271,7 +271,9 @@ class GameResourceQuery:
             key: r.model_copy(update={"aliases": list(dict.fromkeys([*r.aliases, *aliases[key]]))})
             for key, r in self._base.items()
         }
-        item_index = build(Domain(name="Items", title="物品目录"), items, self._packed)
+        # Market-only offers must not be represented as game items.
+        game_items = {key: row for key, row in items.items() if not key.startswith("market:")}
+        item_index = build(Domain(name="Items", title="物品目录"), game_items, self._packed)
         tradable = {
             key: r for key, r in items.items() if r.enabled and r.metadata.get("market_tradable")
         }
