@@ -7,11 +7,10 @@ import base64
 import json
 import logging
 import sys
+from collections import deque
 from contextlib import asynccontextmanager
 from contextvars import ContextVar
-from collections import deque
 from pathlib import Path
-
 
 from ..models.errors import UserInputError
 
