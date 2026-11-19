@@ -1,62 +1,35 @@
-"""Protocol-independent output and lazy platform conversion."""
+"""同一个核心消息载体可以被 QQ 官方和 OneBot 两个平台转换。"""
 
-from types import SimpleNamespace
-from unittest.mock import AsyncMock
+import base64
 
-import pytest
-from nonebot.adapters.onebot.v11 import Message as OBMessage
-
-from nonebot_plugin_aawfcore.protocols.message import (
-    Message,
-    MessageSegment,
-    to_onebot,
-)
-from nonebot_plugin_aawfcore.protocols.qq import qq_messages, send_reply
+from nonebot_plugin_aawfcore.api import pack
+from nonebot_plugin_aawfcore.protocols.message import Message, MessageSegment
 
 
-def test_neutral_messages_are_not_protocol_objects():
-    output = Message(MessageSegment.text("hello"))
-    output += MessageSegment.image(b"image-data")
-    output += MessageSegment.at("123456789")
-    assert not isinstance(output, OBMessage)
-    assert output.extract_plain_text() == "hello"
-    assert len(output["image"]) == 1
-    assert [seg.type for seg in output] == ["text", "image", "at"]
+def test_neutral_message_pack_and_plaintext():
+    content = Message(MessageSegment.text("hello"))
+    content += MessageSegment.image(b"webp")
+    content += MessageSegment.at("openid")
+    assert content.extract_plain_text() == "hello"
+    assert [s.type for s in content["image"]] == ["image"]
+    data = pack(content)
+    assert data["message_type"] == "mixed"
+    assert base64.b64decode(data["segments"][1]["data_base64"]) == b"webp"
+    assert data["segments"][2] == {"type": "at", "user_id": "openid"}
 
 
-def test_neutral_messages_convert_to_onebot_only_at_send_boundary():
-    content = Message([
-        MessageSegment.at("12345"),
-        MessageSegment.text(" hello"),
-        MessageSegment.image(b"picture"),
-    ])
-    native = to_onebot(content)
-    assert isinstance(native, OBMessage)
-    assert [segment.type for segment in native] == ["at", "text", "image"]
-    assert "[CQ:at,qq=12345]" in str(native)
-    assert to_onebot(native) is native
+def test_onebot_and_qq_convert_only_in_protocol_packages():
+    import nonebot
 
+    assert nonebot.load_plugin("nonebot_plugin_aawfqq") is not None
+    assert nonebot.load_plugin("nonebot_plugin_aawfonebot") is not None
+    from nonebot_plugin_aawfqq.router import pages
+    from nonebot_plugin_aawfonebot.router import outbound
 
-def test_neutral_messages_convert_to_official_qq():
-    content = Message([
-        MessageSegment.at("openid_member"),
-        MessageSegment.text("hello"),
-        MessageSegment.image(b"card"),
-    ])
-    native = qq_messages(content)
-    assert len(native) == 1
-    assert [segment.type for segment in native[0]] == [
-        "mention_user", "text", "file_image"
-    ]
-    assert native[0][-1].data["content"] == b"card"
-
-
-@pytest.mark.asyncio
-async def test_legacy_send_reply_uses_lazy_native_conversion():
-    bot = SimpleNamespace(type="OneBot V11")
-    matcher = SimpleNamespace(finish=AsyncMock())
-    content = Message(MessageSegment.text("still works"))
-    await send_reply(bot, object(), content, matcher)
-    arg = matcher.finish.await_args.args[0]
-    assert isinstance(arg, OBMessage)
-    assert arg.extract_plain_text() == "still works"
+    payload = pack(Message([
+        MessageSegment.text("ok"),
+        MessageSegment.image(b"image"),
+        MessageSegment.reply(122),
+    ]))["segments"]
+    assert [s.type for s in pages(payload)[0]] == ["text", "file_image", "reference"]
+    assert [s.type for s in outbound(payload)] == ["text", "image", "reply"]
