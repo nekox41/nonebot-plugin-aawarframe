@@ -351,6 +351,11 @@ class GameResourceQuery:
     def search_market(self, query, allowed_ids=None):
         return search(self.market_index, query, allowed_ids)
 
+    def market_product(self, slug: str):
+        """Resolve a verified game-linked or Market-only offer from the Market index."""
+        matched = self.market_index.identifiers.get(("market.slug", slug), frozenset())
+        return self.market_index.resources[next(iter(matched))] if len(matched) == 1 else None
+
     def translate(self, domain, key, lang="zh-hans"):
         resource = self.get(domain, key)
         return resource.name(lang) if resource else key
