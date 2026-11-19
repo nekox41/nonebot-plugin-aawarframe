@@ -31,10 +31,10 @@ def persist_catalog(
     if len(wm_slugs) != len(set(wm_slugs)):
         raise ValueError("一个市场商品被分配给多个游戏物品")
 
-    by_ref = {r.identifiers.get("game.ref", r.id).replace("/StoreItems/", "/").casefold()
+    by_ref = {r.id.casefold()
               for r in real.values()}
     all_refs = Counter(
-        r.identifiers.get("game.ref", "").replace("/StoreItems/", "/").casefold()
+        r.metadata.get("market_source_game_ref", "").casefold()
         for r in resources.values() if "market.slug" in r.identifiers
     )
 
@@ -52,7 +52,7 @@ def persist_catalog(
                 "WHERE items.payload<>excluded.payload "
                 "OR items.riven_key IS NOT excluded.riven_key "
                 "OR items.enabled<>excluded.enabled",
-                (key, row.identifiers.get("game.ref", key).replace("/StoreItems/", "/"),
+                (key, key,
                  row.names.get("zh-hans", ""), row.names.get("en", ""),
                  families.get(key), row.identifiers.get("market.slug"), metadata,
                  row.model_dump_json(), int(row.enabled)),
@@ -61,7 +61,7 @@ def persist_catalog(
         # Products without a verified item identity cannot occupy the items table.
         for row in orphan.values():
             slug = row.identifiers["market.slug"]
-            ref = row.identifiers.get("game.ref", "").replace("/StoreItems/", "/")
+            ref = row.metadata.get("market_source_game_ref", "")
             if not ref:
                 reason = "missing_game_ref"
             elif ref.casefold() not in by_ref:
