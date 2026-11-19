@@ -318,6 +318,8 @@ class CardRenderer:
                         width, height = 800, None
                         if fixed:
                             document, width, height = await self._fit_document(document)
+                            # htmlrender 的 ViewportConfig 要求整数；内容测量会产生小数像素。
+                            width, height = int(ceil(width)), int(ceil(height))
                         image = await render_html(
                             document,
                             width=width,
@@ -528,7 +530,7 @@ class CardRenderer:
                             }
                         }
                     }
-                    const width = Math.min(2000, Math.max(800, needed));
+                    const width = Math.ceil(Math.min(2000, Math.max(800, needed)));
                     body.style.width = width + 'px';
                     const height = Math.ceil(body.getBoundingClientRect().height);
                     const bounds = body.getBoundingClientRect();
@@ -547,7 +549,7 @@ class CardRenderer:
                 }
                 throw new Error('Card content exceeds 2000px canvas capacity');
             }""")
-            return await page.content(), dimensions["width"], dimensions["height"]
+            return await page.content(), int(ceil(dimensions["width"])), int(ceil(dimensions["height"]))
 
     async def _encode_webp(self, image: bytes) -> bytes:
         # htmlrender 0.8 只接受 PNG/JPEG，借用其 Chromium 编码 WebP，不依赖 Pillow。
