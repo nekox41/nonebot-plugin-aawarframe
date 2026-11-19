@@ -48,8 +48,14 @@ class CoreClient:
         # One in-process Core runtime: both QQ and OneBot share the same quota.
         from .bootstrap import get_runtime
 
-        async with get_runtime().ocr.admission():
-            yield
+        from .models.errors import UserInputError
+
+        try:
+            async with get_runtime().ocr.admission():
+                yield
+        except UserInputError as exc:
+            # The protocol layer should show a user-readable capacity error.
+            raise ValueError(str(exc)) from None
 
     @asynccontextmanager
     async def ocr_download(self):
