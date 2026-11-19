@@ -6,12 +6,12 @@ from unittest.mock import AsyncMock
 import pytest
 from nonebot.adapters.onebot.v11 import Message as OBMessage
 
-from nonebot_plugin_aawarframe.protocols.message import (
+from nonebot_plugin_aawfcore.protocols.message import (
     Message,
     MessageSegment,
     to_onebot,
 )
-from nonebot_plugin_aawarframe.protocols.qq import qq_messages, send_reply
+from nonebot_plugin_aawfcore.protocols.qq import qq_messages, send_reply
 
 
 def test_neutral_messages_are_not_protocol_objects():

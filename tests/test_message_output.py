@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
-from nonebot_plugin_aawarframe.commands import router
+from nonebot_plugin_aawfcore.commands import router
 
 
 async def test_command_sends_result_without_reply_segment(monkeypatch):
