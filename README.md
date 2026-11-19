@@ -13,7 +13,7 @@ Aa 的 Warframe 助手，把游戏查询带到 QQ。
 
 ## 介绍
 
-基于 NoneBot2 的 Warframe 国际服查询插件，支持通过 NapCat 等 OneBot V11 实现在 QQ 中查询游戏状态、市场价格和紫卡周统计，以 WebP 图片卡片展示结果。
+基于 NoneBot2 的 Warframe 国际服查询插件，支持 **QQ 官方机器人（nonebot-adapter-qq）** 与 OneBot V11 两种协议入口，查询游戏状态、市场价格和紫卡周统计，以 WebP 图片卡片展示结果。无需 NapCat 也可以使用 QQ 官方机器人。
 
 希望让玩家在聊天时就能方便地查看任务、安排活动、了解价格。目前以 PC 为主，市场默认查询 PC / 跨平台交易。
 
@@ -160,9 +160,53 @@ WM 展示物品图片、名称和描述，上方为 5 条卖单，下方为 3 �
 | `触伤` | 异常状态伤害 | `病毒` | 病毒伤害 |
 | `弱伤` | 弱点伤害 | `弱暴` | 弱点暴击几率 |
 
+## QQ 官方机器人适配（Issue #14）
+
+本插件已新增 `nonebot-adapter-qq` 入口。此阶段使用独立的 `protocols/qq.py` 适配消息接收、附件下载、OpenID/ACL、图片卡片回复、群/频道订阅主动通知。旧的 OneBot V11 功能仍保留以免破坏已有数据，但**官方机器人不需要运行 NapCat**。
+
+### 安装官方适配器
+
+Python 3.12，进入你的 NoneBot2 项目环境安装：
+
+```bash
+python -m pip install "nonebot-plugin-aawarframe[qq]"
+# 开发 PR 源码包安装方式：
+python -m pip install "nonebot-adapter-qq>=1.7.4,<2"
+```
+
+在 NoneBot2 项目的 `pyproject.toml` 中注册插件和官方适配器；**不必**注册 OneBot V11 适配器：
+
+```toml
+[tool.nonebot]
+plugins = ["nonebot_plugin_aawarframe"]
+adapters = ["nonebot.adapters.qq"]
+```
+
+上述字段按现有配置合并，避免覆盖其他插件/适配器。使用 WebSocket 时 `.env.prod` 示例（替换为**QQ 开放平台**上机器人自己的 AppID 和 AppSecret，不是 QQ 账号密码）：
+
+```dotenv
+DRIVER=~httpx+~websockets
+QQ_IS_SANDBOX=false
+QQ_BOTS='[{"id":"你的AppID","secret":"你的AppSecret","intent":{"c2c_group_at_messages":true},"use_websocket":true}]'
+```
+
+如使用 WebHook，则使用支持 ASGI 的 Driver，例如 `DRIVER=~fastapi+~httpx`，并按官方平台要求配置机器人回调地址 `https://host:port/qq/webhook`、Webhook 鉴权及公网 HTTPS 环境。实际能收到哪些群消息、C2C 消息，取决于机器人在 QQ 开放平台获得的权限、事件配置与测试/正式环境。
+
+### 命令和订阅的协议差异
+
+- **普通查询**：通过 `GroupAtMessageCreateEvent` / `GroupMessageCreateEvent`、C2C 和频道事件识别命令；复用原有查询、图片卡片和错误处理。多张分页卡片会分别发送，避免只保留最后一张图片。
+- **图片分析**：可在消息中附一张图片。引用回复含图片时，优先从官方事件中提供的引用内容提取；如果官方接口不下发引用图片数据，则需重新直接上传图片。只允许已有 QQ 图片 CDN 白名单，继续限制单张图片为 12 MiB。紫卡 OCR 本身仍需 `[ocr]` 依赖。
+- **ACL**：官方 QQ 使用 AppID、`group_openid`、`member_openid` 或频道 ID，而**不是数字 QQ 号/群号**。群白名单值格式 `qq-group:<group_openid>`，频道使用 `qq-channel:<channel_id>`；旧 OneBot 数字 ID 的名单规则继续保持。官方与 OneBot 订阅互相隔离，不会自动跨协议搬迁。
+- **群订阅**：仍可使用 `订阅 夜灵`、`我的订阅` 等。发件箱根据当前 bot 类型走 `send_to_group` / `send_to_channel`；图片发送失败时退回文本。QQ 官方平台可能**禁止无近期用户互动的主动推送**，或有消息额度与频控限制；无法保证到点成功，发送 API 拒绝时会保留失败状态和有限重试，**不会标记已送达**。请在 QQ 官方机器人沙盒/正式环境分别实际测试该权限。
+- **不支持的动作**：不调用 OneBot 的 `get_msg`、`get_image` 或 `send_group_msg`；官方平台没有一对一对应的戳一戳 API，插件不模拟此行为。
+
+### 验证
+
+GitHub Actions 的 `QQ Official Adapter` 工作流在安装真实 `nonebot-adapter-qq` 库后测试 OpenID 会话隔离、群/C2C/频道消息转换、图片和引用、通知成功与发送失败的发件箱状态。此工作流不使用真实 AppSecret；最终能否收到 QQ 事件及主动推送仍需开发者在 QQ 开放平台进行实机验收。
+
 ## 安装
 
-需要 **Python 3.12**，以及已连接 OneBot V11 的 NoneBot2 机器人。
+需要 **Python 3.12** 和 NoneBot2。可选择 QQ 官方机器人（推荐，配置见上文）或已有的 OneBot V11 机器人。
 
 在机器人目录安装插件：
 
@@ -284,6 +328,7 @@ Wiki 查询使用 `wk 关键词`，最多返回 3 条结果，以文本展示标
 
 ```text
 nonebot_plugin_aawarframe/
+├── protocols/      # QQ 官方和 OneBot 消息边界、身份及输出转换
 ├── commands/       # 命令与参数
 ├── services/       # 查询、筛选与排序
 ├── providers/      # 获取接口数据
