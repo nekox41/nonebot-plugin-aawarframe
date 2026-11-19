@@ -10,7 +10,7 @@ from ..localization.resources import PACKAGED
 from ..localization.rivens import resolve_riven_weapon
 from ..models.common import Card
 from ..models.errors import UserInputError
-from ..models.riven_values import RivenAttribute, RivenValuesBoard, RivenVariantValues
+from ..models.riven_values import RivenAttribute, RivenValuesBoard
 
 CLASS_NAMES = {"rifle": "步枪", "shotgun": "霰弹枪", "pistol": "手枪", "archgun": "Arch 枪械", "melee": "近战"}
 VINTAGE = {"Hera", "Zeti", "Ampi", "Tempi", "Pleci", "Exi", "Forti", "Para", "GainCombo"}
@@ -52,16 +52,11 @@ class RivenValuesService:
         weapons = [grq.get("Items", key) for key in ids]
         base = grq.get("Items", riven.identifiers.get("game.ref", ""), "game.ref")
         return sorted(
-            [
-                item for item in weapons
-                if item is not None and item.enabled
-                and "omegaAttenuation" in item.metadata
-            ],
+            [item for item in weapons if item is not None and item.enabled],
             key=lambda item: (item.id != (base.id if base else ""), item.names.get("en", "")),
         )
 
     def attributes(self, weapon, riven, family, layout, weapon_class):
-        disposition = self.rules["disposition"] * float(weapon.metadata["omegaAttenuation"])
         metadata = weapon.metadata
         companion = metadata.get("sentinel") or metadata.get("productCategory") == "SentinelWeapons" or riven.metadata.get("group") == "sentinel"
         ordinary = [a for a in self.rules["attributes"] if not a["spliced"] and a["coefficients"].get(weapon_class) is not None and not (companion and a["id"] in VINTAGE)]
@@ -84,9 +79,9 @@ class RivenValuesService:
                 name = "暴击几率（重击×2）"
             if a["id"] == "Croni" and metadata.get("type") == "Bow":
                 name = "射速（弓类×2）"
-            positive = value_range(a, weapon_class, bonus, disposition) if a["positive"] else "—"
+            positive = value_range(a, weapon_class, bonus, self.rules["disposition"]) if a["positive"] else "—"
             negative_allowed = a["negative"] and not (weapon_class == "melee" and a["id"] == "Visi")
-            negative = value_range(a, weapon_class, malus, disposition) if negative_allowed else "—"
+            negative = value_range(a, weapon_class, malus, self.rules["disposition"]) if negative_allowed else "—"
             return RivenAttribute(name=name, positive=positive, negative=negative)
 
         return [row(a) for a in ordinary], [row(a) for a in spliced]
@@ -104,24 +99,13 @@ class RivenValuesService:
         weapon_class = {"kitgun": "pistol", "zaw": "melee"}.get(weapon_class, weapon_class)
         if weapon_class not in CLASS_NAMES:
             raise UserInputError("暂不支持该武器的紫卡类型。")
-        tables = []
-        for weapon in weapons:
-            ordinary, spliced = self.attributes(
-                weapon, riven, weapons, layout, weapon_class
-            )
-            tables.append(RivenVariantValues(
-                name=weapon.name(),
-                disposition=float(weapon.metadata["omegaAttenuation"]),
-                ordinary=ordinary,
-                spliced=spliced,
-            ))
+        ordinary, spliced = self.attributes(weapons[0], riven, weapons, layout, weapon_class)
         board = RivenValuesBoard(
             layout=layout,
             name=riven.name(),
             weapon_class=CLASS_NAMES[weapon_class],
             variants=list(dict.fromkeys(w.name() for w in weapons if w.name() != riven.name())),
-            variant_values=tables,
-            ordinary=tables[0].ordinary,
-            spliced=tables[0].spliced,
+            ordinary=ordinary,
+            spliced=spliced,
         )
         return Card(title="紫卡数值 · " + riven.name(), source=self.rules["source"], riven_values_board=board)
