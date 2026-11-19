@@ -119,7 +119,8 @@ async def test_alias_api_and_removed_admin_endpoints(grq):
         assert (await client.post("/api/previews", json={"template": "unknown"})).status_code == 404
         for endpoint in ("domains", "resources", "settings", "review", "export"):
             assert (await client.get("/api/" + endpoint)).status_code == 404
-        assert (await client.get("/")).headers["content-security-policy"]
+        policy = (await client.get("/")).headers["content-security-policy"]
+        assert "img-src 'self' data:" in policy
 
 
 def test_old_aliases_and_mapping_changes_are_preserved(grq, tmp_path):
