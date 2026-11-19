@@ -10,7 +10,6 @@ import argparse
 import asyncio
 import json
 import os
-import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -67,7 +66,9 @@ async def main() -> None:
     nonebot.init(driver="~none", render={"provider": "playwright", "startup": "off"})
     from nonebot_plugin_aawfcore.grq import GameResourceQuery
     from nonebot_plugin_aawfcore.initialization.pipeline import (
-        export_archive, initialize, validate,
+        export_archive,
+        initialize,
+        validate,
     )
 
     validate(ASSETS)
