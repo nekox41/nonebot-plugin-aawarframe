@@ -156,7 +156,7 @@ async def test_official_group_notification_uses_openid_and_file_image(tmp_path):
     bot.send_to_group.assert_not_awaited()
     assert bot.send_to_channel.await_args.kwargs["channel_id"] == CHANNEL
     assert [seg.type for seg in bot.send_to_channel.await_args.kwargs["message"]] == [
-        "text", "text"
+        "mention_user", "text", "text"
     ]
 
 
