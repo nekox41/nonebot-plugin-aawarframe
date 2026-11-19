@@ -16,7 +16,7 @@ from .infrastructure.http import HttpClient
 from .infrastructure.images import ItemImages
 from .infrastructure.riven_ocr import RivenOCR
 from .infrastructure.wiki_http import WikiHttpClient
-from .initialization.pipeline import ensure_offline, initialize
+from .initialization.pipeline import ensure_offline
 from .providers.market import MarketProvider
 from .providers.riven_market import RivenMarketProvider
 from .providers.rivens import RivenProvider
@@ -150,10 +150,8 @@ def setup() -> None:
 
     @driver.on_startup
     async def startup():
-        # 资源准备失败时使用离线数据，再启动机器人运行时。
-        config = get_plugin_config(Config)
-        if config.aawarframe_data_auto_update:
-            await initialize(config.aawarframe_cache_dir)
+        # Runtime.__init__ synchronously restores the verified packaged snapshot;
+        # startup must not perform any network acquisition.
         get_runtime().start()
 
     @driver.on_shutdown

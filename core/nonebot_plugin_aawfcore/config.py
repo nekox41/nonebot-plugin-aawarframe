@@ -16,7 +16,6 @@ class Config(BaseModel):
     aawarframe_theme: str = Field(default="default", pattern=r"^[a-zA-Z0-9_-]+$")
     aawarframe_render_concurrency: int = Field(default=2, ge=1, le=2)
 
-    aawarframe_data_auto_update: bool = True
     aawarframe_ocr_python: str | None = None
 
     aawarframe_admin_enabled: bool = False
