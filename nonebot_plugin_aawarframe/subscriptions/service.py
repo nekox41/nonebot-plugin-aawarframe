@@ -7,7 +7,6 @@ from pathlib import Path
 from urllib.parse import quote
 
 from nonebot import get_bots
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
 from ..commands.parsing import parse_riven_market
 from ..localization.riven_attributes import allowed, attributes
@@ -15,6 +14,7 @@ from ..localization.rivens import resolve_riven_weapon
 from ..models.common import Card, Section
 from ..models.errors import UserInputError
 from ..models.riven_market import RivenMarketQuery
+from ..protocols.message import Message, MessageSegment, to_onebot
 from ..protocols.qq import is_qq_bot, send_subscription
 from ..providers.worldstate import WorldStateProvider
 from ..rendering.viewmodels import fallback_text
@@ -448,7 +448,7 @@ class SubscriptionService:
                 )
         else:
             await asyncio.wait_for(
-                bot.send_group_msg(group_id=int(delivery.group_id), message=message),
+                bot.send_group_msg(group_id=int(delivery.group_id), message=to_onebot(message)),
                 timeout=20,
             )
 
