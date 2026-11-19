@@ -112,18 +112,16 @@ async def test_cancellation_releases_admission_and_download_permit(monkeypatch):
             assert ocr.pending == 0
             # A cancelled download has returned its semaphore permit.
             assert ocr.download_slots._value == MAX_DOWNLOADS
-            assert await asyncio.wait_for(
-                (asyncio.create_task(router.analyze_riven_message(
-                    SimpleNamespace(), event_for(2), ""
-                ))), timeout=0.02
-            ) is None
-        except TimeoutError:
-            # The second request has entered download; the test then releases it.
-            pass
+            second = asyncio.create_task(
+                router.analyze_riven_message(SimpleNamespace(), event_for(2), "")
+            )
+            await asyncio.sleep(0.02)
+            assert ocr.pending == 1
         finally:
             release.set()
-        await asyncio.sleep(0)
+        assert await asyncio.wait_for(second, timeout=3) == Message("done")
         assert ocr.pending == 0
+        assert ocr.download_slots._value == MAX_DOWNLOADS
 
 
 @pytest.mark.asyncio
