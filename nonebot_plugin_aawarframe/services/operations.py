@@ -125,6 +125,7 @@ def build_invasions(snapshot: Snapshot, now: datetime) -> Card:
             InvasionDisplay(
                 node=node["name"],
                 planet=node.get("systemName", ""),
+                mission_type=node.get("missionName", ""),
                 attacker=faction_name(invasion.attacker),
                 defender=faction_name(invasion.defender),
                 attacker_percent=percent,
@@ -137,6 +138,10 @@ def build_invasions(snapshot: Snapshot, now: datetime) -> Card:
     board.invasions.sort(key=lambda item: (item.planet, item.node))
     if warnings:
         card.notes.append("部分入侵暂时无法显示。")
+    if any(item.mission_type for item in board.invasions):
+        card.notes.append(
+            "显示的是星图节点基础任务类型，并非当前入侵任务的实时轮换类型；普通 Corpus/Grineer 入侵每 15 分钟轮换，实际类型请以游戏内星图为准。"
+        )
     if not board.invasions:
         card.status = DataStatus.EMPTY
     return card
