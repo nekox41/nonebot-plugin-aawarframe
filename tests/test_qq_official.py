@@ -5,6 +5,9 @@ from unittest.mock import AsyncMock
 
 import httpx
 import pytest
+
+pytest.importorskip("nonebot.adapters.qq")
+
 from nonebot.adapters.onebot.v11 import Message as OBMessage
 from nonebot.adapters.onebot.v11 import MessageSegment as OBSegment
 from nonebot.adapters.qq import Message as QQMessage
