@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Warframe · 别名管理</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<section id="login" class="login-card"><div class="brand">Aa <span>Warframe 助手</span></div><h1>别名管理</h1><p class="muted">使用管理口令登录。</p><form id="login-form"><label for="password">登录口令</label><input id="password" type="password" autocomplete="current-password" required><button class="primary full">登录</button><p id="login-error" class="error" role="alert"></p></form></section>
+<div id="console" hidden>
+<header><a class="brand" href="/">Aa <span>Warframe 助手</span></a><button id="logout" class="secondary">退出登录</button></header>
+<aside id="sidebar"><p class="nav-label">功能管理</p><button class="active" data-view="aliases">别名管理</button><button data-view="arbitration">仲裁管理</button></aside>
+<main><div class="heading"><div><p class="eyebrow">WARFRAME</p><h1 id="page-title">别名管理</h1><p id="page-description" class="muted">给物品添加常用称呼，查询时便可使用这个名字。</p></div><span id="alias-count" class="count"></span></div>
+<div id="aliases-view"><section class="panel"><h2>添加别名</h2><form id="alias-form"><div class="form-grid"><div><label for="alias-name">别名</label><input id="alias-name" placeholder="例如：毒妈" maxlength="120" required autocomplete="off"></div><div><label for="item-query">对应物品</label><input id="item-query" placeholder="输入中文或英文名称搜索" autocomplete="off" aria-controls="item-results"></div></div><div id="item-results" class="results" aria-live="polite"></div><div id="selected-item" class="selection" hidden></div><div class="form-footer"><p id="form-message" class="muted" role="status">搜索后，选择一个物品。</p><button id="add-alias" class="primary" disabled>添加别名</button></div><p id="form-error" class="error" role="alert"></p></form></section>
+<section class="panel"><div class="list-heading"><h2>已有别名</h2><input id="alias-filter" type="search" placeholder="筛选别名或物品" aria-label="筛选已有别名"></div><div id="alias-list"></div><p id="list-error" class="error" role="alert"></p></section>
+</div><div id="arbitration-view" hidden><section class="panel"><div class="list-heading"><h2>仲裁节点</h2><input id="arbitration-filter" type="search" placeholder="搜索地点、任务类型或派系" aria-label="筛选仲裁节点"></div><p class="muted">掉落记录单位：生息精华 / 分钟</p><div id="arbitration-list"></div><p id="arbitration-error" class="error" role="alert"></p></section></div><footer>By. Aameow</footer></main></div>
+<dialog id="delete-dialog"><h2>删除别名</h2><p id="delete-message"></p><div class="dialog-actions"><button id="delete-cancel" class="secondary">取消</button><button id="delete-confirm" class="danger">删除</button></div></dialog>
+</body></html>

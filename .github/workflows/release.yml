@@ -1,0 +1,164 @@
+name: Release
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      pypi_exists: ${{ steps.release.outputs.pypi_exists }}
+      release_exists: ${{ steps.release.outputs.release_exists }}
+      release_needed: ${{ steps.release.outputs.release_needed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check release version
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REF: ${{ github.ref }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          import tomllib
+          import urllib.error
+          import urllib.request
+          from pathlib import Path
+
+          version = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
+          ref = os.environ["RELEASE_REF"]
+          event = os.environ["EVENT_NAME"]
+          if ref.startswith("refs/tags/"):
+              tag = ref.removeprefix("refs/tags/")
+              if tag != "v" + version:
+                  raise SystemExit(f"Tag {tag} does not match project version v{version}")
+          elif ref != "refs/heads/master":
+              raise SystemExit("Release workflow must run from master or a matching version tag")
+
+          url = f"https://pypi.org/pypi/nonebot-plugin-aawarframe/{version}/json"
+          try:
+              with urllib.request.urlopen(url, timeout=15) as response:
+                  pypi_exists = response.status == 200
+          except urllib.error.HTTPError as error:
+              if error.code != 404:
+                  raise
+              pypi_exists = False
+
+          result = subprocess.run(
+              ["gh", "release", "view", "v" + version],
+              stdout=subprocess.DEVNULL,
+              stderr=subprocess.DEVNULL,
+              check=False,
+          )
+          release_exists = result.returncode == 0
+          release_needed = not (pypi_exists and release_exists)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"version={version}\n")
+              output.write(f"pypi_exists={str(pypi_exists).lower()}\n")
+              output.write(f"release_exists={str(release_exists).lower()}\n")
+              output.write(f"release_needed={str(release_needed).lower()}\n")
+          print(json.dumps({
+              "version": version,
+              "pypi_exists": pypi_exists,
+              "release_exists": release_exists,
+              "release_needed": release_needed,
+          }))
+          PY
+
+  build:
+    needs: prepare
+    if: needs.prepare.outputs.release_needed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install tooling
+        run: python -m pip install -e ".[dev,qq,onebot]"
+      - name: Build resource snapshot once
+        run: python scripts/build_resources.py --build
+      - name: Validate
+        run: |
+          python -m compileall -q nonebot_plugin_aawarframe scripts tests
+          python -m pytest -q
+      - name: Build PyPI distributions
+        run: |
+          mkdir -p dist/pypi
+          python -m build --sdist --wheel --outdir dist/pypi
+          python -m twine check dist/pypi/*
+      - name: Build manual plugin archive
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          zip -qr "dist/nonebot_plugin_aawarframe-v${VERSION}.zip" nonebot_plugin_aawarframe
+          python - <<'PY'
+          import os
+          from zipfile import ZipFile
+          name = f"dist/nonebot_plugin_aawarframe-v{os.environ['VERSION']}.zip"
+          with ZipFile(name) as archive:
+              names = archive.namelist()
+          assert names and all(name.startswith("nonebot_plugin_aawarframe/") for name in names)
+          print(f"Manual archive contains {len(names)} files under nonebot_plugin_aawarframe/")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aawarframe-release
+          path: dist/*
+          if-no-files-found: error
+
+  publish-pypi:
+    needs: [prepare, build]
+    if: needs.prepare.outputs.pypi_exists != 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: aawarframe
+      url: https://pypi.org/p/nonebot-plugin-aawarframe
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: aawarframe-release
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/pypi
+
+  publish-github-release:
+    needs: [prepare, build, publish-pypi]
+    if: always() && needs.prepare.result == 'success' && needs.build.result == 'success' && needs.prepare.outputs.release_exists != 'true' && (needs.publish-pypi.result == 'success' || needs.publish-pypi.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: aawarframe-release
+          path: dist
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.prepare.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: AaWarframe v${{ needs.prepare.outputs.version }}
+          generate_release_notes: true
+          make_latest: true
+          fail_on_unmatched_files: true
+          files: dist/nonebot_plugin_aawarframe-v${{ needs.prepare.outputs.version }}.zip

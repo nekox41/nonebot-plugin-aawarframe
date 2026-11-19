@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+build/
+dist/
+*.egg-info
+data/
+# Downloaded and generated resources are build outputs, not source files.
+nonebot_plugin_aawarframe/assets/*.json
+nonebot_plugin_aawarframe/assets/*.csv.gz
+nonebot_plugin_aawarframe/assets/*.json.gz
+nonebot_plugin_aawarframe/assets/*.tar.gz
+nonebot_plugin_aawarframe/assets/grq/*.json.gz
+nonebot_plugin_aawarframe/assets/resource-sources.json

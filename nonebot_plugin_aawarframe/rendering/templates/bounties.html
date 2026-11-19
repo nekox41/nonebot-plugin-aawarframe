@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+{% if not card.bounty_items %}
+<div class="fissure-empty"><h2>当前暂无{{ card.title }}</h2><p>请稍后再试。</p></div>
+{% else %}
+<div class="bounty-refresh"><span>{{ card.bounty_region }}</span><span>本期剩余 {{ card.bounty_remaining }} · {{ (card.bounty_expiry | beijing).strftime('%H:%M:%S') }} 刷新</span></div>
+{% if card.bounty_detail %}
+{% set job = card.bounty_items[0] %}
+<section class="bounty-detail">
+  <h2>{{ job.name }}</h2>
+  <p class="bounty-meta">{{ job.kind }} · 等级 {{ job.min_level }}–{{ job.max_level }} · {{ card.bounty_currency }} {{ job.standing if job.standing is not none else '—' }}</p>
+  {% include 'bounty_rewards.html' %}
+  {% if job.task_pools %}<h3 class="task-pool-title">{{ job.task_pool_title }}</h3>{% endif %}
+  {% for tasks in job.task_pools %}
+  <div class="stage-pool-row"><strong class="stage-pool-label">阶段 {{ loop.index }}</strong><div class="task-grid">{% for task in tasks %}<span class="task-chip">{{ task }}</span>{% endfor %}</div></div>
+  {% endfor %}
+  {% if job.task_pool_note %}<p class="bounty-caption">{{ job.task_pool_note }}</p>{% endif %}
+</section>
+{% else %}
+<table class="bounty-overview">
+  <thead><tr><th>序号</th><th>赏金任务</th><th>等级</th><th>{{ card.bounty_currency }}</th></tr></thead>
+  <tbody>{% for job in card.bounty_items %}<tr><td>{{ job.index }}</td><td>{{ job.name }}{% if job.kind != '常规' and job.kind not in job.name %}（{{ job.kind }}）{% endif %}</td><td>{{ job.min_level }}–{{ job.max_level }}</td><td>{{ job.standing if job.standing is not none else '—' }}</td></tr>{% endfor %}</tbody>
+</table>
+{% if card.bounty_locations %}
+<section class="bounty-locations">
+{% for location, jobs in card.bounty_locations.items() %}
+<div class="bounty-location"><strong>{{ location }}</strong><div>{% for name in jobs %}<span>{{ name }}</span>{% endfor %}</div></div>
+{% endfor %}
+</section>
+{% endif %}
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+{% set half = (card.attribute_rows|length + 1) // 2 %}
+<div class="attribute-tables">
+{% for rows in [card.attribute_rows[:half], card.attribute_rows[half:]] %}
+<table class="attribute-table">
+  <thead><tr><th>缩写</th><th>词条名称</th></tr></thead>
+  <tbody>{% for short, name in rows %}<tr><td>{{ short }}</td><td>{{ name }}</td></tr>{% endfor %}</tbody>
+</table>
+{% endfor %}
+</div>
+{% endblock %}

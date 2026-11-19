@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+{% set board = card.market_board %}
+<section class="market-item">
+  {% if board.image %}<img class="market-icon" src="{{ board.image }}" alt="{{ board.name }}">{% endif %}
+  <div class="market-item-info">
+    <p class="market-context">WARFRAME MARKET · PC / 跨平台</p>
+    {% if board.rank is not none %}<p class="market-rank">{% if board.rank == board.max_rank %}满级{% else %}等级 {{ board.rank }}{% endif %}<span>{{ board.rank }} / {{ board.max_rank }}</span></p>{% endif %}
+    {% if board.subtype %}<p class="market-subtype">{{ board.subtype }}</p>{% endif %}
+    {% if board.description %}<p class="market-description">{{ board.description }}</p>{% endif %}
+  </div>
+</section>
+{% for side, title, orders in [('sell', '卖家', board.sell), ('buy', '买家', board.buy)] %}
+<section class="market-side market-side--{{ side }}">
+  <div class="market-side-heading"><h2>{{ title }}</h2><span>{{ orders|length }} 人</span></div>
+  <table class="market-orders">
+    <colgroup><col class="market-user-col"><col class="market-status-col"><col class="market-stock-col"><col class="market-trade-col"><col class="market-price-col"></colgroup>
+    <thead><tr><th>用户</th><th>状态</th><th>库存</th><th>单次交易</th><th>单价 / 白金</th></tr></thead>
+    <tbody>{% for order in orders %}
+      <tr><td class="market-user">{{ order.user.name }}</td><td><span class="market-status market-status--{{ order.user.status }}">{{ '游戏中' if order.user.status == 'ingame' else '在线' }}</span></td><td>{{ order.quantity }}</td><td>{{ order.per_trade }}</td><td class="market-price">{{ ('%.2f'|format(order.platinum / order.per_trade)).rstrip('0').rstrip('.') }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+  {% if not orders %}<p class="market-empty">暂无符合条件的在线挂单</p>{% endif %}
+</section>
+{% endfor %}
+{% endblock %}

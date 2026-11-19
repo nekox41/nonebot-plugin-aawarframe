@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+{% set board = card.operation_board %}
+{% if board.expiry %}<div class="operation-period"><span>剩余 {{ board.remaining }}</span><span>{{ (board.expiry | beijing).strftime('%m-%d %H:%M') }} 刷新</span></div>{% endif %}
+{% if board.tasks %}
+<div class="operation-banner"><strong>{{ board.boss }}{% if board.faction %} · {{ board.faction }}{% endif %}</strong>{% if board.reward %}<strong class="operation-shard operation-shard--{{ board.tone }}">{{ board.reward }}</strong>{% endif %}</div>
+{% for task in board.tasks %}
+<section class="operation-task">
+  <div class="operation-task-head"><h2>{{ task.number }}. {{ task.mission }}</h2><span>{{ task.node }}{% if task.planet %} · {{ task.planet }}{% endif %}</span></div>
+  {% if task.modifier %}<p class="operation-condition">{{ task.modifier }}</p>{% endif %}
+</section>
+{% endfor %}
+{% elif board.kind == 'invasions' and board.invasions %}
+<p class="operation-count">{% if total > 1 %}本页{% else %}当前进行中{% endif %} {{ board.invasions | length }} 项</p>
+{% set split = ((board.invasions | length + 1) // 2) if board.invasions | length > 6 else board.invasions | length %}
+<div class="invasion-columns{% if board.invasions | length > 6 %} invasion-columns--two{% endif %}">
+{% for group in [board.invasions[:split], board.invasions[split:]] if group %}
+<div class="invasion-panel">
+{% for item in group %}
+<section class="invasion-card">
+  <div class="invasion-head"><h2>{{ item.node }}{% if item.planet %} · {{ item.planet }}{% endif %}</h2><span>{% if item.infestation %}清除 {{ '%.1f%%' | format(item.defender_percent) }}{% else %}阵营对抗{% endif %}</span></div>
+  <progress class="invasion-progress" max="100" value="{{ item.defender_percent if item.infestation else item.attacker_percent }}"></progress>
+  <div class="invasion-sides">
+    {% if item.infestation %}
+    <div class="invasion-side"><strong>{{ item.defender }} {{ '%.1f%%' | format(item.defender_percent) }}</strong>{% for reward in item.defender_rewards %}<p class="invasion-reward">{{ reward }}</p>{% else %}<p class="invasion-reward">—</p>{% endfor %}</div>
+    <div class="invasion-side invasion-side--right"><strong>感染者剩余 {{ '%.1f%%' | format(item.attacker_percent) }}</strong><p class="invasion-reward">—</p></div>
+    {% else %}
+    <div class="invasion-side"><strong>{{ item.attacker }} {{ '%.1f%%' | format(item.attacker_percent) }}</strong>{% for reward in item.attacker_rewards %}<p class="invasion-reward">{{ reward }}</p>{% else %}<p class="invasion-reward">—</p>{% endfor %}</div>
+    <div class="invasion-side invasion-side--right"><strong>{{ item.defender }} {{ '%.1f%%' | format(item.defender_percent) }}</strong>{% for reward in item.defender_rewards %}<p class="invasion-reward">{{ reward }}</p>{% else %}<p class="invasion-reward">—</p>{% endfor %}</div>
+    {% endif %}
+  </div>
+</section>
+{% endfor %}
+</div>
+{% endfor %}
+</div>
+{% else %}<div class="fissure-empty"><h2>{% if board.kind == 'invasions' %}当前暂无入侵任务{% elif board.kind == 'archon' %}当前暂无执刑官猎杀{% else %}当前暂无突击任务{% endif %}</h2></div>{% endif %}
+{% endblock %}

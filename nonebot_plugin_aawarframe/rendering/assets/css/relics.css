@@ -1,0 +1,15 @@
+.part-group + .part-group { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.part-heading { margin-bottom: 10px; font-size: var(--data-font); white-space: nowrap; }
+.part-heading span { color: var(--muted); }
+.parts-relics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.relic-chip { display: flex; align-items: baseline; gap: 8px; padding: 8px; border-radius: 8px; background: var(--soft); white-space: nowrap; }
+.relic-chip strong { font-size: var(--data-font); font-weight: 600; }
+.relic-tier { font-size: 20px; }
+.relic-chip--rare .relic-tier { color: #997321; }
+.relic-chip--uncommon .relic-tier { color: #687887; }
+.relic-chip--common .relic-tier { color: #99623c; }
+.relic-chip small { margin-left: auto; font-size: 17px; color: var(--muted); }
+.relic-context, .relic-empty { margin-bottom: 12px; color: var(--muted); font-size: var(--data-font); }
+.relic-rewards { table-layout: auto; font-size: var(--data-font); }
+.relic-rewards th, .relic-rewards td { padding: 12px 8px; font-size: inherit; line-height: 1.25; white-space: nowrap; overflow-wrap: normal; }
+.relic-price { color: var(--accent); font-weight: 600; }

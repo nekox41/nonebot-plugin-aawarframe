@@ -1,0 +1,192 @@
+{
+  "data": {
+    "Time": 1794384078,
+    "SeasonInfo": {
+      "Activation": {
+        "$date": {
+          "$numberLong": "1786548600000"
+        }
+      },
+      "Expiry": {
+        "$date": {
+          "$numberLong": "1804464000000"
+        }
+      },
+      "AffiliationTag": "RadioLegionIntermission16Syndicate",
+      "Season": 18,
+      "Phase": 0,
+      "Params": "",
+      "ActiveChallenges": [
+        {
+          "_id": {
+            "$oid": "001900140000000000000190"
+          },
+          "Daily": true,
+          "Activation": {
+            "$date": {
+              "$numberLong": "1794182400000"
+            }
+          },
+          "Expiry": {
+            "$date": {
+              "$numberLong": "1794441600000"
+            }
+          },
+          "Challenge": "/Lotus/Types/Challenges/Seasons/Daily/SeasonDailyAimGlide"
+        },
+        {
+          "_id": {
+            "$oid": "001900140000000000000191"
+          },
+          "Daily": true,
+          "Activation": {
+            "$date": {
+              "$numberLong": "1794268800000"
+            }
+          },
+          "Expiry": {
+            "$date": {
+              "$numberLong": "1794528000000"
+            }
+          },
+          "Challenge": "/Lotus/Types/Challenges/Seasons/Daily/SeasonDailyKillEnemiesWithGas"
+        },
+        {
+          "_id": {
+            "$oid": "001900140000000000000192"
+          },
+          "Daily": true,
+          "Activation": {
+            "$date": {
+              "$numberLong": "1794355200000"
+            }
+          },
+          "Expiry": {
+            "$date": {
+              "$numberLong": "1794614400000"
+            }
+          },
+          "Challenge": "/Lotus/Types/Challenges/Seasons/Daily/SeasonDailyBuildersTouch"
+        },
+        {
+          "_id": {
+            "$oid": "001900140000000000000183"
+          },
+          "Activation": {
+            "$date": {
+              "$numberLong": "1794182400000"
+            }
+          },
+          "Expiry": {
+            "$date": {
+              "$numberLong": "1794787200000"
+            }
+          },
+          "Challenge": "/Lotus/Types/Challenges/Seasons/Weekly/SeasonWeeklyPermanentCompleteMissions14"
+        },
+        {
+          "_id": {
+            "$oid": "001900140000000000000184"
+          },
+          "Activation": {
+            "$date": {
+              "$numberLong": "1794182400000"
+            }
+          },
+          "Expiry": {
+            "$date": {
+              "$numberLong": "1794787200000"
+            }
+          },
+          "Challenge": "/Lotus/Types/Challenges/Seasons/Weekly/SeasonWeeklyPermanentKillEximus14"
+        },
+        {
+          "_id": {
+            "$oid": "001900140000000000000185"
+          },
+          "Activation": {
+            "$date": {
+              "$numberLong": "1794182400000"
+            }
+          },
+          "Expiry": {
+            "$date": {
+              "$numberLong": "1794787200000"
+            }
+          },
+          "Challenge": "/Lotus/Types/Challenges/Seasons/Weekly/SeasonWeeklyPermanentKillEnemies14"
+        },
+        {
+          "_id": {
+            "$oid": "001900140000000000000186"
+          },
+          "Activation": {
+            "$date": {
+              "$numberLong": "1794182400000"
+            }
+          },
+          "Expiry": {
+            "$date": {
+              "$numberLong": "1794787200000"
+            }
+          },
+          "Challenge": "/Lotus/Types/Challenges/Seasons/Weekly/SeasonWeeklyToAshes",
+          "HasPrerequisites": true
+        },
+        {
+          "_id": {
+            "$oid": "001900140000000000000187"
+          },
+          "Activation": {
+            "$date": {
+              "$numberLong": "1794182400000"
+            }
+          },
+          "Expiry": {
+            "$date": {
+              "$numberLong": "1794787200000"
+            }
+          },
+          "Challenge": "/Lotus/Types/Challenges/Seasons/Weekly/SeasonWeeklyHorsingAround",
+          "HasPrerequisites": true
+        },
+        {
+          "_id": {
+            "$oid": "001900140000000000000188"
+          },
+          "Activation": {
+            "$date": {
+              "$numberLong": "1794182400000"
+            }
+          },
+          "Expiry": {
+            "$date": {
+              "$numberLong": "1794787200000"
+            }
+          },
+          "Challenge": "/Lotus/Types/Challenges/Seasons/WeeklyHard/SeasonWeeklyHardUnlockRelics",
+          "HasPrerequisites": true
+        },
+        {
+          "_id": {
+            "$oid": "001900140000000000000189"
+          },
+          "Activation": {
+            "$date": {
+              "$numberLong": "1794182400000"
+            }
+          },
+          "Expiry": {
+            "$date": {
+              "$numberLong": "1794787200000"
+            }
+          },
+          "Challenge": "/Lotus/Types/Challenges/Seasons/WeeklyHard/SeasonWeeklyHardCollectUniqueResources"
+        }
+      ]
+    }
+  },
+  "source": "https://api.warframe.com/cdn/worldState.php",
+  "fetched_at": "2026-11-11T08:01:48.972055Z",
+  "stale": false
+}

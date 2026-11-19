@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% macro task(item) %}
+<article class="fissure{% if item.urgent %} fissure--urgent{% endif %}">
+  <div class="fissure__task"><strong>{{ item.mission }}</strong><span>{{ item.faction }}</span></div>
+  <div class="fissure__location"><strong>{{ item.node }}</strong><span>{{ item.planet }}</span></div>
+  <div class="fissure__time"><strong>{{ item.remaining_short or item.remaining }}</strong><span>{{ (item.expiry | beijing).strftime('%H:%M:%S') }} 结束{% if item.urgent %} · 即将结束{% endif %}</span></div>
+</article>
+{% endmacro %}
+{% macro tiers(order) %}
+<div class="fissures{% if card.fissure_items | length > 16 %} fissures--dense{% endif %}">
+  {% for key in order %}
+    {% set items = card.fissure_items | selectattr('tier_key', 'equalto', key) | list %}
+    {% if items %}
+    <h2 class="fissure-group fissure-tier--{{ key }}">{{ items[0].tier }}</h2>
+    {% for item in items %}{{ task(item) }}{% endfor %}
+    {% endif %}
+  {% endfor %}
+</div>
+{% endmacro %}
+{% block content %}
+<div class="fissure-summary">
+  <span>{% if card.fissure_mode == 'steel' %}钢铁之路{% elif card.fissure_mode == 'railjack' %}九重天 · 虚空风暴{% else %}普通任务{% endif %}</span>
+  <span>{{ card.item_total }} 个进行中任务</span>
+</div>
+{% if not card.fissure_items %}
+<div class="fissure-empty"><h2>当前暂无任务</h2><p>稍后再来看看新的裂缝。</p></div>
+{% else %}
+<div class="fissure-columns">
+  <section class="fissure-panel" data-side="left">{{ tiers(['VoidT1', 'VoidT2'] if card.fissure_mode == 'railjack' else ['VoidT1', 'VoidT2', 'VoidT3']) }}</section>
+  <section class="fissure-panel" data-side="right">{{ tiers(['VoidT3', 'VoidT4'] if card.fissure_mode == 'railjack' else ['VoidT4', 'VoidT6', 'VoidT5']) }}</section>
+</div>
+{% endif %}
+{% set unknown = card.fissure_items | selectattr('tier_key', 'equalto', 'unknown') | list %}
+{% if card.fissure_mode == 'railjack' %}
+{{ tiers(['VoidT5', 'VoidT6']) }}
+{% endif %}
+{% if unknown %}
+<div class="fissures fissure-extras">
+  {% for item in unknown %}<h2 class="fissure-group">{{ item.tier }}</h2>{{ task(item) }}{% endfor %}
+</div>
+{% endif %}
+{% endblock %}

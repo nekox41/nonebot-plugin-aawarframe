@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+{% if card.rotation_expiry %}<p class="weekly-refresh">{{ (card.rotation_expiry | beijing).strftime('%m-%d %H:%M') }} 刷新</p>{% endif %}
+{% for section in card.sections %}
+<section class="weekly-section">
+  <h2>{{ section.title }}</h2>
+  {% if section.rows %}
+  <table class="weekly-table{% if section.columns | length == 6 %} weekly-table--incarnons{% endif %}">
+    <thead><tr>{% for column in section.columns %}<th>{{ column }}</th>{% endfor %}</tr></thead>
+    <tbody>{% for row in section.rows %}<tr{% if loop.index0 in section.highlighted_rows %} class="weekly-current"{% endif %}>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+  </table>
+  {% endif %}
+  {% for note in section.notes %}<p class="note">{{ note }}</p>{% endfor %}
+</section>
+{% endfor %}
+{% endblock %}

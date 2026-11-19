@@ -1,0 +1,375 @@
+{
+  "source": "https://api.warframe.com/cdn/worldState.php",
+  "fetched_at": "2026-11-10T06:04:45+00:00",
+  "data": {
+    "Time": 1794290685,
+    "SyndicateMissions": [
+      {
+        "_id": {
+          "$oid": "6af2a6f30000000000000002"
+        },
+        "Activation": {
+          "$date": {
+            "$numberLong": "1794287347796"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794296346670"
+          }
+        },
+        "Tag": "EntratiSyndicate",
+        "Seed": 51369,
+        "Nodes": [],
+        "Jobs": [
+          {
+            "jobType": "/Lotus/Types/Gameplay/InfestedMicroplanet/Jobs/DeimosCrpSurvivorBounty",
+            "rewards": "/Lotus/Types/Game/MissionDecks/DeimosMissionRewards/TierATableARewards",
+            "masteryReq": 0,
+            "minEnemyLevel": 5,
+            "maxEnemyLevel": 15,
+            "xpAmounts": [
+              6,
+              6,
+              6
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/InfestedMicroplanet/Jobs/DeimosKeyPiecesBounty",
+            "rewards": "/Lotus/Types/Game/MissionDecks/DeimosMissionRewards/TierCTableARewards",
+            "masteryReq": 1,
+            "minEnemyLevel": 15,
+            "maxEnemyLevel": 25,
+            "xpAmounts": [
+              10,
+              10,
+              10
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/InfestedMicroplanet/Jobs/DeimosEndlessPurifyBounty",
+            "rewards": "/Lotus/Types/Game/MissionDecks/DeimosMissionRewards/TierBTableARewards",
+            "masteryReq": 5,
+            "minEnemyLevel": 25,
+            "maxEnemyLevel": 30,
+            "endless": true,
+            "xpAmounts": [
+              14,
+              14,
+              14
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/InfestedMicroplanet/Jobs/DeimosAssassinateBounty",
+            "rewards": "/Lotus/Types/Game/MissionDecks/DeimosMissionRewards/TierDTableARewards",
+            "masteryReq": 2,
+            "minEnemyLevel": 30,
+            "maxEnemyLevel": 40,
+            "xpAmounts": [
+              16,
+              16,
+              16,
+              24
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/InfestedMicroplanet/Jobs/DeimosExcavateBounty",
+            "rewards": "/Lotus/Types/Game/MissionDecks/DeimosMissionRewards/TierETableARewards",
+            "masteryReq": 3,
+            "minEnemyLevel": 40,
+            "maxEnemyLevel": 60,
+            "xpAmounts": [
+              21,
+              21,
+              21,
+              21,
+              41
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/InfestedMicroplanet/Jobs/DeimosGrnSurvivorBounty",
+            "rewards": "/Lotus/Types/Game/MissionDecks/DeimosMissionRewards/TierETableARewards",
+            "masteryReq": 10,
+            "minEnemyLevel": 100,
+            "maxEnemyLevel": 100,
+            "xpAmounts": [
+              25,
+              25,
+              25,
+              25,
+              50
+            ]
+          },
+          {
+            "rewards": "/Lotus/Types/Game/MissionDecks/DeimosMissionRewards/VaultBountyTierATableCRewards",
+            "masteryReq": 5,
+            "minEnemyLevel": 30,
+            "maxEnemyLevel": 40,
+            "xpAmounts": [
+              2,
+              2,
+              2,
+              4
+            ],
+            "locationTag": "ChamberB",
+            "isVault": true
+          },
+          {
+            "rewards": "/Lotus/Types/Game/MissionDecks/DeimosMissionRewards/VaultBountyTierBTableCRewards",
+            "masteryReq": 5,
+            "minEnemyLevel": 40,
+            "maxEnemyLevel": 50,
+            "xpAmounts": [
+              4,
+              4,
+              4,
+              5
+            ],
+            "locationTag": "ChamberA",
+            "isVault": true
+          },
+          {
+            "rewards": "/Lotus/Types/Game/MissionDecks/DeimosMissionRewards/VaultBountyTierCTableCRewards",
+            "masteryReq": 5,
+            "minEnemyLevel": 50,
+            "maxEnemyLevel": 60,
+            "xpAmounts": [
+              5,
+              5,
+              5,
+              7
+            ],
+            "locationTag": "ChamberC",
+            "isVault": true
+          }
+        ]
+      },
+      {
+        "_id": {
+          "$oid": "6af2a6f30000000000000010"
+        },
+        "Activation": {
+          "$date": {
+            "$numberLong": "1794287347796"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794296346670"
+          }
+        },
+        "Tag": "CetusSyndicate",
+        "Seed": 51369,
+        "Nodes": [],
+        "Jobs": [
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/AttritionBountySab",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierATableARewards",
+            "masteryReq": 0,
+            "minEnemyLevel": 5,
+            "maxEnemyLevel": 15,
+            "xpAmounts": [
+              380,
+              380,
+              380
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/ReclamationBountyCap",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierBTableARewards",
+            "masteryReq": 1,
+            "minEnemyLevel": 10,
+            "maxEnemyLevel": 30,
+            "xpAmounts": [
+              670,
+              670,
+              670
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/AttritionBountyLib",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierCTableARewards",
+            "masteryReq": 2,
+            "minEnemyLevel": 20,
+            "maxEnemyLevel": 40,
+            "xpAmounts": [
+              600,
+              600,
+              600,
+              880
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/SabotageBountySab",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierDTableARewards",
+            "masteryReq": 3,
+            "minEnemyLevel": 30,
+            "maxEnemyLevel": 50,
+            "xpAmounts": [
+              550,
+              550,
+              550,
+              550,
+              1080
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/ReclamationBountyCache",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierETableARewards",
+            "masteryReq": 5,
+            "minEnemyLevel": 40,
+            "maxEnemyLevel": 60,
+            "xpAmounts": [
+              720,
+              720,
+              720,
+              720,
+              1410
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/CaptureBountyCapTwo",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/TierETableARewards",
+            "masteryReq": 10,
+            "minEnemyLevel": 100,
+            "maxEnemyLevel": 100,
+            "xpAmounts": [
+              840,
+              840,
+              840,
+              840,
+              1660
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Eidolon/Jobs/Narmer/AssassinateBountyAss",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/NarmerTableARewards",
+            "masteryReq": 0,
+            "minEnemyLevel": 50,
+            "maxEnemyLevel": 70,
+            "xpAmounts": [
+              810,
+              810,
+              810,
+              810,
+              1580
+            ]
+          }
+        ]
+      },
+      {
+        "_id": {
+          "$oid": "6af2a6f30000000000000033"
+        },
+        "Activation": {
+          "$date": {
+            "$numberLong": "1794287347796"
+          }
+        },
+        "Expiry": {
+          "$date": {
+            "$numberLong": "1794296346670"
+          }
+        },
+        "Tag": "SolarisSyndicate",
+        "Seed": 51369,
+        "Nodes": [],
+        "Jobs": [
+          {
+            "jobType": "/Lotus/Types/Gameplay/Venus/Jobs/VenusCullJobExterminate",
+            "rewards": "/Lotus/Types/Game/MissionDecks/VenusJobMissionRewards/VenusTierATableARewards",
+            "masteryReq": 0,
+            "minEnemyLevel": 5,
+            "maxEnemyLevel": 15,
+            "xpAmounts": [
+              460,
+              460,
+              460
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Venus/Jobs/VenusWetworkJobAssassinate",
+            "rewards": "/Lotus/Types/Game/MissionDecks/VenusJobMissionRewards/VenusTierBTableARewards",
+            "masteryReq": 1,
+            "minEnemyLevel": 10,
+            "maxEnemyLevel": 30,
+            "xpAmounts": [
+              670,
+              670,
+              670
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Venus/Jobs/VenusChaosJobExcavation",
+            "rewards": "/Lotus/Types/Game/MissionDecks/VenusJobMissionRewards/VenusTierCTableARewards",
+            "masteryReq": 2,
+            "minEnemyLevel": 20,
+            "maxEnemyLevel": 40,
+            "xpAmounts": [
+              640,
+              640,
+              640,
+              950
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Venus/Jobs/VenusHelpingJobResource",
+            "rewards": "/Lotus/Types/Game/MissionDecks/VenusJobMissionRewards/VenusTierDTableARewards",
+            "masteryReq": 3,
+            "minEnemyLevel": 30,
+            "maxEnemyLevel": 50,
+            "xpAmounts": [
+              620,
+              620,
+              620,
+              620,
+              1220
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Venus/Jobs/VenusIntelJobSpy",
+            "rewards": "/Lotus/Types/Game/MissionDecks/VenusJobMissionRewards/VenusTierETableARewards",
+            "masteryReq": 5,
+            "minEnemyLevel": 40,
+            "maxEnemyLevel": 60,
+            "xpAmounts": [
+              690,
+              690,
+              690,
+              690,
+              1360
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Venus/Jobs/VenusTheftJobExcavation",
+            "rewards": "/Lotus/Types/Game/MissionDecks/VenusJobMissionRewards/VenusTierETableARewards",
+            "masteryReq": 10,
+            "minEnemyLevel": 100,
+            "maxEnemyLevel": 100,
+            "xpAmounts": [
+              840,
+              840,
+              840,
+              840,
+              1660
+            ]
+          },
+          {
+            "jobType": "/Lotus/Types/Gameplay/Venus/Jobs/Narmer/NarmerVenusCullJobAssassinate",
+            "rewards": "/Lotus/Types/Game/MissionDecks/EidolonJobMissionRewards/NarmerTableARewards",
+            "masteryReq": 0,
+            "minEnemyLevel": 50,
+            "maxEnemyLevel": 70,
+            "xpAmounts": [
+              770,
+              770,
+              770,
+              770,
+              1510
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

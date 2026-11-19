@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+{% if card.archimedea_expiry %}
+<div class="research-period">
+  {% if card.archimedea_activation %}<span>{{ (card.archimedea_activation | beijing).strftime('%m-%d') }} — {{ (card.archimedea_expiry | beijing).strftime('%m-%d') }}</span>{% endif %}
+  <strong>剩余 {{ card.archimedea_remaining }}</strong>
+  <span>{{ (card.archimedea_expiry | beijing).strftime('%m-%d %H:%M') }} 刷新</span>
+</div>
+{% endif %}
+{% if card.sections %}
+<div class="research-legend"><span class="research-tag">偏差 / 风险</span><span>共有条件</span><span class="research-tag research-tag--elite">精英风险</span><span>仅精英生效</span></div>
+{% for section in card.sections %}
+<section class="research-section{% if loop.last %} research-section--personal{% endif %}">
+  <h2>{{ section.title }}</h2>
+  {% for row in section.rows %}
+  <div class="research-modifier{% if row[0].startswith('精英') %} research-modifier--elite{% endif %}">
+    <div class="research-modifier-name"><span class="research-tag{% if row[0].startswith('精英') %} research-tag--elite{% endif %}">{{ row[0] }}</span><strong>{{ row[1] }}</strong></div>
+    <p>{{ row[2] }}</p>
+  </div>
+  {% endfor %}
+  {% for note in section.notes %}<p class="note">{{ note }}</p>{% endfor %}
+</section>
+{% endfor %}
+{% endif %}
+{% endblock %}

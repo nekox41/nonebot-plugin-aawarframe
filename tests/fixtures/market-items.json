@@ -1,0 +1,32 @@
+[
+  {
+    "id": "item-1",
+    "slug": "serration",
+    "gameRef": "/Lotus/Mods/Serration",
+    "maxRank": 10,
+    "i18n": {
+      "en": {
+        "name": "Serration"
+      },
+      "zh-hans": {
+        "name": "膛线"
+      }
+    },
+    "subtypes": [
+      "blueprint"
+    ]
+  },
+  {
+    "id": "item-2",
+    "slug": "frost_prime_set",
+    "gameRef": "/Lotus/FrostPrime",
+    "i18n": {
+      "en": {
+        "name": "Frost Prime Set"
+      },
+      "zh-hans": {
+        "name": "Frost Prime 一套"
+      }
+    }
+  }
+]
