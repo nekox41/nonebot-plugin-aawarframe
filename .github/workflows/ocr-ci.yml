@@ -1,0 +1,29 @@
+name: OCR End-to-End Admission
+
+on:
+  pull_request:
+    paths:
+      - "nonebot_plugin_aawarframe/infrastructure/riven_ocr.py"
+      - "nonebot_plugin_aawarframe/commands/router.py"
+      - "tests/test_ocr_admission.py"
+      - ".github/workflows/ocr-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  ocr-admission:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install plugin and test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Compile source
+        run: python -m compileall -q nonebot_plugin_aawarframe
+      - name: Lint affected code
+        run: python -m ruff check nonebot_plugin_aawarframe/infrastructure/riven_ocr.py nonebot_plugin_aawarframe/commands/router.py tests/test_ocr_admission.py
+      - name: Verify concurrent OCR and download limits
+        run: python -m pytest -q tests/test_ocr_admission.py tests/test_message_output.py
+      - name: Full regression suite
+        run: python -m pytest -q
