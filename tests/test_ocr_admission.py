@@ -1,6 +1,7 @@
 """Issue #1: enforce admission BEFORE QQ image fetch and avoid resource leaks."""
 
 import asyncio
+import base64
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
@@ -16,6 +17,7 @@ from nonebot_plugin_aawarframe.infrastructure.riven_ocr import (
     MAX_DOWNLOADS,
     RivenOCR,
     download_image,
+    message_image,
 )
 from nonebot_plugin_aawarframe.models.errors import UserInputError
 
@@ -195,6 +197,20 @@ async def test_content_length_stream_limit_and_qq_redirects():
         assert paths == [
             "/oversized-header", "/lying-header", "/redirect-outside", "/good"
         ]
+
+
+@pytest.mark.asyncio
+async def test_base64_decoded_size_is_still_checked_after_length_heuristic():
+    # 12 MiB + 1 byte produces a Base64 URL shorter than the fast length cutoff;
+    # the decoded-size guard must reject it rather than silently catch ValueError.
+    encoded = "base64://" + base64.b64encode(b"x" * (LIMIT + 1)).decode("ascii")
+    assert len(encoded) <= LIMIT * 4 // 3 + 20
+    event = SimpleNamespace(
+        message=Message(MessageSegment("image", {"url": encoded})),
+        reply=None,
+    )
+    with pytest.raises(UserInputError, match="12 MB"):
+        await message_image(SimpleNamespace(), event, SimpleNamespace())
 
 
 @pytest.mark.asyncio
