@@ -31,7 +31,7 @@ jobs:
           python -m pip install --no-deps ./nonebot_plugin_aawfqq ./nonebot_plugin_aawfonebot
       - name: Verify new backend and frontend imports
         run: |
-          python -m compileall -q core/nonebot_plugin_aawfcore nonebot_plugin_aawfqq nonebot_plugin_aawfonebot
+          python -m compileall -q scripts core/nonebot_plugin_aawfcore nonebot_plugin_aawfqq nonebot_plugin_aawfonebot tests
           python - <<'PY'
           import nonebot
           nonebot.init(driver="~none", render={"provider":"playwright","startup":"off"})
@@ -42,7 +42,7 @@ jobs:
           PY
       - name: Lint new boundaries
         run: |
-          python -m ruff check core/nonebot_plugin_aawfcore/api.py core/nonebot_plugin_aawfcore/client.py nonebot_plugin_aawfqq/nonebot_plugin_aawfqq nonebot_plugin_aawfonebot/nonebot_plugin_aawfonebot scripts/build_resources.py scripts/package_release.py
+          python -m ruff check core/nonebot_plugin_aawfcore/api.py core/nonebot_plugin_aawfcore/client.py core/nonebot_plugin_aawfcore/infrastructure/riven_ocr.py nonebot_plugin_aawfqq/nonebot_plugin_aawfqq nonebot_plugin_aawfonebot/nonebot_plugin_aawfonebot scripts/build_resources.py scripts/package_release.py
       - name: Run complete test suite
         run: python -m pytest -q
       - name: Build three independent distributions

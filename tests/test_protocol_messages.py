@@ -21,8 +21,8 @@ def test_neutral_message_pack_and_plaintext():
 def test_onebot_and_qq_convert_only_in_protocol_packages():
     import nonebot
 
-    assert nonebot.load_plugin("nonebot_plugin_aawfqq") is not None
-    assert nonebot.load_plugin("nonebot_plugin_aawfonebot") is not None
+    assert (nonebot.get_plugin("nonebot_plugin_aawfqq") or nonebot.load_plugin("nonebot_plugin_aawfqq")) is not None
+    assert (nonebot.get_plugin("nonebot_plugin_aawfonebot") or nonebot.load_plugin("nonebot_plugin_aawfonebot")) is not None
     from nonebot_plugin_aawfqq.router import pages
     from nonebot_plugin_aawfonebot.router import outbound
 

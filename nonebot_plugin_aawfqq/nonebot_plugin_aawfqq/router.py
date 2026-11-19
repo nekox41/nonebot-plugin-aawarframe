@@ -9,8 +9,8 @@ from nonebot.adapters import Bot, Event
 from nonebot.adapters.qq import Message, MessageSegment
 from nonebot.matcher import Matcher
 from nonebot.typing import T_State
-
 from nonebot_plugin_aawfcore.client import CoreClient, decode_image
+
 from .media import download_image
 
 logger = logging.getLogger(__name__)
@@ -71,21 +71,29 @@ def pages(segments: list[dict]) -> list[Message]:
 
 async def accept(bot: Bot, event: Event, matcher: Matcher, state: T_State):
     bot_id, group_id, user_id = session(bot, event)
-    image_base64 = None
-    if state["aawf_feature"] == "riven_analysis":
-        try:
-            image_base64 = base64.b64encode(await event_image(event)).decode("ascii")
-        except Exception as exc:
-            await matcher.finish(MessageSegment.text(str(exc)))
-            return
-    try:
-        result = await client.query(
+
+    async def execute_query():
+        image_base64 = None
+        if state["aawf_feature"] == "riven_analysis":
+            async with client.ocr_download():
+                image_base64 = base64.b64encode(await event_image(event)).decode("ascii")
+        return await client.query(
             feature=state["aawf_feature"], arguments=state["aawf_arguments"],
             bot_id=bot_id, group_id=group_id, user_id=user_id,
             image_base64=image_base64,
         )
+
+    try:
+        if state["aawf_feature"] == "riven_analysis":
+            # Reserve BEFORE any network operation or reply lookup.
+            async with client.ocr_admission():
+                result = await execute_query()
+        else:
+            result = await execute_query()
         for page in pages(result["segments"]):
             await bot.send(event, page)
+    except ValueError as exc:
+        await bot.send(event, MessageSegment.text(str(exc)))
     except Exception:
         logger.exception("QQ 官方回复失败")
         try:
@@ -93,7 +101,6 @@ async def accept(bot: Bot, event: Event, matcher: Matcher, state: T_State):
         except Exception:
             logger.warning("QQ 官方文本回退失败，可能超出回复窗口", exc_info=True)
     await matcher.finish()
-
 
 async def deliver(bot: Bot, delivery: dict):
     contents = pages(delivery["segments"])

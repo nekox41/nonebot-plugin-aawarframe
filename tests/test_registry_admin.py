@@ -19,7 +19,11 @@ BURSTON = "/Lotus/Weapons/Tenno/Rifle/BurstRifle"
 
 
 @pytest.fixture(scope="module")
-def grq(tmp_path_factory):
+def grq(tmp_path_factory, test_assets_root):
+    from nonebot_plugin_aawfcore.localization.resources import configure_resources
+
+    if test_assets_root is not None:
+        configure_resources(test_assets_root)
     query = GameResourceQuery(tmp_path_factory.mktemp("unified") / "registry.sqlite3")
     yield query
     query.close()

@@ -86,9 +86,9 @@ def test_missing_inactive_or_empty_season():
 
 
 async def test_command_registration_and_world_service(monkeypatch):
-    registered = []
-    monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
-    router.setup()
+    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+
+    registered = DEFAULT_COMMANDS
     assert ("电波", set(), "nightwave") in registered
     snapshot, now = recorded()
     monkeypatch.setattr("nonebot_plugin_aawfcore.services.worldstate.utcnow", lambda: now)

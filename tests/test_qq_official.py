@@ -8,7 +8,7 @@ import pytest
 pytest.importorskip("nonebot.adapters.qq")
 import nonebot
 
-assert nonebot.load_plugin("nonebot_plugin_aawfqq") is not None
+assert (nonebot.get_plugin("nonebot_plugin_aawfqq") or nonebot.load_plugin("nonebot_plugin_aawfqq")) is not None
 
 from nonebot.adapters.qq import GroupMessageCreateEvent, Message, MessageSegment
 from nonebot_plugin_aawfcore.api import pack

@@ -14,7 +14,6 @@ from pydantic import BaseModel, Field
 
 from .bootstrap import get_runtime
 from .commands.router import dispatch
-from .models.errors import UserInputError
 
 logger = logging.getLogger(__name__)
 app = FastAPI(title="AAWarframe Core API", version="1", docs_url=None, redoc_url=None)

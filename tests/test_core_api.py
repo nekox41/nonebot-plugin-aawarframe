@@ -130,8 +130,8 @@ async def test_claim_delivery_and_ack_via_backend_http(monkeypatch):
 @pytest.mark.asyncio
 async def test_two_adapters_consume_core_segments_without_native_cross_dependency(monkeypatch):
     import nonebot
-    assert nonebot.load_plugin("nonebot_plugin_aawfqq") is not None
-    assert nonebot.load_plugin("nonebot_plugin_aawfonebot") is not None
+    assert (nonebot.get_plugin("nonebot_plugin_aawfqq") or nonebot.load_plugin("nonebot_plugin_aawfqq")) is not None
+    assert (nonebot.get_plugin("nonebot_plugin_aawfonebot") or nonebot.load_plugin("nonebot_plugin_aawfonebot")) is not None
 
     from nonebot_plugin_aawfqq.router import pages
     from nonebot_plugin_aawfonebot.router import outbound

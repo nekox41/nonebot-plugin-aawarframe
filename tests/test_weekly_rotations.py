@@ -89,9 +89,9 @@ async def test_world_query_and_commands(monkeypatch, feature):
     service = WorldStateService(SimpleNamespace(fetch=AsyncMock(return_value=snapshot)))
     card = await service.query(feature)
     assert card.weekly_mode and card.status == DataStatus.OK and not card.notes
-    registered = []
-    monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
-    router.setup()
+    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+
+    registered = DEFAULT_COMMANDS
     assert ("氏族", set(), "clan") in registered
     assert ("电波", set(), "nightwave") in registered
     for name in ("日历", "钢精", "回廊", "灵化"):

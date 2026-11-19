@@ -12,6 +12,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from nonebot_plugin_aawfcore.commands import router
+from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
 from nonebot_plugin_aawfcore.localization.resolver import load_mapping
 from nonebot_plugin_aawfcore.models.common import DataStatus, Snapshot
 from nonebot_plugin_aawfcore.models.errors import UserInputError
@@ -88,7 +89,7 @@ async def test_new_bounty_commands_dispatch_index_and_render_errors(monkeypatch)
             world=world, renderer=renderer,
             control=SimpleNamespace(settings=SimpleNamespace(commands=[
                 SimpleNamespace(feature=feature, name=name)
-                for name, _, feature in router.DEFAULT_COMMANDS
+                for name, _, feature in DEFAULT_COMMANDS
             ])),
         )
     )
@@ -98,9 +99,7 @@ async def test_new_bounty_commands_dispatch_index_and_render_errors(monkeypatch)
         assert [segment.type for segment in result] == ["image"]
         result = await router.dispatch(feature, "0")
         assert [segment.type for segment in result] == ["image"]
-    registered = []
-    monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
-    router.setup()
+    registered = DEFAULT_COMMANDS
     assert ("圣所", set(), "sanctum_bounties") in registered
     assert ("扎里曼", set(), "zariman_bounties") in registered
     assert ("1999", set(), "hex_bounties") in registered

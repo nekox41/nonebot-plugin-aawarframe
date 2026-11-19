@@ -11,15 +11,10 @@ from nonebot_plugin_aawfcore.services.bounties import build_bounties, build_boun
 
 
 def test_commands_and_aliases(monkeypatch):
-    registered = {}
-    monkeypatch.setattr(
-        router,
-        "register",
-        lambda name, aliases, feature: registered.update(
-            {key: feature for key in (name, *aliases)}
-        ),
-    )
-    router.setup()
+    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+
+    registered = {key: feature for name, aliases, feature in DEFAULT_COMMANDS
+                  for key in (name, *aliases)}
     assert "夜灵" not in registered and "王境" not in registered
     assert registered["平原"] == "plains"
     assert registered["赏金"] == "bounty_summary"

@@ -7,7 +7,6 @@ from urllib.parse import urljoin, urlsplit
 import httpx
 from nonebot.adapters.onebot.v11 import Message
 
-
 MAX_IMAGE_BYTES = 12 * 1024 * 1024
 ALLOWED_DOMAINS = ("qq.com", "qq.com.cn", "qpic.cn")
 

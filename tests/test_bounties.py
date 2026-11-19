@@ -110,9 +110,9 @@ def test_reward_stage_mapping_and_missing_probability():
 
 
 def test_cetus_alias_is_removed(monkeypatch):
-    registered = []
-    monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
-    router.setup()
+    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+
+    registered = DEFAULT_COMMANDS
     assert ("地球", set(), "bounties") in registered
     assert not any(name == "希图斯" or "希图斯" in aliases for name, aliases, _ in registered)
 

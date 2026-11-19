@@ -122,9 +122,9 @@ async def test_empty_keyword_skips_http_and_failure_is_text(monkeypatch):
 
 
 def test_command_and_alias_registration(monkeypatch):
-    registrations = []
-    monkeypatch.setattr(router, "register", lambda *args: registrations.append(args))
-    router.setup()
+    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+
+    registrations = DEFAULT_COMMANDS
     assert ("wk", set(), "wiki") in registrations
 
 
