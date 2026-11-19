@@ -1,0 +1,134 @@
+name: Release — Core, QQ and OneBot Together
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build, e.g. 0.23.0 (manual runs do not publish)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install build tools and core
+        run: |
+          python -m pip install build
+          python -m pip install -e core
+      - name: Check three synchronized versions against tag
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          MANUAL_VERSION: ${{ inputs.version }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python - <<'PY'
+          import os
+          import tomllib
+          from pathlib import Path
+          expected = (
+              os.environ["MANUAL_VERSION"] if os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch"
+              else os.environ["GITHUB_REF_NAME"].removeprefix("v")
+          )
+          packages = ["core", "nonebot_plugin_aawfqq", "nonebot_plugin_aawfonebot"]
+          for name in packages:
+              with (Path(name) / "pyproject.toml").open("rb") as inp:
+                  project = tomllib.load(inp)["project"]
+              assert project["version"] == expected, (
+                  f"{name} is {project['version']} but release tag/version is {expected}"
+              )
+          with open(os.environ["GITHUB_ENV"], "a") as env:
+              env.write(f"AAWF_VERSION={expected}\n")
+          PY
+      - name: Fetch fresh data and validate generated archive
+        run: python scripts/build_resources.py --build
+      - name: Build and verify all three PyPI projects
+        run: |
+          python -m build --wheel --sdist core --outdir dist/core
+          python -m build --wheel --sdist nonebot_plugin_aawfqq --outdir dist/qq
+          python -m build --wheel --sdist nonebot_plugin_aawfonebot --outdir dist/onebot
+          python -m pip install twine
+          python -m twine check dist/*/*
+      - name: Package three source/manual installation ZIPs
+        run: python scripts/package_release.py --version "$AAWF_VERSION"
+      - name: Keep release artifacts for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: aawf-release-${{ github.run_number }}
+          path: |
+            dist/core/*
+            dist/qq/*
+            dist/onebot/*
+            dist/manual/*
+          retention-days: 30
+          if-no-files-found: error
+
+  publish-core:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: aawf-release-${{ github.run_number }}
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/core
+          password: ${{ secrets.PYPI_API_TOKEN_CORE }}
+
+  publish-qq:
+    if: github.event_name == 'push'
+    needs: publish-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: aawf-release-${{ github.run_number }}
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/qq
+          password: ${{ secrets.PYPI_API_TOKEN_QQ }}
+
+  publish-onebot:
+    if: github.event_name == 'push'
+    needs: publish-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: aawf-release-${{ github.run_number }}
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/onebot
+          password: ${{ secrets.PYPI_API_TOKEN_ONEBOT }}
+
+  release-github:
+    if: github.event_name == 'push'
+    needs: [publish-qq, publish-onebot]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: aawf-release-${{ github.run_number }}
+          path: dist
+      - name: Create one GitHub Release with three platform distributions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" dist/core/* dist/qq/* dist/onebot/* dist/manual/* \
+            --title "AAWarframe $TAG — Core + QQ + OneBot" \
+            --generate-notes
