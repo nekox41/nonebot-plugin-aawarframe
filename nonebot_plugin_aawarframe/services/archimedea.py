@@ -80,7 +80,14 @@ def build_archimedea(snapshot: Snapshot, kind: str, now: datetime | None = None)
     target = max(active, key=lambda c: c.activation or datetime.min.replace(tzinfo=timezone.utc))
     card.archimedea_activation = target.activation
     card.archimedea_expiry = target.expiry
-    card.render_cache_until = target.expiry
+    transitions = [target.expiry] if target.expiry else []
+    transitions.extend(
+        conquest.activation
+        for conquest in conquests
+        if conquest.type == kind and conquest.activation and conquest.activation > now
+    )
+    if transitions:
+        card.render_cache_until = min(transitions)
     if target.expiry:
         card.archimedea_remaining = remaining_clock(target.expiry, now)
     prefix = PREFIX + "MissionVariant_" + ("LabConquest_" if kind == "CT_LAB" else "HexConquest_")

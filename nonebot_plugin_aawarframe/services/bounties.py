@@ -98,7 +98,9 @@ def build_bounties(
     if warnings or job_warnings:
         card.notes.append("部分任务暂时无法显示。")
     card.bounty_expiry = current.expiry
-    card.render_cache_until = current.expiry
+    transitions = [current.expiry]
+    transitions.extend(mission.activation for mission in missions if mission.activation > now)
+    card.render_cache_until = min(transitions)
     card.bounty_remaining = remaining_clock(current.expiry, now)
     ordered = sorted(
         jobs,

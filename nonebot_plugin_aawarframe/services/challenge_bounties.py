@@ -61,7 +61,9 @@ def build_challenge_bounties(
         card.notes.append("当前赏金轮换数据暂缺。")
         return card
     card.bounty_expiry = current.expiry
-    card.render_cache_until = current.expiry
+    transitions = [current.expiry]
+    transitions.extend(mission.activation for mission in missions if mission.activation > now)
+    card.render_cache_until = min(transitions)
     card.bounty_remaining = remaining_clock(current.expiry, now)
     data = load_mapping("challenge_bounties.json")
     manifest = data["manifests"][region]

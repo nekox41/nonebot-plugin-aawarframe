@@ -37,7 +37,9 @@ def build_sortie(snapshot: Snapshot, now: datetime, *, archon: bool = False) -> 
     board.boss = boss.get("name", current.boss)
     board.faction = faction_name(boss.get("faction", ""))
     board.expiry = current.expiry
-    card.render_cache_until = current.expiry
+    transitions = [current.expiry]
+    transitions.extend(item.activation for item in sorties if item.activation > now)
+    card.render_cache_until = min(transitions)
     delta = current.expiry - now
     board.remaining = (
         f"{delta.days}天 {delta.seconds // 3600:02}:{delta.seconds // 60 % 60:02}"
