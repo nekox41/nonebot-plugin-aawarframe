@@ -9,7 +9,6 @@ from nonebot.adapters import Bot, Event
 from nonebot.adapters.qq import Message, MessageSegment
 from nonebot.matcher import Matcher
 from nonebot.typing import T_State
-
 from nonebot_plugin_aawfcore.client import CoreClient, decode_image
 
 from .media import download_image
