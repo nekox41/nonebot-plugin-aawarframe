@@ -67,7 +67,10 @@ PREVIEW_CATALOG = [
     ("fissures", "虚空裂缝", "fissures.html", "裂缝等级、任务与剩余时间"),
     ("arbitration", "仲裁排期", "arbitration.html", "当前仲裁和后续轮换"),
     ("market", "Market 挂单", "market.html", "在线卖家与买家列表"),
-    ("operations", "突击与入侵", "operations.html", "阶段任务与阵营进度"),
+    ("sortie", "突击任务", "operations.html", "阶段任务与特殊条件"),
+    ("archon", "执刑官猎杀", "operations.html", "执刑官弱点与阶段任务"),
+    ("invasions", "入侵任务", "operations.html", "阵营进度与任务奖励"),
+    ("parts", "Prime 部件来源", "relics.html", "部件对应的遗物来源"),
     ("relics", "遗物奖励", "relics.html", "遗物奖励概率和白金价格"),
     ("trend", "成交趋势", "trend.html", "成交量与价格变化"),
     ("riven_analysis", "紫卡分析", "riven_analysis.html", "词条评估与分析结果"),
@@ -105,8 +108,8 @@ def _preview_card(template: str):
     from ..models.bounties import BountyDisplay
     from ..models.common import Card, CycleDisplay, FissureDisplay, Section
     from ..models.market import MarketBoard
-    from ..models.operations import OperationBoard, OperationTask
-    from ..models.relics import RelicBoard, RelicReward
+    from ..models.operations import InvasionDisplay, OperationBoard, OperationTask
+    from ..models.relics import PartRelics, PartsBoard, RelicBoard, RelicReference, RelicReward
     from ..models.riven_market import RivenListing, RivenMarketBoard
     from ..models.riven_values import RivenAttribute, RivenValuesBoard
     from ..models.trend import TrendBoard, TrendPeriod, TrendPoint
@@ -151,15 +154,39 @@ def _preview_card(template: str):
     elif template == "market":
         base["market_board"] = MarketBoard(name="圣装战甲部件",
                                             description="PC / 跨平台在线挂单")
-    elif template == "operations":
-        base["operation_board"] = OperationBoard(
-            kind="sortie", boss="突击指挥官", faction="Grineer",
-            tasks=[
-                OperationTask(number=1, mission="生存", node="卡吕普索",
-                              planet="土星", modifier="敌人护盾增强"),
-                OperationTask(number=2, mission="防御", node="泰亚", planet="地球"),
-                OperationTask(number=3, mission="间谍", node="阿马尔", planet="木星"),
+    elif template in {"sortie", "archon", "invasions"}:
+        tasks = [
+            OperationTask(number=1, mission="生存", node="卡吕普索",
+                          planet="土星", modifier="敌人护盾增强"),
+            OperationTask(number=2, mission="防御", node="泰亚", planet="地球"),
+            OperationTask(number=3, mission="间谍", node="阿马尔", planet="木星"),
+        ]
+        if template == "invasions":
+            base["operation_board"] = OperationBoard(
+                kind="invasions",
+                invasions=[InvasionDisplay(
+                    node="塞德娜 · 卡律布狄斯", planet="塞德娜",
+                    attacker="Grineer", defender="Corpus",
+                    attacker_percent=62.5, defender_percent=37.5,
+                    attacker_rewards=["Forma 蓝图"], defender_rewards=["Orokin 电池"],
+                )],
+            )
+        else:
+            base["operation_board"] = OperationBoard(
+                kind=template,
+                boss="夜灵水力使" if template == "archon" else "突击指挥官",
+                faction="Grineer",
+                reward="琥珀执刑官源力石" if template == "archon" else "",
+                tone="gold" if template == "archon" else "",
+                tasks=tasks,
+            )
+    elif template == "parts":
+        base["parts_board"] = PartsBoard(parts=[
+            PartRelics(name="圣装武器部件", quantity=1, relics=[
+                RelicReference(name="Lith A1", rarity="rare", vaulted=False),
+                RelicReference(name="Meso B7", rarity="uncommon", vaulted=True),
             ])
+        ])
     elif template == "relics":
         base["relic_board"] = RelicBoard(
             name="Lith A1", vaulted=False,
