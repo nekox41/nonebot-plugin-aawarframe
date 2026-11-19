@@ -24,6 +24,11 @@ _test_assets = (
 )
 
 
+@pytest.fixture(scope="session")
+def test_assets_root():
+    return _test_assets
+
+
 @pytest.fixture(autouse=True)
 def reset_resource_directory():
     # Some tests deliberately reconfigure the global resource directory.
