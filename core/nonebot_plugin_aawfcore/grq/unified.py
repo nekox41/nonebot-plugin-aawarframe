@@ -95,6 +95,7 @@ def persist_catalog(
                 "payload=excluded.payload,enabled=excluded.enabled "
                 "WHERE items.payload<>excluded.payload "
                 "OR items.riven_key IS NOT excluded.riven_key "
+                "OR items.wm_slug IS NOT excluded.wm_slug "
                 "OR items.enabled<>excluded.enabled",
                 (key, key,
                  row.names.get("zh-hans", ""), row.names.get("en", ""),
