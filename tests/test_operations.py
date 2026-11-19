@@ -59,7 +59,7 @@ def test_invasion_factions_rewards_and_progress_are_correct():
     snapshot, now = recorded()
     card = build_invasions(snapshot, now)
     items = card.operation_board.invasions
-    assert len(items) == 4 and not card.notes
+    assert len(items) == 4 and not any(note.startswith('部分入侵') for note in card.notes)
     ordinary = next(item for item in items if item.node == 'Enceladus')
     assert ordinary.attacker == 'Corpus' and ordinary.defender == 'Grineer'
     assert ordinary.attacker_percent == pytest.approx((1 + 22869 / 49000) * 50)
@@ -125,3 +125,19 @@ async def test_service_routes_and_commands_render_images(feature, monkeypatch):
     registered = DEFAULT_COMMANDS
     for command, name in [('突击', 'sortie'), ('执刑官', 'archon'), ('入侵', 'invasions')]:
         assert (command, set(), name) in registered
+
+
+
+def test_invasion_shows_base_node_mission_type_without_claiming_live_rotation(monkeypatch):
+    snapshot, now = recorded()
+    monkeypatch.setattr(
+        "nonebot_plugin_aawarframe.services.operations.node_info",
+        lambda _: {"name": "Test Node", "systemName": "Saturn", "missionName": "歼灭"},
+    )
+    card = build_invasions(snapshot, now)
+    assert card.operation_board.invasions
+    assert all(item.mission_type == "歼灭" for item in card.operation_board.invasions)
+    html = CardRenderer().html(card)
+    assert "节点基础任务：歼灭" in html
+    assert any("每 15 分钟轮换" in note for note in card.notes)
+    assert "节点基础任务：歼灭" in card.text()
