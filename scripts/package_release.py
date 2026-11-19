@@ -52,7 +52,7 @@ def build(version: str) -> None:
                  f"   load only nonebot_plugin_aawf{name} as the frontend plugin;\n"
                  "   it automatically loads nonebot_plugin_aawfcore.\n")
                 + "4. Register the selected NoneBot adapter in your bot.py.\n"
-                "The core uses data/aawarframe as the persistent shared data folder.\n"
+                + "The core uses data/aawarframe as the persistent shared data folder.\n"
             )
             archive.writestr("INSTALL.txt", docs)
         print(path, path.stat().st_size)
