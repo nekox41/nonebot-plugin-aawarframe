@@ -160,6 +160,52 @@ WM 展示物品图片、名称和描述，上方为 5 条卖单，下方为 3 �
 | `触伤` | 异常状态伤害 | `病毒` | 病毒伤害 |
 | `弱伤` | 弱点伤害 | `弱暴` | 弱点暴击几率 |
 
+## 选择协议安装（单协议，无需安装所有适配器）
+
+本仓库采用**共享核心 + 独立协议入口**，而不是为每个协议复制一份 Warframe 业务代码。核心发行包 `nonebot-plugin-aawarframe` 不强制依赖 OneBot 或 QQ 官方协议；各平台薄包装只追加自己的协议依赖，数据与渲染缓存依旧写入同一 `AAWARFRAME_CACHE_DIR`（默认 `data/aawarframe`）。
+
+| 安装发行包 | NoneBot 插件名 | 协议依赖 |
+| --- | --- | --- |
+| `nonebot-plugin-aawfqq` | `nonebot_plugin_aawfqq` | 仅 `nonebot-adapter-qq` |
+| `nonebot-plugin-aawfonebot` | `nonebot_plugin_aawfonebot` | 仅 `nonebot-adapter-onebot` |
+| `nonebot-plugin-aawarframe`（核心） | `nonebot_plugin_aawarframe` | 无强制协议依赖，支持 `[qq]` / `[onebot]` 可选扩展 |
+
+两个独立平台包的源码和构建配置已经位于仓库 `distributions/qq/` 与 `distributions/onebot/`，目前属于 **PR 测试版，尚未上传 PyPI**。PyPI 正式发布后，按自己使用的平台只安装对应的一个发行包即可，例如 `pip install nonebot-plugin-aawfqq`。无需安装 OOPZ 或 OneBot。
+
+开发测试直接使用仓库：
+
+```bash
+# 官方 QQ 机器人
+python -m pip install -e '.[qq]'
+python -m pip install -e distributions/qq
+
+# 或者，仅使用 OneBot V11
+python -m pip install -e '.[onebot]'
+python -m pip install -e distributions/onebot
+```
+
+两种安装是**二选一**的示例，不需要全部执行。两个发行包通过 NoneBot 的 `require()` 加载同一个 `nonebot_plugin_aawarframe` 核心，因此也不会重复初始化业务服务。首次启动产生的数据文件、用户修改过的资源、订阅数据库和渲染缓存不随协议入口改变而重新复制。
+
+### 修复 bot.py 的 ModuleNotFoundError
+
+无论如何拆分插件，**用户自己的 `bot.py` 如果直接写了 `from nonebot.adapters.onebot.v11 import Adapter`，但没有安装 OneBot，都会在插件加载之前崩溃**。这不是安装 QQ 插件可以自动覆盖的代码。
+
+如果你只用 QQ 官方机器人，直接删除该导入和对应的 `driver.register_adapter(ONEBOT_V11Adapter)`，使用：
+
+```python
+import nonebot
+from nonebot.adapters.qq import Adapter as QQAdapter
+
+nonebot.init()
+driver = nonebot.get_driver()
+driver.register_adapter(QQAdapter)
+nonebot.load_plugin("nonebot_plugin_aawarframe")  # 源码 PR / 核心版本
+# 将来安装 nonebot-plugin-aawfqq 后可使用 nonebot_plugin_aawfqq
+nonebot.run()
+```
+
+仓库还提供 [仅 QQ 官方的 bot.py 示例](examples/bot_qq_only.py)。如果通过 `pyproject.toml` 的 `[tool.nonebot].adapters` 注册适配器，则不要在 `bot.py` 额外无条件导入其它协议。数据目录迁移只解决**文件共享**；OpenID 和 OneBot 数字 QQ/群号属于不同身份，不应未经用户确认直接合并订阅身份。
+
 ## QQ 官方机器人适配（Issue #14）
 
 本插件已新增 `nonebot-adapter-qq` 入口。此阶段使用独立的 `protocols/qq.py` 适配消息接收、附件下载、OpenID/ACL、图片卡片回复、群/频道订阅主动通知。旧的 OneBot V11 功能仍保留以免破坏已有数据，但**官方机器人不需要运行 NapCat**。
@@ -170,6 +216,8 @@ Python 3.12，进入你的 NoneBot2 项目环境安装：
 
 ```bash
 python -m pip install "nonebot-plugin-aawarframe[qq]"
+# QQ 官方专用独立包待正式发布后使用：
+# python -m pip install nonebot-plugin-aawfqq
 # 开发 PR 源码包安装方式：
 python -m pip install "nonebot-adapter-qq>=1.7.4,<2"
 ```
