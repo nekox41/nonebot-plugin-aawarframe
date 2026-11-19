@@ -1,6 +1,7 @@
 """Build-time-only network resource acquisition (never imported by bot startup)."""
 
 import asyncio
+import gzip
 import json
 import logging
 import re
