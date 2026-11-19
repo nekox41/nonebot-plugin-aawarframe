@@ -1,0 +1,88 @@
+name: Publish Protocol Packages
+
+on:
+  push:
+    tags:
+      - 'qq-v*'
+      - 'onebot-v*'
+  workflow_dispatch:
+    inputs:
+      adapter:
+        description: Build only: independent adapter distribution
+        type: choice
+        options:
+          - qq
+          - onebot
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Select independent distribution and validate tag/version
+        id: target
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
+          SELECTED_ADAPTER: ${{ inputs.adapter }}
+        run: |
+          python - <<'PY'
+          import os
+          import tomllib
+          from pathlib import Path
+
+          ref = os.environ["REF_NAME"]
+          event = os.environ["EVENT_NAME"]
+          adapter = os.environ["SELECTED_ADAPTER"] if event == "workflow_dispatch" else ""
+          version = None
+          if event != "workflow_dispatch":
+              for prefix, platform in (("qq-v", "qq"), ("onebot-v", "onebot")):
+                  if ref.startswith(prefix):
+                      adapter = platform
+                      version = ref[len(prefix):]
+                      break
+          if adapter not in {"qq", "onebot"}:
+              raise SystemExit("Invalid adapter/tag, expected qq-vX.Y.Z or onebot-vX.Y.Z")
+          project = tomllib.loads((Path("distributions")/adapter/"pyproject.toml").read_text())["project"]
+          if version is not None and version != project["version"]:
+              raise SystemExit(f"Tag {ref} does not match {adapter} version {project['version']}")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              print(f"adapter={adapter}", file=out)
+              print(f"package={project['name']}", file=out)
+          PY
+      - name: Build selected wheel and source distribution
+        env:
+          ADAPTER: ${{ steps.target.outputs.adapter }}
+        run: |
+          python -m pip install build
+          python -m build "distributions/$ADAPTER" --wheel --sdist --outdir dist/
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: protocol-${{ steps.target.outputs.adapter }}-dist
+          path: dist/*
+      - name: Create separate draft GitHub Release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          PACKAGE: ${{ steps.target.outputs.package }}
+        run: |
+          gh release create "$TAG" dist/* --draft --title "$PACKAGE $TAG" --notes "Independently versioned protocol package. Requires shared nonebot-plugin-aawarframe core."
+      - name: Publish QQ distribution to PyPI
+        if: github.event_name == 'push' && steps.target.outputs.adapter == 'qq'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN_QQ }}
+      - name: Publish OneBot distribution to PyPI
+        if: github.event_name == 'push' && steps.target.outputs.adapter == 'onebot'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN_ONEBOT }}
