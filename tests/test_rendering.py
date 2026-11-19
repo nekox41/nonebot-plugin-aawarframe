@@ -153,9 +153,9 @@ def test_worldstate_proxy_rejects_invalid_protocol():
 
 
 async def test_render_cache_uses_stable_data_and_ten_second_time_buckets(monkeypatch):
+    import asyncio
     from datetime import datetime, timedelta, timezone
 
-    import asyncio
     import nonebot_plugin_htmlrender
 
     from nonebot_plugin_aawarframe.models.common import CycleDisplay
