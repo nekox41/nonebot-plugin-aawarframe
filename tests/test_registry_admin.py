@@ -112,9 +112,16 @@ async def test_alias_api_and_removed_admin_endpoints(grq):
             for r in (await client.get("/api/aliases")).json()["items"]
         )
         assert (await client.request("DELETE", "/api/aliases", json=payload)).status_code == 200
-        for endpoint in ("domains", "resources", "settings", "review", "export", "status"):
+        dashboard = (await client.get("/api/status")).json()
+        assert dashboard["ok"] and dashboard["resource_count"] >= 20000
+        assert dashboard["alias_count"] >= 0
+        assert any(item["name"] == "Market" for item in dashboard["resources"])
+        assert (await client.get("/api/previews")).json()["items"]
+        assert (await client.post("/api/previews", json={"template": "unknown"})).status_code == 404
+        for endpoint in ("domains", "resources", "settings", "review", "export"):
             assert (await client.get("/api/" + endpoint)).status_code == 404
-        assert (await client.get("/")).headers["content-security-policy"]
+        policy = (await client.get("/")).headers["content-security-policy"]
+        assert "img-src 'self' data:" in policy
 
 
 def test_old_aliases_and_mapping_changes_are_preserved(grq, tmp_path):
@@ -159,3 +166,67 @@ def test_old_aliases_and_mapping_changes_are_preserved(grq, tmp_path):
     )
     assert path.with_name("registry.pre-unified-items.sqlite3").exists()
     query.close()
+
+
+@pytest.mark.parametrize("template", [
+    "card", "cycles", "fissures", "arbitration", "market", "sortie", "archon", "invasions",
+    "parts", "relics",
+    "trend", "riven_analysis", "attributes", "commands", "riven_market", "riven_values",
+    "void_trader", "weekly", "nightwave", "archimedea", "bounties", "challenge_bounties",
+])
+def test_preview_catalog_cards_are_valid(template):
+    from nonebot_plugin_aawarframe.admin.server import _preview_card
+
+    card = _preview_card(template)
+    assert card.title
+    assert card.source == "AAWarframe · WebUI 预览"
+
+
+async def test_preview_api_renders_local_sample_without_upstream_requests(grq):
+    renderer = SimpleNamespace(
+        render=AsyncMock(return_value=[b"webp-preview"]),
+        metrics={},
+    )
+    app = create_app(SimpleNamespace(grq=grq, renderer=renderer), "long-test-password-12345")
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://test") as client:
+        client.headers["Authorization"] = "Bearer long-test-password-12345"
+        response = await client.post("/api/previews", json={"template": "sortie"})
+        assert response.status_code == 200
+        assert response.json()["images"] == ["d2VicC1wcmV2aWV3"]
+        renderer.render.assert_awaited_once()
+
+
+async def test_editor_persists_overrides_and_hot_reloads_renderer(grq, tmp_path):
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+
+    renderer = CardRenderer()
+    app = create_app(
+        SimpleNamespace(grq=grq, renderer=renderer),
+        "long-test-password-12345",
+        tmp_path / "admin-overrides",
+    )
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://test") as client:
+        client.headers["Authorization"] = "Bearer long-test-password-12345"
+        files = (await client.get("/api/editor/files")).json()["items"]
+        assert any(item["name"] == "templates/card.html" for item in files)
+        source = (await client.get("/api/editor/file", params={"name": "css/base.css"})).json()
+        marker = "\\n/* webui-live-override */"
+        changed = source["content"] + marker
+        saved = await client.put(
+            "/api/editor/file",
+            json={"name": "css/base.css", "content": changed, "revision": source["revision"]},
+        )
+        assert saved.status_code == 200
+        assert "webui-live-override" in renderer.css
+        current = (await client.get("/api/editor/file", params={"name": "css/base.css"})).json()
+        assert current["overridden"] and current["content"] == changed
+        invalid = await client.put(
+            "/api/editor/file",
+            json={"name": "templates/card.html", "content": "{% if broken %}",
+                  "revision": (await client.get("/api/editor/file", params={"name": "templates/card.html"})).json()["revision"]},
+        )
+        assert invalid.status_code == 422
+        reset = await client.delete("/api/editor/file", params={"name": "css/base.css"})
+        assert reset.status_code == 200
+        assert "webui-live-override" not in renderer.css
+    await renderer.close()
