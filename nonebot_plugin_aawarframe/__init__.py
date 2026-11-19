@@ -16,7 +16,7 @@ __plugin_meta__ = PluginMetadata(
     type="application",
     homepage="https://github.com/nekox41/nonebot-plugin-aawarframe",
     config=Config,
-    supported_adapters={"~onebot.v11"},
+    supported_adapters={"~onebot.v11", "~qq"},
 )
 
 from .bootstrap import setup as setup_runtime  # noqa: E402
