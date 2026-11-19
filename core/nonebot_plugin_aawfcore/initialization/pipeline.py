@@ -3,9 +3,9 @@
 # 作者：Aameow
 
 import gzip
+import hashlib
 import json
 import logging
-import hashlib
 import shutil
 import sqlite3
 import tarfile
