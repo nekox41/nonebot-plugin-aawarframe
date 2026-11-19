@@ -438,7 +438,10 @@ class GameResourceQuery:
                 raise ValueError("市场目录为空或存在重复标识")
             from .sources import market_resources
 
-            current = {r.id: self.get("Items", r.id) for r in self._base.values()}
+            current = {
+                r.id: self.get("Items", r.id)
+                for r in self._base.values() if not r.id.startswith("market:")
+            }
             # 移除已下架商品的交易标记；物品本身和人工别名继续保留。
             for key, r in list(current.items()):
                 meta = {**r.metadata, "market_tradable": False}
