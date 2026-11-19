@@ -10,10 +10,10 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawarframe.models.common import DataStatus, Snapshot
-from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
-from nonebot_plugin_aawarframe.services.archimedea import build_archimedea
-from nonebot_plugin_aawarframe.services.worldstate import WorldStateService
+from nonebot_plugin_aawfcore.models.common import DataStatus, Snapshot
+from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
+from nonebot_plugin_aawfcore.services.archimedea import build_archimedea
+from nonebot_plugin_aawfcore.services.worldstate import WorldStateService
 
 
 def recorded():
@@ -83,7 +83,7 @@ def test_partial_mission_keeps_original_number():
 @pytest.mark.parametrize("feature,kind", [("deep", "CT_LAB"), ("temporal", "CT_HEX")])
 async def test_world_service_routes_research(monkeypatch, feature, kind):
     snapshot, now = recorded()
-    monkeypatch.setattr("nonebot_plugin_aawarframe.services.worldstate.utcnow", lambda: now)
+    monkeypatch.setattr("nonebot_plugin_aawfcore.services.worldstate.utcnow", lambda: now)
     provider = SimpleNamespace(fetch=AsyncMock(return_value=snapshot))
     card = await WorldStateService(provider).query(feature)
     assert card.text() == build_archimedea(snapshot, kind, now).text()

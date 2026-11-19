@@ -9,7 +9,7 @@ import nonebot
 import pytest
 
 nonebot.init(driver="~none", render={"provider": "playwright", "startup": "off"})
-assert nonebot.load_plugin("nonebot_plugin_aawarframe") is not None
+assert nonebot.load_plugin("nonebot_plugin_aawfcore") is not None
 
 
 @pytest.fixture

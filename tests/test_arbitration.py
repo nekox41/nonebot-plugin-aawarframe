@@ -9,11 +9,11 @@ from types import SimpleNamespace
 import httpx
 import pytest
 
-from nonebot_plugin_aawarframe.admin.server import create_app
-from nonebot_plugin_aawarframe.initialization.nodes import parse_schedule
-from nonebot_plugin_aawarframe.localization.resources import raw_mapping
-from nonebot_plugin_aawarframe.models.errors import UserInputError
-from nonebot_plugin_aawarframe.services.arbitration import BEIJING, ArbitrationService
+from nonebot_plugin_aawfcore.admin.server import create_app
+from nonebot_plugin_aawfcore.initialization.nodes import parse_schedule
+from nonebot_plugin_aawfcore.localization.resources import raw_mapping
+from nonebot_plugin_aawfcore.models.errors import UserInputError
+from nonebot_plugin_aawfcore.services.arbitration import BEIJING, ArbitrationService
 
 NOW = datetime(2026, 11, 14, 9, 30, tzinfo=timezone.utc)
 
