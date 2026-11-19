@@ -375,7 +375,11 @@ async function loadPreviews() {
     previewItems = (await api('previews')).items || [];
     $('preview-count').textContent = previewItems.length + ' 项';
     drawPreviewList();
-    if (!selectedPreview && previewItems.length) selectPreview(previewItems[0].id);
+    if (selectedPreview && previewItems.some(item => item.id === selectedPreview.id)) {
+      await selectPreview(selectedPreview.id);
+    } else if (previewItems.length) {
+      await selectPreview(previewItems[0].id);
+    }
   } catch (error) {
     showError('preview-error', error);
   }
