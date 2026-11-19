@@ -72,6 +72,11 @@ async def main() -> None:
     )
 
     validate(ASSETS)
+    riven_rules = json.loads((ASSETS / "riven_stats.json").read_text(encoding="utf-8"))
+    if not isinstance(riven_rules, dict) or not {
+        "source", "disposition", "layouts", "attributes"
+    }.issubset(riven_rules):
+        raise ValueError("紫卡规则资源结构不完整，拒绝构建")
     os.environ["AAWF_BUILD_RESOURCE"] = "1"
     with tempfile.TemporaryDirectory(prefix="aawf-resource-build-") as temp:
         directory = Path(temp)
@@ -91,7 +96,9 @@ async def main() -> None:
 
     # 仅在构建的制品中保留离线包（不是将大量抓取数据作为 Git 源码）。
     for filename in SEEDS:
-        (ASSETS / filename).unlink(missing_ok=True)
+        # Riven rules are static runtime package data, not part of the versioned game cache.
+        if filename != "riven_stats.json":
+            (ASSETS / filename).unlink(missing_ok=True)
     (ASSETS / "grq").mkdir(parents=True, exist_ok=True)
     print("Resource provenance: WFCD + Warframe Market + browse.wf and legacy translation seeds")
 
