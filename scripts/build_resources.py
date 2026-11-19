@@ -78,10 +78,10 @@ async def main() -> None:
     with tempfile.TemporaryDirectory(prefix="aawf-resource-build-") as temp:
         directory = Path(temp)
         latest = await initialize(directory, force=True)
-        marker = directory / "resources/current.json"
-        state = json.loads(marker.read_text("utf-8"))
-        if state.get("network") is not True:
-            raise RuntimeError("实时资源更新失败，拒绝用历史种子发布新版本")
+        # The build-only initializer raises on any failed upstream acquisition.
+        # Runtime markers no longer carry network freshness state.
+        if not latest.name.startswith("online-"):
+            raise RuntimeError("构建未生成联网更新的资源版本")
         validate(latest)
         db = GameResourceQuery(directory / "registry.sqlite3")
         db.close()
