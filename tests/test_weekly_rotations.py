@@ -9,15 +9,15 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawarframe.commands import router
-from nonebot_plugin_aawarframe.models.common import DataStatus, Snapshot
-from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
-from nonebot_plugin_aawarframe.services.calendar import build_calendar
-from nonebot_plugin_aawarframe.services.circuit import build_circuit, rotation_index
-from nonebot_plugin_aawarframe.services.clan import build_clan
-from nonebot_plugin_aawarframe.services.steel_path import build_steel_path
-from nonebot_plugin_aawarframe.services.weekly import week_bounds
-from nonebot_plugin_aawarframe.services.worldstate import WorldStateService
+from nonebot_plugin_aawfcore.commands import router
+from nonebot_plugin_aawfcore.models.common import DataStatus, Snapshot
+from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
+from nonebot_plugin_aawfcore.services.calendar import build_calendar
+from nonebot_plugin_aawfcore.services.circuit import build_circuit, rotation_index
+from nonebot_plugin_aawfcore.services.clan import build_clan
+from nonebot_plugin_aawfcore.services.steel_path import build_steel_path
+from nonebot_plugin_aawfcore.services.weekly import week_bounds
+from nonebot_plugin_aawfcore.services.worldstate import WorldStateService
 
 
 def recorded():
@@ -85,7 +85,7 @@ def test_fixed_steel_rotation_wrap_and_reset_boundary():
 @pytest.mark.parametrize("feature", ["clan", "calendar", "circuit", "incarnons", "steel_path"])
 async def test_world_query_and_commands(monkeypatch, feature):
     snapshot, now = recorded()
-    monkeypatch.setattr("nonebot_plugin_aawarframe.services.worldstate.utcnow", lambda: now)
+    monkeypatch.setattr("nonebot_plugin_aawfcore.services.worldstate.utcnow", lambda: now)
     service = WorldStateService(SimpleNamespace(fetch=AsyncMock(return_value=snapshot)))
     card = await service.query(feature)
     assert card.weekly_mode and card.status == DataStatus.OK and not card.notes

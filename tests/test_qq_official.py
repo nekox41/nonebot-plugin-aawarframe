@@ -13,9 +13,9 @@ from nonebot.adapters.onebot.v11 import MessageSegment as OBSegment
 from nonebot.adapters.qq import Message as QQMessage
 from nonebot.adapters.qq import MessageSegment as QQSegment
 
-from nonebot_plugin_aawarframe.admin.control import ACL
-from nonebot_plugin_aawarframe.commands import router
-from nonebot_plugin_aawarframe.protocols.qq import (
+from nonebot_plugin_aawfcore.admin.control import ACL
+from nonebot_plugin_aawfcore.commands import router
+from nonebot_plugin_aawfcore.protocols.qq import (
     CHANNEL_PREFIX,
     GROUP_PREFIX,
     group_scope,
@@ -25,7 +25,7 @@ from nonebot_plugin_aawarframe.protocols.qq import (
     send_reply,
     send_subscription,
 )
-from nonebot_plugin_aawarframe.subscriptions.service import SubscriptionService
+from nonebot_plugin_aawfcore.subscriptions.service import SubscriptionService
 
 QQ_BOT = "test-bot-app-id"
 GROUP = "g_openid-example_1234"
@@ -164,8 +164,8 @@ async def test_official_group_notification_uses_openid_and_file_image(tmp_path):
 async def test_official_notification_scheduler_and_db_scope(tmp_path, monkeypatch):
     from datetime import datetime, timedelta, timezone
 
-    from nonebot_plugin_aawarframe.models.common import Snapshot
-    from nonebot_plugin_aawarframe.models.worldstate import CycleState
+    from nonebot_plugin_aawfcore.models.common import Snapshot
+    from nonebot_plugin_aawfcore.models.worldstate import CycleState
 
     now = datetime.now(timezone.utc) + timedelta(minutes=30)
     cycle = CycleState(
@@ -176,12 +176,12 @@ async def test_official_notification_scheduler_and_db_scope(tmp_path, monkeypatc
         data={"test": True}, source="test",
     )))
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.cetus_cycle",
+        "nonebot_plugin_aawfcore.subscriptions.service.cetus_cycle",
         lambda data, stamp: (cycle, []),
     )
     bot = fake_qq_bot()
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
+        "nonebot_plugin_aawfcore.subscriptions.service.get_bots",
         lambda: {QQ_BOT: bot},
     )
     service = SubscriptionService(tmp_path, provider)
@@ -225,8 +225,8 @@ async def test_qq_official_attachment_and_reply_image():
 async def test_official_notification_failure_does_not_mark_sent(tmp_path, monkeypatch):
     from datetime import datetime, timedelta, timezone
 
-    from nonebot_plugin_aawarframe.models.common import Snapshot
-    from nonebot_plugin_aawarframe.models.worldstate import CycleState
+    from nonebot_plugin_aawfcore.models.common import Snapshot
+    from nonebot_plugin_aawfcore.models.worldstate import CycleState
 
     now = datetime.now(timezone.utc) + timedelta(minutes=30)
     cycle = CycleState(
@@ -239,11 +239,11 @@ async def test_official_notification_failure_does_not_mark_sent(tmp_path, monkey
     bot = fake_qq_bot()
     bot.send_to_group.side_effect = RuntimeError("QQ proactive permission denied")
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
+        "nonebot_plugin_aawfcore.subscriptions.service.get_bots",
         lambda: {QQ_BOT: bot},
     )
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.cetus_cycle",
+        "nonebot_plugin_aawfcore.subscriptions.service.cetus_cycle",
         lambda data, stamp: (cycle, []),
     )
     service = SubscriptionService(tmp_path, provider)

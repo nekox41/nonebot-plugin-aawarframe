@@ -6,12 +6,12 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawarframe.models.common import Snapshot
-from nonebot_plugin_aawarframe.subscriptions.rules import parse_rule
-from nonebot_plugin_aawarframe.subscriptions.service import SubscriptionService
-from nonebot_plugin_aawarframe.subscriptions.sources import arbitration_events, fissure_events
-from nonebot_plugin_aawarframe.subscriptions.store import SubscriptionStore
-from nonebot_plugin_aawarframe.subscriptions.targets import (
+from nonebot_plugin_aawfcore.models.common import Snapshot
+from nonebot_plugin_aawfcore.subscriptions.rules import parse_rule
+from nonebot_plugin_aawfcore.subscriptions.service import SubscriptionService
+from nonebot_plugin_aawfcore.subscriptions.sources import arbitration_events, fissure_events
+from nonebot_plugin_aawfcore.subscriptions.store import SubscriptionStore
+from nonebot_plugin_aawfcore.subscriptions.targets import (
     aya_events,
     efficient_bounty_events,
     market_rank_events,
@@ -83,7 +83,7 @@ def test_rules_are_normalized_and_bounded():
 def test_three_fissure_modes_and_combined_filters(monkeypatch):
     now = datetime(2026, 11, 17, 12, tzinfo=UTC)
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.sources.node_info",
+        "nonebot_plugin_aawfcore.subscriptions.sources.node_info",
         lambda node: {
             "name": node, "missionName": "生存", "systemName": "塞德娜"
         },
@@ -149,7 +149,7 @@ def test_quick_bounty_conditions(monkeypatch):
         objectives=["找到保险箱"], kind="杀毒",
     )
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.targets.build_bounties",
+        "nonebot_plugin_aawfcore.subscriptions.targets.build_bounties",
         lambda snapshot, now, region: SimpleNamespace(
             bounty_items=[good, blocked] if region != "hex" else [good1999, vault],
             bounty_expiry=now + timedelta(hours=1),
@@ -168,7 +168,7 @@ def test_quick_bounty_conditions(monkeypatch):
 def test_aya_three_tents(monkeypatch):
     now = datetime(2026, 11, 17, 12, tzinfo=UTC)
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.targets.build_bounties",
+        "nonebot_plugin_aawfcore.subscriptions.targets.build_bounties",
         lambda *args, **kwargs: SimpleNamespace(
             bounty_expiry=now + timedelta(minutes=30),
             bounty_locations={
@@ -218,7 +218,7 @@ def test_riven_price_is_strict_and_needs_buyout():
 
 
 def test_store_transition_dedup_and_rearm(tmp_path):
-    from nonebot_plugin_aawarframe.subscriptions.sources import Event
+    from nonebot_plugin_aawfcore.subscriptions.sources import Event
     now = datetime.now(UTC)
     store = SubscriptionStore(tmp_path / "sub.sqlite3")
     sub, _ = store.subscribe(
@@ -254,7 +254,7 @@ async def test_market_account_ingame_one_minute_poll(tmp_path, monkeypatch):
     ))
     bot = SimpleNamespace(send_group_msg=AsyncMock())
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
+        "nonebot_plugin_aawfcore.subscriptions.service.get_bots",
         lambda: {"bot": bot},
     )
     service = SubscriptionService(
@@ -292,7 +292,7 @@ async def test_riven_watcher_baseline_then_new_auction(tmp_path, monkeypatch):
     renderer = SimpleNamespace(render=AsyncMock(return_value=[b"image"]))
     bot = SimpleNamespace(send_group_msg=AsyncMock())
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
+        "nonebot_plugin_aawfcore.subscriptions.service.get_bots",
         lambda: {"bot": bot},
     )
     service = SubscriptionService(
@@ -311,8 +311,8 @@ async def test_riven_watcher_baseline_then_new_auction(tmp_path, monkeypatch):
 
 
 def test_subscription_card_renders_with_notification_header():
-    from nonebot_plugin_aawarframe.models.common import Card, Section
-    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+    from nonebot_plugin_aawfcore.models.common import Card, Section
+    from nonebot_plugin_aawfcore.rendering.renderer import CardRenderer
 
     renderer = CardRenderer()
     card = Card(

@@ -6,14 +6,14 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from nonebot_plugin_aawarframe.models.common import Snapshot
-from nonebot_plugin_aawarframe.models.worldstate import CycleState
-from nonebot_plugin_aawarframe.subscriptions.rules import (
+from nonebot_plugin_aawfcore.models.common import Snapshot
+from nonebot_plugin_aawfcore.models.worldstate import CycleState
+from nonebot_plugin_aawfcore.subscriptions.rules import (
     next_cetus_occurrence,
     parse_cetus_rule,
 )
-from nonebot_plugin_aawarframe.subscriptions.service import SubscriptionService
-from nonebot_plugin_aawarframe.subscriptions.store import SubscriptionStore
+from nonebot_plugin_aawfcore.subscriptions.service import SubscriptionService
+from nonebot_plugin_aawfcore.subscriptions.store import SubscriptionStore
 
 UTC = timezone.utc
 
@@ -91,11 +91,11 @@ async def test_scheduler_sends_once_and_restarts(tmp_path, monkeypatch):
     )
     fake_bot = SimpleNamespace(send_group_msg=AsyncMock(return_value={"message_id": 123}))
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.cetus_cycle",
+        "nonebot_plugin_aawfcore.subscriptions.service.cetus_cycle",
         lambda data, stamp: (cycle, []),
     )
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
+        "nonebot_plugin_aawfcore.subscriptions.service.get_bots",
         lambda: {"bot": fake_bot},
     )
     service = SubscriptionService(tmp_path, provider)
@@ -150,7 +150,7 @@ async def test_stale_snapshot_suppresses_notifications(tmp_path, monkeypatch):
     )
     fake_bot = SimpleNamespace(send_group_msg=AsyncMock())
     monkeypatch.setattr(
-        "nonebot_plugin_aawarframe.subscriptions.service.get_bots",
+        "nonebot_plugin_aawfcore.subscriptions.service.get_bots",
         lambda: {"bot": fake_bot},
     )
     service = SubscriptionService(tmp_path, provider)
