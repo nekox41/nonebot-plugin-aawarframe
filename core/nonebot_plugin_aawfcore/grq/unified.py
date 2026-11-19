@@ -7,8 +7,8 @@ import json
 import sqlite3
 from collections import Counter
 
+from .links import PREFIXES, SUFFIXES, WEAPON_CATEGORIES
 from .models import Resource
-from .links import PREFIXES, SUFFIXES
 from .normalizer import normalize_name
 
 
@@ -30,15 +30,15 @@ def persist_catalog(
 
     # Exact, category-guarded variant identity derivation happens once at import,
     # never during each Riven values query. Names only determine a compatible
-    # family: the item ID and its own omegaAttenuation remain independent.
+    # family. Disposition is globally fixed at 1.2 and is not an identity field.
     known = {
         normalize_name(r.names.get("en", "")): r.id
         for r in real.values()
-        if r.metadata.get("omegaAttenuation") is not None
+        if r.metadata.get("category") in WEAPON_CATEGORIES
     }
     variants = {}
     for key, row in real.items():
-        if row.metadata.get("omegaAttenuation") is None:
+        if row.metadata.get("category") not in WEAPON_CATEGORIES:
             continue
         name = row.names.get("en", "")
         alternatives = [name]
@@ -54,7 +54,7 @@ def persist_catalog(
         if base is None:
             candidates = [
                 r for r in real.values()
-                if r.metadata.get("omegaAttenuation") is not None
+                if r.metadata.get("category") in WEAPON_CATEGORIES
                 and normalize_name(r.names.get("en", "")) ==
                 normalize_name(riven.names.get("en", ""))
             ]
