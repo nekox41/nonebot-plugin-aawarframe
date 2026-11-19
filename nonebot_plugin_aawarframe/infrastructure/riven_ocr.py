@@ -98,7 +98,7 @@ async def download_image(url, http):
                 except ValueError:
                     pass
             data = bytearray()
-            async for chunk in response.aiter_bytes():
+            async for chunk in response.aiter_bytes(chunk_size=64 * 1024):
                 data.extend(chunk)
                 if len(data) > LIMIT:
                     raise UserInputError("图片超过 12 MB，请裁剪后发送。")
