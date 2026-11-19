@@ -1,62 +1,83 @@
-"""为手动 src/plugins 安装创建三份独立可解压 GitHub Release 包。"""
+"""Bundle the independently built wheels for manual NoneBot2 installation."""
 
 import argparse
-import tomllib
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DIST = ROOT / "dist" / "manual"
-CORE = ROOT / "core" / "nonebot_plugin_aawfcore"
-PLUGINS = {
-    "core": None,
-    "qq": ROOT / "nonebot_plugin_aawfqq" / "nonebot_plugin_aawfqq",
-    "onebot": ROOT / "nonebot_plugin_aawfonebot" / "nonebot_plugin_aawfonebot",
+DISTRIBUTIONS = {
+    "core": ("nonebot-plugin-aawfcore", "core"),
+    "qq": ("nonebot-plugin-aawfqq", "qq"),
+    "onebot": ("nonebot-plugin-aawfonebot", "onebot"),
 }
-EXTRAS = {
-    "core": [],
-    "qq": ["nonebot-adapter-qq>=1.7.4,<2"],
-    "onebot": ["nonebot-adapter-onebot>=2.4.6,<3"],
+BUNDLES = {
+    "core": ("core",),
+    "qq": ("core", "qq"),
+    "onebot": ("core", "onebot"),
+}
+PLUGIN_CONFIG = {
+    "core": ("nonebot_plugin_aawfcore", None),
+    "qq": ("nonebot_plugin_aawfqq", "nonebot.adapters.qq"),
+    "onebot": ("nonebot_plugin_aawfonebot", "nonebot.adapters.onebot.v11"),
 }
 
 
-def build(version: str) -> None:
-    with (ROOT / "core" / "pyproject.toml").open("rb") as inp:
-        requirements = tomllib.load(inp)["project"]["dependencies"]
-    archive_file = CORE / "assets" / "offline.tar.gz"
-    if not archive_file.exists():
-        raise SystemExit("先运行 python scripts/build_resources.py 生成资源")
-    DIST.mkdir(parents=True, exist_ok=True)
-    for name, frontend in PLUGINS.items():
-        path = DIST / f"nonebot-plugin-aawf{name}-manual-v{version}.zip"
+def find_wheel(root: Path, package: str, version: str) -> Path:
+    distribution, directory = DISTRIBUTIONS[package]
+    prefix = distribution.replace("-", "_").lower() + f"-{version}-"
+    matches = [
+        path for path in (root / "dist" / directory).glob("*.whl")
+        if path.name.lower().startswith(prefix)
+    ]
+    if len(matches) != 1:
+        raise SystemExit(
+            f"预期在 dist/{directory} 找到一个 {distribution} {version} wheel，实际找到 {len(matches)} 个"
+        )
+    wheel = matches[0]
+    if package == "core":
+        required = {
+            "nonebot_plugin_aawfcore/assets/offline.tar.gz",
+            "nonebot_plugin_aawfcore/assets/riven_stats.json",
+        }
+        with zipfile.ZipFile(wheel) as archive:
+            missing = required - set(archive.namelist())
+        if missing:
+            raise SystemExit("Core wheel 缺少运行时资源：" + ", ".join(sorted(missing)))
+    return wheel
+
+
+def build(version: str, root: Path = ROOT) -> None:
+    root = Path(root)
+    output = root / "dist" / "manual"
+    output.mkdir(parents=True, exist_ok=True)
+
+    for bundle, packages in BUNDLES.items():
+        wheels = [find_wheel(root, package, version) for package in packages]
+        plugin, adapter = PLUGIN_CONFIG[bundle]
+        install = " ".join(f"./wheels/{wheel.name}" for wheel in wheels)
+        adapter_config = f'adapters = ["{adapter}"]' if adapter else "# No protocol adapter is required by the Core-only bundle."
+        docs = (
+            "AAWarframe manual wheel installation\n"
+            f"Version: {version}; bundle: {bundle}\n\n"
+            "Requirements: Python 3.12 and an existing NoneBot2 project.\n\n"
+            "1. Extract this archive anywhere outside src/plugins.\n"
+            "2. Activate the NoneBot project's virtual environment.\n"
+            f"3. Install the included distributions:\n   python -m pip install {install}\n"
+            "4. Merge the following settings into the project's pyproject.toml "
+            "[tool.nonebot] section:\n\n"
+            "[tool.nonebot]\n"
+            f'plugins = ["{plugin}"]\n'
+            f"{adapter_config}\n\n"
+            "Do not copy the installed Core package into src/plugins. The protocol "
+            "package imports the Core as the normal Python distribution installed above.\n"
+            "Persistent data and generated game resources are stored under "
+            "data/aawarframe by default.\n"
+            "The included wheels declare and install their Python dependencies.\n"
+        )
+        path = output / f"nonebot-plugin-aawf{bundle}-manual-v{version}.zip"
         with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED, compresslevel=5) as archive:
-            for folder in (CORE, frontend):
-                if folder is None:
-                    continue
-                for file in folder.rglob("*"):
-                    if not file.is_file() or file.suffix == ".pyc" or "__pycache__" in file.parts:
-                        continue
-                    package_relative = file.relative_to(folder.parent)
-                    zip_name = "src/plugins/" + str(package_relative)
-                    archive.write(file, arcname=zip_name)
-            req = "\n".join([*requirements, *EXTRAS[name]]) + "\n"
-            archive.writestr("AAWF-REQUIREMENTS.txt", req)
-            instruction = (
-                "   load nonebot_plugin_aawfcore for a core-only install.\n"
-                if name == "core"
-                else f"   load only nonebot_plugin_aawf{name} as the frontend plugin;\n"
-                     "   it automatically loads nonebot_plugin_aawfcore.\n"
-            )
-            docs = (
-                "AAWarframe manual NoneBot2 installation\n"
-                f"Version: {version}; protocol: {name}\n"
-                "1. unzip <archive>.zip -d <NoneBot2 project>/\n"
-                "2. python -m pip install -r AAWF-REQUIREMENTS.txt\n"
-                "3. In pyproject.toml [tool.nonebot] set plugin_dirs = ['src/plugins'];\n"
-                + instruction
-                + "4. Register the selected NoneBot adapter in your bot.py.\n"
-                + "The core uses data/aawarframe as the persistent shared data folder.\n"
-            )
+            for wheel in wheels:
+                archive.write(wheel, arcname=f"wheels/{wheel.name}")
             archive.writestr("INSTALL.txt", docs)
         print(path, path.stat().st_size)
 

@@ -47,9 +47,9 @@ jobs:
         run: python -m pytest -q
       - name: Build three independent distributions
         run: |
-          python -m build --sdist --wheel core --outdir dist/pypi
-          python -m build --sdist --wheel nonebot_plugin_aawfqq --outdir dist/pypi
-          python -m build --sdist --wheel nonebot_plugin_aawfonebot --outdir dist/pypi
+          python -m build --sdist --wheel core --outdir dist/core
+          python -m build --sdist --wheel nonebot_plugin_aawfqq --outdir dist/qq
+          python -m build --sdist --wheel nonebot_plugin_aawfonebot --outdir dist/onebot
       - name: Build three manual-install release archives
         run: |
           python - <<'PY'
@@ -65,7 +65,9 @@ jobs:
         with:
           name: aawf-three-packages-${{ github.run_number }}
           path: |
-            dist/pypi/*
+            dist/core/*
+            dist/qq/*
+            dist/onebot/*
             dist/manual/*
           retention-days: 14
           if-no-files-found: error
