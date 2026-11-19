@@ -85,9 +85,9 @@ async def test_missing_storm_field_is_not_reported_as_empty(worldstate):
 
 
 def test_railjack_command_alias(monkeypatch):
-    registered = []
-    monkeypatch.setattr(router, "register", lambda *args: registered.append(args))
-    router.setup()
+    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+
+    registered = DEFAULT_COMMANDS
     assert ("九重天", set(), "railjack_fissures") in registered
 
 
