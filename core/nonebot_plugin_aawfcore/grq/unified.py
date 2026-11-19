@@ -80,6 +80,9 @@ def persist_catalog(
     )
 
     with db:
+        # A slug may have moved to another verified game item between releases.
+        # Clear previous assignments transactionally before enforcing UNIQUE.
+        db.execute("UPDATE items SET wm_slug=NULL WHERE wm_slug IS NOT NULL")
         for key, row in real.items():
             metadata = json.dumps(row.metadata, ensure_ascii=False, separators=(",", ":"))
             db.execute(
@@ -155,6 +158,11 @@ def persist_catalog(
             "(SELECT slug FROM current_market_slugs)"
         )
         db.execute("DROP TABLE current_market_slugs")
+        # Legacy aliases were copied to the foreign-keyed tables; do not import
+        # deleted aliases again on a later Market refresh.
+        db.execute("DELETE FROM item_aliases")
+        # The obsolete catalog JSON duplicates the new items payload.
+        db.execute("DELETE FROM item_catalog")
 
 
 def load_catalog(db: sqlite3.Connection) -> dict[str, Resource]:
