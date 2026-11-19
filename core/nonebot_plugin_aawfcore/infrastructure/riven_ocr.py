@@ -9,86 +9,11 @@ import logging
 import sys
 from collections import deque
 from pathlib import Path
-from urllib.parse import urljoin, urlsplit
 
-import httpx
 
 from ..models.errors import UserInputError
 
 LIMIT = 12 * 1024 * 1024
-
-
-def image_segments(message):
-    from nonebot.adapters.onebot.v11 import Message
-
-    return [segment for segment in Message(message) if segment.type == "image"]
-
-
-async def message_image(bot, event, http):
-    images = image_segments(event.message)
-    if not images:
-        reply = event.reply
-        original = getattr(event, "original_message", event.message)
-        reply_id = reply.message_id if reply else next(
-            (segment.data.get("id") for segment in original if segment.type == "reply"), None
-        )
-        if reply_id is not None:
-            try:
-                # 不依赖适配器的 Reply 模型校验，兼容缺少 real_id 等字段的返回。
-                message = await bot.get_msg(message_id=int(reply_id))
-                images = image_segments(message.get("message") or message.get("raw_message", ""))
-            except Exception:
-                logging.getLogger(__name__).debug("重新读取引用消息失败")
-        if not images and reply:
-            images = image_segments(reply.message)
-    if len(images) != 1:
-        raise UserInputError("请在“分析”后附上一张紫卡图片，或引用一张图片。")
-    segment = images[0].data
-    urls = []
-    # 引用的他人图片可能只保留 file 标识，或携带已失效的临时链接。
-    if segment.get("file") and not segment["file"].startswith("base64://"):
-        try:
-            info = await bot.get_image(file=segment["file"])
-            if info.get("url"):
-                urls.append(info["url"])
-        except Exception:
-            logging.getLogger(__name__).debug("刷新图片地址失败，使用消息中的地址")
-    urls.extend(value for value in (segment.get("url"), segment.get("file")) if value and value not in urls)
-    for url in urls:
-        if url.startswith("base64://"):
-            if len(url) > LIMIT * 4 // 3 + 20:
-                raise UserInputError("图片超过 12 MB，请裁剪后发送。")
-            try:
-                return base64.b64decode(url[9:], validate=True)
-            except ValueError:
-                continue
-        try:
-            data = await download_image(url, http)
-            if data:
-                return data
-        except httpx.HTTPError:
-            continue
-    raise UserInputError("无法读取这张图片，请重新上传后分析。")
-
-
-async def download_image(url, http):
-    for _ in range(4):
-        parts = urlsplit(url)
-        host = (parts.hostname or "").lower()
-        if parts.scheme not in {"http", "https"} or not any(host == domain or host.endswith("." + domain) for domain in ("qq.com", "qq.com.cn", "qpic.cn")) or parts.username or parts.password or parts.port not in {None, 80, 443}:
-            return None
-        async with http.client.stream("GET", url, follow_redirects=False) as response:
-            if response.is_redirect:
-                url = urljoin(url, response.headers.get("location", ""))
-                continue
-            response.raise_for_status()
-            data = bytearray()
-            async for chunk in response.aiter_bytes():
-                data.extend(chunk)
-                if len(data) > LIMIT:
-                    raise UserInputError("图片超过 12 MB，请裁剪后发送。")
-            return bytes(data)
-    return None
 
 
 class RivenOCR:
