@@ -471,6 +471,9 @@ function editorOverridden() {
   return Boolean(file && file.overridden);
 }
 async function selectEditorFile(name) {
+  if (selectedFile && name !== selectedFile && $('editor-content').value !== editorOriginal) {
+    if (!window.confirm('当前文件有未保存修改，确定放弃并切换文件吗？')) return;
+  }
   $('editor-error').textContent = '';
   try {
     const data = await api('editor/file?' + new URLSearchParams({ name }));
@@ -537,11 +540,21 @@ async function resetEditorFile() {
 function previewKeyForFile(name) {
   if (name.startsWith('css/')) return 'card';
   const file = name.replace('templates/', '').replace('.html', '');
-  if (file === 'base' || file === 'bounty_rewards') return file === 'base' ? 'card' : 'bounties';
+  if (file === 'base') return 'card';
+  if (file === 'bounty_rewards') return 'bounties';
+  if (file === 'operations') return 'sortie';
   return previewItems.some(item => item.id === file) ? file : 'card';
 }
 async function previewEditorFile() {
   if (!selectedFile) return;
+  if (!previewItems.length) {
+    try {
+      previewItems = (await api('previews')).items || [];
+    } catch (error) {
+      showError('editor-error', error);
+      return;
+    }
+  }
   $('editor-preview-panel').hidden = false;
   $('editor-preview-image').hidden = true;
   const key = previewKeyForFile(selectedFile);
