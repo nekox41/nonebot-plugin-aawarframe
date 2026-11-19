@@ -4,20 +4,12 @@
 
 import logging
 
-from nonebot import get_driver, on_message
-from nonebot.adapters import Bot, Event
-from nonebot.matcher import Matcher
-from nonebot.typing import T_State
 
-from ..admin.control import DEFAULT_COMMANDS
 from ..bootstrap import get_runtime
-from ..infrastructure.riven_ocr import message_image
 from ..localization.riven_attributes import attributes
 from ..models.common import Card
 from ..models.errors import UserInputError, WikiChallengeError
 from ..protocols.message import Message, MessageSegment
-from ..protocols.qq import group_scope, is_qq_bot, send_reply
-from ..protocols.qq import message_image as qq_message_image
 from ..rendering.viewmodels import fallback_text, wiki_text
 from ..services.bounties import BOUNTY_FEATURES
 from .parsing import (
@@ -125,60 +117,3 @@ async def dispatch(
     return await response(card, runtime)
 
 
-def command_identity_from_event(event: Event) -> tuple[str, str | None]:
-    """根据官方 QQ/OneBot 事件取得 ACL 的用户与会话标识。"""
-    # 规则没有注入 Bot；来自 QQ Adapter 的 event 类型直接包含 group_openid。
-    if hasattr(event, "group_openid"):
-        return str(event.get_user_id()), "qq-group:" + str(event.group_openid)
-    if getattr(event, "channel_id", None) and getattr(event, "guild_id", None):
-        return str(event.get_user_id()), "qq-channel:" + str(event.channel_id)
-    user = getattr(event, "user_id", None)
-    if user is None:
-        user = event.get_user_id()
-    group = getattr(event, "group_id", None)
-    return str(user), str(group) if group is not None else None
-
-
-def register(name: str, aliases: set[str], feature: str) -> None:
-    async def rule(event: Event, state: T_State) -> bool:
-        if "aawarframe_route" not in state:
-            user_id, group_id = command_identity_from_event(event)
-            state["aawarframe_route"] = get_runtime().control.route(
-                event.get_plaintext().lstrip(),
-                get_driver().config.command_start,
-                user_id,
-                group_id,
-            )
-        route = state["aawarframe_route"]
-        if route is None or route[0] != feature:
-            return False
-        state["aawarframe_arguments"] = route[1]
-        return True
-
-    command = on_message(rule=rule, block=True, priority=10)
-
-    @command.handle()
-    async def handle(bot: Bot, event: Event, matcher: Matcher, state: T_State):
-        image = None
-        if feature == "riven_analysis":
-            try:
-                image = await (
-                    qq_message_image(bot, event, get_runtime().http)
-                    if is_qq_bot(bot)
-                    else message_image(bot, event, get_runtime().http)
-                )
-            except UserInputError as exc:
-                await matcher.finish(str(exc))
-            except Exception:
-                logger.exception("下载紫卡图片失败")
-                await matcher.finish("无法下载图片，请重新上传。")
-        subscriber = group_scope(bot, event)
-        result = await dispatch(
-            feature, state["aawarframe_arguments"], image, subscriber=subscriber
-        )
-        await send_reply(bot, event, result, matcher)
-
-
-def setup() -> None:
-    for name, aliases, feature in DEFAULT_COMMANDS:
-        register(name, aliases, feature)
