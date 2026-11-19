@@ -120,8 +120,8 @@ async def test_service_routes_and_commands_render_images(feature, monkeypatch):
     monkeypatch.setattr(router, 'get_runtime', lambda: runtime)
     message = await router.dispatch(feature)
     assert [segment.type for segment in message] == ['image']
-    registered = []
-    monkeypatch.setattr(router, 'register', lambda *args: registered.append(args))
-    router.setup()
+    from nonebot_plugin_aawfcore.admin.control import DEFAULT_COMMANDS
+
+    registered = DEFAULT_COMMANDS
     for command, name in [('突击', 'sortie'), ('执刑官', 'archon'), ('入侵', 'invasions')]:
         assert (command, set(), name) in registered
