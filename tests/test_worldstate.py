@@ -10,17 +10,17 @@ from unittest.mock import AsyncMock
 import httpx
 import pytest
 
-from nonebot_plugin_aawarframe.infrastructure.http import HttpClient
-from nonebot_plugin_aawarframe.models.common import DataStatus, Snapshot
-from nonebot_plugin_aawarframe.models.worldstate import parse_date
-from nonebot_plugin_aawarframe.providers.worldstate import WorldStateProvider
-from nonebot_plugin_aawarframe.services.archimedea import build_archimedea
-from nonebot_plugin_aawarframe.services.bounties import build_bounties
-from nonebot_plugin_aawarframe.services.cetus import build_cetus
-from nonebot_plugin_aawarframe.services.clan import build_clan
-from nonebot_plugin_aawarframe.services.fissures import build_fissures
-from nonebot_plugin_aawarframe.services.worldstate import WorldStateService
-from nonebot_plugin_aawarframe.worldstate.parsers.common import ParseError
+from nonebot_plugin_aawfcore.infrastructure.http import HttpClient
+from nonebot_plugin_aawfcore.models.common import DataStatus, Snapshot
+from nonebot_plugin_aawfcore.models.worldstate import parse_date
+from nonebot_plugin_aawfcore.providers.worldstate import WorldStateProvider
+from nonebot_plugin_aawfcore.services.archimedea import build_archimedea
+from nonebot_plugin_aawfcore.services.bounties import build_bounties
+from nonebot_plugin_aawfcore.services.cetus import build_cetus
+from nonebot_plugin_aawfcore.services.clan import build_clan
+from nonebot_plugin_aawfcore.services.fissures import build_fissures
+from nonebot_plugin_aawfcore.services.worldstate import WorldStateService
+from nonebot_plugin_aawfcore.worldstate.parsers.common import ParseError
 
 NOW = datetime.fromtimestamp(1793923200, timezone.utc)
 
@@ -74,7 +74,7 @@ def test_archimedea_and_bounties(worldstate):
 
 
 async def test_service_isolates_parser_failures(worldstate, monkeypatch):
-    monkeypatch.setattr("nonebot_plugin_aawarframe.services.worldstate.utcnow", lambda: NOW)
+    monkeypatch.setattr("nonebot_plugin_aawfcore.services.worldstate.utcnow", lambda: NOW)
     del worldstate["Conquests"]
     provider = SimpleNamespace(
         fetch=AsyncMock(return_value=Snapshot(data=worldstate, source="fixture"))
@@ -117,7 +117,7 @@ async def test_recorded_official_worldstate(feature, monkeypatch):
     recorded = json.loads((Path(__file__).parent / "fixtures/worldstate-recorded.json").read_text())
     snapshot = Snapshot.model_validate(recorded)
     now = datetime.fromtimestamp(snapshot.data["Time"], timezone.utc)
-    monkeypatch.setattr("nonebot_plugin_aawarframe.services.worldstate.utcnow", lambda: now)
+    monkeypatch.setattr("nonebot_plugin_aawfcore.services.worldstate.utcnow", lambda: now)
     provider = SimpleNamespace(fetch=AsyncMock(return_value=snapshot))
     card = await WorldStateService(provider).query(feature)
     assert card.status == DataStatus.OK
