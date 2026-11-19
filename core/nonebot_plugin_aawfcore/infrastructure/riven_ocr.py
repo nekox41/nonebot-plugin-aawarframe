@@ -7,6 +7,8 @@ import base64
 import json
 import logging
 import sys
+from contextlib import asynccontextmanager
+from contextvars import ContextVar
 from collections import deque
 from pathlib import Path
 
@@ -14,6 +16,9 @@ from pathlib import Path
 from ..models.errors import UserInputError
 
 LIMIT = 12 * 1024 * 1024
+MAX_ANALYSES = 8
+MAX_DOWNLOADS = 4
+DOWNLOAD_TIMEOUT = 30
 
 
 class RivenOCR:
@@ -22,6 +27,10 @@ class RivenOCR:
         self.process = None
         self.lock = asyncio.Lock()
         self.pending = 0
+        self.download_slots = asyncio.Semaphore(MAX_DOWNLOADS)
+        self._admission_owner: ContextVar[asyncio.Task | None] = ContextVar(
+            'aawf_ocr_admission_owner', default=None
+        )
         self.log_task = None
         self.errors = deque(maxlen=30)
 
@@ -56,11 +65,29 @@ class RivenOCR:
         if not (await asyncio.wait_for(self.read(), 300)).get("ready"):
             raise RuntimeError("OCR 初始化失败")
 
-    async def recognize(self, image, analyze):
-        if self.pending >= 8:
+    @asynccontextmanager
+    async def admission(self):
+        """Reserve one slot BEFORE fetching media; nested calls in the same task reuse it.
+
+        asyncio tasks inherit ContextVars, so ownership also checks current_task().
+        The counter changes without awaits and is atomic within the event loop.
+        """
+        task = asyncio.current_task()
+        if task is not None and self._admission_owner.get() is task:
+            yield
+            return
+        if self.pending >= MAX_ANALYSES:
             raise UserInputError("分析队列已满，请稍后再发。")
         self.pending += 1
+        token = self._admission_owner.set(task)
         try:
+            yield
+        finally:
+            self._admission_owner.reset(token)
+            self.pending -= 1
+
+    async def recognize(self, image, analyze):
+        async with self.admission():
             async with self.lock:
                 try:
                     await self.start()
@@ -90,9 +117,6 @@ class RivenOCR:
                     await self.close()
                     logging.getLogger(__name__).exception("紫卡 OCR 不可用")
                     raise UserInputError("识别服务暂不可用，请稍后重试。") from None
-        finally:
-            self.pending -= 1
-
     async def close(self):
         if self.process:
             if self.process.returncode is None:
