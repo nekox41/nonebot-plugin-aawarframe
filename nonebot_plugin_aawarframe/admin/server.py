@@ -24,6 +24,9 @@ from fastapi.responses import FileResponse, JSONResponse
 from jinja2 import TemplateSyntaxError
 from pydantic import BaseModel, Field
 
+from ..models.common import Card
+from .preview_data import PreviewDataStore
+
 logger = logging.getLogger(__name__)
 STATIC = Path(__file__).parent / "static"
 
@@ -143,8 +146,8 @@ def _version_items(override_dir: Path, kind: str, feature: str) -> list[dict[str
     ]
 
 
-def _sample_fields(feature: str) -> list[dict[str, str]]:
-    sample = _preview_card(feature).model_dump(mode="json")
+def _sample_fields(card: Card) -> list[dict[str, str]]:
+    sample = card.model_dump(mode="json")
     fields: list[dict[str, str]] = []
 
     def visit(path: str, value, depth: int = 0):
@@ -156,7 +159,7 @@ def _sample_fields(feature: str) -> list[dict[str, str]]:
             "placeholder": "{{ " + path + " }}",
             "example": example,
         })
-        if depth >= 4:
+        if depth >= 6:
             return
         if isinstance(value, dict):
             for key, child in value.items():
@@ -174,173 +177,11 @@ def _sample_fields(feature: str) -> list[dict[str, str]]:
         })
     return fields
 
-
-def _preview_card(template: str):
-    from ..models.arbitration import ArbitrationBoard, ArbitrationEntry
-    from ..models.bounties import BountyDisplay
-    from ..models.common import Card, CycleDisplay, FissureDisplay, Section
-    from ..models.market import MarketBoard
-    from ..models.operations import InvasionDisplay, OperationBoard, OperationTask
-    from ..models.relics import PartRelics, PartsBoard, RelicBoard, RelicReference, RelicReward
-    from ..models.riven_market import RivenListing, RivenMarketBoard
-    from ..models.riven_values import RivenAttribute, RivenValuesBoard
-    from ..models.trend import TrendBoard, TrendPeriod, TrendPoint
-    from ..models.void_trader import TraderBoard, TraderGroup, TraderItem
-
-    now = datetime.now(timezone.utc)
-    base = {
-        "title": "Warframe · 示例预览",
-        "source": "AAWarframe · WebUI 预览",
-        "fetched_at": now,
-        "sections": [
-            Section(
-                title="示例信息",
-                columns=["项目", "内容"],
-                rows=[["数据状态", "正常"], ["更新时间", "刚刚"]],
-                notes=["这是本地生成的示例，不会触发外部数据请求。"],
-            )
-        ],
-    }
-    if template == "cycles":
-        base["cycle_items"] = [
-            CycleDisplay(name="夜灵平原", state="白天", next_state="黑夜",
-                         remaining="18 分钟", remaining_short="18:00",
-                         expiry=now + timedelta(minutes=18), tone="day"),
-            CycleDisplay(name="金星", state="温暖", next_state="寒冷",
-                         remaining="22 分钟", remaining_short="22:00",
-                         expiry=now + timedelta(minutes=22), tone="warm"),
-        ]
-    elif template == "fissures":
-        base.update(title="虚空裂缝", fissure_mode="normal", item_total=1,
-                    fissure_items=[FissureDisplay(
-                        tier="古纪", tier_key="VoidT1", node="防御 · 泰亚",
-                        planet="地球", mission="防御", faction="Grineer",
-                        remaining="24 分钟", remaining_short="24:00",
-                        expiry=now + timedelta(minutes=24))])
-    elif template == "arbitration":
-        base["arbitration_board"] = ArbitrationBoard(current=True, entries=[
-            ArbitrationEntry(node_id="SolNode1", node="泰亚", planet="地球",
-                             mission="防御", faction="Grineer", time=now,
-                             remaining="42:00", label="当前", grade="S",
-                             vitus_per_minute=2.5)])
-    elif template == "market":
-        base["market_board"] = MarketBoard(name="圣装战甲部件",
-                                            description="PC / 跨平台在线挂单")
-    elif template in {"sortie", "archon", "invasions"}:
-        tasks = [
-            OperationTask(number=1, mission="生存", node="卡吕普索",
-                          planet="土星", modifier="敌人护盾增强"),
-            OperationTask(number=2, mission="防御", node="泰亚", planet="地球"),
-            OperationTask(number=3, mission="间谍", node="阿马尔", planet="木星"),
-        ]
-        if template == "invasions":
-            base["operation_board"] = OperationBoard(
-                kind="invasions",
-                invasions=[InvasionDisplay(
-                    node="塞德娜 · 卡律布狄斯", planet="塞德娜",
-                    attacker="Grineer", defender="Corpus",
-                    attacker_percent=62.5, defender_percent=37.5,
-                    attacker_rewards=["Forma 蓝图"], defender_rewards=["Orokin 电池"],
-                )],
-            )
-        else:
-            base["operation_board"] = OperationBoard(
-                kind=template,
-                boss="夜灵水力使" if template == "archon" else "突击指挥官",
-                faction="Grineer",
-                reward="琥珀执刑官源力石" if template == "archon" else "",
-                tone="gold" if template == "archon" else "",
-                tasks=tasks,
-            )
-    elif template == "parts":
-        base["parts_board"] = PartsBoard(parts=[
-            PartRelics(name="圣装武器部件", quantity=1, relics=[
-                RelicReference(name="Lith A1", rarity="rare", vaulted=False),
-                RelicReference(name="Meso B7", rarity="uncommon", vaulted=True),
-            ])
-        ])
-    elif template == "relics":
-        base["relic_board"] = RelicBoard(
-            name="Lith A1", vaulted=False,
-            rewards=[
-                RelicReward(ref="Lith A1", name="圣装战甲蓝图",
-                            chances=[25.33, 23.33, 20, 16.67], price=8.5),
-                RelicReward(ref="Lith A1", name="圣装武器部件",
-                            chances=[25.33, 23.33, 20, 16.67], price=14),
-            ])
-    elif template == "trend":
-        base["trend_board"] = TrendBoard(name="圣装部件", periods=[
-            TrendPeriod(title="近 7 天", volume=128, average=14.6, points=[
-                TrendPoint(time=now - timedelta(days=1), volume=12, price=13.5),
-                TrendPoint(time=now, volume=18, price=15.2),
-            ])])
-    elif template == "riven_analysis":
-        base.update(title="紫卡分析 · 示例武器", analysis_mode=True,
-                    sections=[Section(title="词条评估",
-                                      columns=["词条", "数值", "基准", "评级"],
-                                      rows=[["暴击几率", "+120%", "+100%", "S"],
-                                            ["多重射击", "+90%", "+100%", "A"]])])
-    elif template == "attributes":
-        base["attribute_rows"] = [("CC", "暴击几率"), ("CD", "暴击伤害"),
-                                  ("MS", "多重射击")]
-    elif template == "commands":
-        base["command_names"] = ["平原", "裂缝", "突击", "仲裁", "wm", "遗物", "紫卡分析"]
-    elif template == "riven_market":
-        base["riven_market_board"] = RivenMarketBoard(
-            weapon="示例武器", positive_filter="暴击几率 · 多重射击",
-            negative_filter="无负面",
-            listings=[RivenListing(
-                seller="Tenno", status="游戏中", price=120, price_type="固定价格",
-                rank=8, mastery=16, rolls=3,
-                positives=["暴击几率 +120%", "多重射击 +90%"], negatives=[])])
-    elif template == "riven_values":
-        base["riven_values_board"] = RivenValuesBoard(
-            layout="2", name="伯斯顿", weapon_class="步枪",
-            variants=["伯斯顿", "伯斯顿 Prime"],
-            ordinary=[RivenAttribute(name="暴击几率", positive="+90%", negative="—")])
-    elif template == "void_trader":
-        base["trader_board"] = TraderBoard(
-            location="中继站 · 示例货单", time=now + timedelta(days=2),
-            groups=[TraderGroup(name="武器与装备",
-                                items=[TraderItem(name="圣装武器部件",
-                                                  ducats=100, credits=50000)])])
-    elif template == "weekly":
-        base.update(title="每周轮换", weekly_mode=True,
-                    sections=[Section(title="本周奖励", columns=["项目", "奖励", "状态"],
-                                      rows=[["钢铁之路", "装饰品", "可领取"],
-                                            ["灵化武器", "进化材料", "轮换中"]],
-                                      highlighted_rows=[0])])
-    elif template == "nightwave":
-        base.update(title="午夜电波", nightwave_mode=True,
-                    sections=[Section(title="本周挑战",
-                                      rows=[["完成 3 次任务", "完成任意任务目标",
-                                             "4500", "6 天", "每周"]])])
-    elif template == "archimedea":
-        base.update(title="深层科研", archimedea_mode=True,
-                    archimedea_activation=now - timedelta(days=2),
-                    archimedea_expiry=now + timedelta(days=5),
-                    archimedea_remaining="5 天",
-                    sections=[Section(title="偏差条件", rows=[
-                        ["偏差", "敌人护甲提升", "敌人获得额外护甲。"],
-                        ["精英风险", "能量限制", "能量补给效率降低。"]])])
-    elif template in {"bounties", "challenge_bounties"}:
-        base.update(
-            title="赏金任务", bounty_mode=template == "bounties",
-            bounty_challenge_mode=template == "challenge_bounties",
-            bounty_region="夜灵平原 · 希图斯", bounty_currency="基础声望",
-            bounty_remaining="42 分钟", bounty_expiry=now + timedelta(minutes=42),
-            bounty_items=[BountyDisplay(
-                index=1, name="高风险赏金", kind="常规", min_level=20,
-                max_level=40, stages=5, standing=1000, mastery=0, rotation="A",
-                node="地球", mission="解放营地", faction="Grineer",
-                objectives=["清理敌人", "保护目标"])])
-    elif template == "base":
-        base["title"] = "卡片基础模板"
-    return Card(**base)
-
-
 def create_app(runtime, token: str, override_dir: Path | None = None):
     grq = runtime.grq
+    preview_store = getattr(getattr(runtime, "admin", None), "preview_store", None)
+    if preview_store is None and override_dir is not None:
+        preview_store = PreviewDataStore(override_dir.parent / "preview-data.json")
     digest = hashlib.sha256(token.encode()).digest()
     failures = OrderedDict()
 
@@ -552,6 +393,14 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
                 ]
             item["selected_template"] = selections["templates"].get(key, "")
             item["selected_css"] = selections["css"].get(key, "")
+            record = preview_store.for_preview(key) if preview_store else None
+            item["has_data"] = record is not None
+            if record:
+                item["data_feature"] = record["feature"]
+                item["data_arguments"] = record["arguments"]
+                item["data_updated_at"] = record["updated_at"]
+                item["data_title"] = record["card"].get("title", "")
+                item["data_status"] = record["card"].get("status", "")
             items.append(item)
         return {"items": items}
 
@@ -561,16 +410,28 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
             raise HTTPException(404, "找不到此预览项目")
         if not getattr(runtime, "renderer", None):
             raise HTTPException(503, "图片渲染器尚未启动")
+        record = preview_store.for_preview(payload.template) if preview_store else None
+        if record is None:
+            raise HTTPException(
+                409,
+                "尚无此功能的真实命令数据。请先在机器人中执行对应命令，再刷新管理台预览。",
+            )
         try:
-            images = await runtime.renderer.render(_preview_card(payload.template))
+            card = Card.model_validate(record["card"])
+            images = await runtime.renderer.render(card)
         except Exception as exc:
             logger.exception("管理台图片预览失败：%s", payload.template)
             raise HTTPException(503, "预览渲染失败：" + str(exc)[:160]) from exc
         if not images:
             raise HTTPException(503, "渲染器没有返回图片")
-        return {"template": payload.template,
-                "images": [base64.b64encode(image).decode("ascii") for image in images],
-                "media_type": "image/webp"}
+        return {
+            "template": payload.template,
+            "data_feature": record["feature"],
+            "data_arguments": record["arguments"],
+            "data_updated_at": record["updated_at"],
+            "images": [base64.b64encode(image).decode("ascii") for image in images],
+            "media_type": "image/webp",
+        }
 
     if override_dir is not None:
         override_dir.mkdir(parents=True, exist_ok=True)
@@ -637,7 +498,20 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
         async def editor_schema(feature: str):
             if feature not in _feature_ids():
                 raise HTTPException(404, "找不到此功能")
-            return {"feature": feature, "fields": _sample_fields(feature)}
+            record = preview_store.for_preview(feature) if preview_store else None
+            if record is None:
+                raise HTTPException(
+                    409,
+                    "尚无此功能的真实命令数据。请先在机器人中执行对应命令。",
+                )
+            card = Card.model_validate(record["card"])
+            return {
+                "feature": feature,
+                "data_feature": record["feature"],
+                "data_arguments": record["arguments"],
+                "data_updated_at": record["updated_at"],
+                "fields": _sample_fields(card),
+            }
 
         @app.get("/api/editor/files", dependencies=auth)
         async def editor_files():
@@ -764,6 +638,16 @@ class AdminServer:
         self.runtime, self.config = runtime, config
         self.server = None
         self.task = None
+        self.preview_store = PreviewDataStore(
+            config.aawarframe_cache_dir / "admin" / "preview-data.json"
+        )
+
+    def record_preview(self, feature: str, arguments: str, card: Card) -> None:
+        if feature == "list_subscriptions":
+            return
+        preview_id = self.runtime.renderer._feature_name(card)
+        if preview_id in _feature_ids():
+            self.preview_store.record(feature, preview_id, arguments, card)
 
     def start(self):
         config = self.config
