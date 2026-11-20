@@ -643,10 +643,6 @@ class AdminServer:
         self.runtime, self.config = runtime, config
         self.server = None
         self.task = None
-    def record_preview(self, feature: str, arguments: str, card: Card) -> None:
-        """Kept as a no-op compatibility hook; WebUI previews use fixed source fixtures."""
-        return
-
     def start(self):
         config = self.config
         directory = config.aawarframe_cache_dir / "admin"
