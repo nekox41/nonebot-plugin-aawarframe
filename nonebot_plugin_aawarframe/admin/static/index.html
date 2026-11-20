@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <title>Aa Warframe · 管理控制台</title>
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
@@ -147,30 +148,38 @@
       </section>
 
       <section id="editor-view" class="page-view" hidden>
-        <div class="page-heading"><div><p class="eyebrow">RENDER ENGINE / 04</p><h1>模板编辑器</h1><p class="page-description">编辑独立 HTML 模板与全局 CSS 主题。HTML 按功能绑定，CSS 主题由所有功能共享。</p></div><span class="live-pill"><i></i> HOT RELOAD</span></div>
+        <div class="page-heading"><div><p class="eyebrow">FILE MANAGER / 04</p><h1>模板编辑器</h1><p class="page-description">只管理 HTML 模板和 CSS 主题文件。功能绑定与全局主题切换请在「渲染预览」中完成。</p></div><span class="live-pill"><i></i> FILE MANAGER</span></div>
         <div class="editor-workspace">
           <aside class="editor-files surface-card">
-            <div class="section-heading"><div><p class="eyebrow">SOURCE FILES</p><h2>模板文件</h2></div><span id="editor-file-count" class="subtle-count">—</span></div>
-            <input id="editor-filter" class="search-input" type="search" placeholder="筛选文件…" aria-label="筛选模板文件">
-            <div id="editor-file-list" class="editor-file-list"><p class="empty">正在读取文件列表…</p></div>
+            <input id="editor-filter" class="search-input" type="search" placeholder="筛选文件…" aria-label="筛选 HTML 模板和 CSS 主题">
+            <section class="editor-file-group">
+              <div class="editor-file-group-heading">
+                <div><p class="eyebrow">HTML TEMPLATES</p><h2>HTML 模板管理</h2><span id="editor-html-count" class="subtle-count">— 个文件</span></div>
+                <button id="editor-new-html" class="button secondary small-button" type="button">＋ 新建</button>
+              </div>
+              <div id="editor-html-list" class="editor-file-list"><p class="empty">正在读取 HTML 模板…</p></div>
+            </section>
+            <div class="editor-file-divider"></div>
+            <section class="editor-file-group">
+              <div class="editor-file-group-heading">
+                <div><p class="eyebrow">CSS THEMES</p><h2>CSS 主题管理</h2><span id="editor-css-count" class="subtle-count">— 个文件</span></div>
+                <button id="editor-new-css" class="button secondary small-button" type="button">＋ 新建</button>
+              </div>
+              <div id="editor-css-list" class="editor-file-list"><p class="empty">正在读取 CSS 主题…</p></div>
+            </section>
           </aside>
           <section class="editor-main surface-card">
             <div class="editor-toolbar">
               <div class="editor-file-meta"><strong id="editor-file-name">选择一个文件</strong><span id="editor-file-status" class="file-status">未选择</span></div>
-              <div class="editor-actions"><button id="editor-preview" class="button secondary" disabled>预览效果</button><button id="editor-reset" class="button secondary" disabled>恢复原版</button><button id="editor-delete" class="button danger" disabled>删除自定义文件</button></div>
+              <div class="editor-actions"><button id="editor-save" class="button primary" type="button" disabled>保存修改</button><button id="editor-reset" class="button secondary" type="button" disabled>恢复内置版本</button><button id="editor-delete" class="button danger" type="button" disabled>删除文件</button></div>
             </div>
-            <div class="editor-data-panel">
-              <div class="editor-data-heading"><div><strong>功能数据与占位符</strong><p>字段来自项目内固定的完整预览数据；点击字段即可将对应 Jinja 占位符插入光标位置。</p></div><label>关联功能<select id="editor-feature" aria-label="选择模板关联功能"></select></label></div>
-              <div id="editor-fields" class="editor-fields"><p class="empty">选择功能以载入可用数据字段。</p></div>
+            <div id="editor-new-file-row" class="editor-new-file-row" hidden>
+              <label for="editor-new-name">新文件名称</label>
+              <input id="editor-new-name" type="text" maxlength="80" placeholder="例如：tenno-layout（无需填写扩展名）" autocomplete="off">
+              <small id="editor-new-file-hint">保存时会自动添加 .html 扩展名。</small>
             </div>
-            <textarea id="editor-content" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="从左侧选择一个 HTML 或 CSS 文件…" disabled></textarea>
-            <div class="editor-version-save">
-              <label for="editor-version-name">新版本名称</label>
-              <input id="editor-version-name" type="text" maxlength="80" placeholder="例如：compact-v2" autocomplete="off">
-              <button id="editor-save" class="button primary" type="button" disabled>另存为新版本</button>
-            </div>
+            <textarea id="editor-content" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="从左侧打开一个文件，或新建 HTML / CSS 文件…" disabled></textarea>
             <div class="editor-footer"><span id="editor-hint">修改只会保存到数据目录，不会覆盖安装包文件。</span><span id="editor-message" role="status"></span></div>
-            <div id="editor-preview-panel" class="editor-preview-panel" hidden><div class="section-heading"><div><p class="eyebrow">AFTER RELOAD</p><h2>渲染效果</h2></div><button id="close-editor-preview" class="button subtle">收起</button></div><img id="editor-preview-image" alt="模板热更新预览"></div>
             <p id="editor-error" class="error" role="alert"></p>
           </section>
         </div>
