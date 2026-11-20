@@ -150,6 +150,10 @@ def _theme_options(override_dir: Path) -> list[dict[str, str]]:
     return [{"id": name, "title": name} for name in sorted(names)]
 
 
+def _file_revision(content: str) -> str:
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
 def _sample_fields(card: Card, renderer) -> list[dict[str, str]]:
     context = renderer.template_context(card)
     sample = {
