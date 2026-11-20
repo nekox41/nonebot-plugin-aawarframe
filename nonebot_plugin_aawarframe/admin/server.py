@@ -700,7 +700,7 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
         async def create_editor_version(payload: EditorVersionInput):
             if payload.feature not in _feature_ids():
                 raise HTTPException(404, "找不到此功能")
-            if "\\x00" in payload.content:
+            if "\x00" in payload.content:
                 raise HTTPException(400, "文件内容包含无效字符")
             slug = re.sub(r"[^a-z0-9_-]+", "-", payload.name.casefold()).strip("-_")[:48]
             if not slug:
@@ -763,8 +763,6 @@ class AdminServer:
             token = token_file.read_text().strip()
         if len(token) < 16:
             raise ValueError("管理口令至少需要 16 个字符")
-        cert = config.aawarframe_admin_cert or directory / "cert.pem"
-        key = config.aawarframe_admin_key or directory / "key.pem"
         app = create_app(self.runtime, token, directory / "overrides")
         self.server = EmbeddedServer(
             uvicorn.Config(
@@ -787,7 +785,7 @@ class AdminServer:
             await self.server.serve()
         except SystemExit as exc:
             # 管理端口冲突不应终止机器人主进程。
-            raise RuntimeError("管理台未能启动，请检查端口和证书") from exc
+            raise RuntimeError("管理台未能启动，请检查端口和监听地址") from exc
 
     def _done(self, task):
         if not task.cancelled() and task.exception():
