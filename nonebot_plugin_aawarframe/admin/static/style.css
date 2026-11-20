@@ -302,3 +302,10 @@ label{display:block;font-size:12px;font-weight:650;color:#4a5664;margin:18px 0 7
   .editor-version-save{grid-template-columns:1fr}
   .editor-version-save label,.editor-version-save input,.editor-version-save .button{grid-column:1}
 }
+
+
+/* Provenance of live command data used by preview and editor */
+.preview-data-meta{margin-top:6px;font-size:9px;color:#8793a0;line-height:1.5;overflow-wrap:anywhere}
+.preview-data-ready{color:#4e8b70!important}
+.preview-data-missing{color:#a0a8b2!important}
+.preview-option .preview-data-ready,.preview-option .preview-data-missing{font-size:8px;margin-top:4px}
