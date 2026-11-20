@@ -411,6 +411,7 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
         return FileResponse(STATIC / "style.css", media_type="text/css")
 
     auth = [Depends(authenticate)]
+    selections = {"templates": {}, "css": {}}
 
     @app.get("/api/session", dependencies=auth)
     async def session():
@@ -536,10 +537,22 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
 
     @app.get("/api/previews", dependencies=auth)
     async def previews():
-        return {"items": [
-            {"id": key, "title": title, "template": template, "description": description}
-            for key, title, template, description in PREVIEW_CATALOG
-        ]}
+        items = []
+        for key, title, template, description in PREVIEW_CATALOG:
+            item = {"id": key, "title": title, "template": template, "description": description}
+            if override_dir is not None:
+                item["template_versions"] = [
+                    {"id": "", "title": "内置模板 · " + template},
+                    *_version_items(override_dir, "templates", key),
+                ]
+                item["css_versions"] = [
+                    {"id": "", "title": "默认样式"},
+                    *_version_items(override_dir, "css", key),
+                ]
+            item["selected_template"] = selections["templates"].get(key, "")
+            item["selected_css"] = selections["css"].get(key, "")
+            items.append(item)
+        return {"items": items}
 
     @app.post("/api/previews", dependencies=auth)
     async def render_preview(payload: PreviewInput):
@@ -561,7 +574,6 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
     if override_dir is not None:
         override_dir.mkdir(parents=True, exist_ok=True)
         selection_file = override_dir / "selections.json"
-        selections = {"templates": {}, "css": {}}
         if selection_file.is_file():
             try:
                 loaded = json.loads(selection_file.read_text(encoding="utf-8"))
