@@ -22,6 +22,3 @@ class Config(BaseModel):
     aawarframe_admin_host: str = "127.0.0.1"
     aawarframe_admin_port: int = Field(default=8443, ge=1024, le=65535)
     aawarframe_admin_password: SecretStr | None = Field(default=None, repr=False)
-    aawarframe_admin_public_host: str | None = None
-    aawarframe_admin_cert: Path | None = None
-    aawarframe_admin_key: Path | None = None
