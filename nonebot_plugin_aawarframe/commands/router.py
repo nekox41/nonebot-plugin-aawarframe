@@ -2,7 +2,6 @@
 # Date: 2026-11-15
 # Author: Aameow
 
-import asyncio
 import logging
 
 
@@ -115,11 +114,6 @@ async def dispatch(
     except Exception:
         logger.exception("查询 %s 失败", feature)
         return Message(MessageSegment.text("数据源暂时不可用，请稍后重试。"))
-    if getattr(runtime, "admin", None) is not None:
-        try:
-            await asyncio.to_thread(runtime.admin.record_preview, feature, arguments, card)
-        except Exception:
-            logger.exception("保存 %s 的实际预览数据失败", feature)
     return await response(card, runtime)
 
 

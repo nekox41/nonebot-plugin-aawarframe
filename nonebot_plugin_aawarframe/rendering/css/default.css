@@ -1,3 +1,4 @@
+/* Source: base.css */
 :root {
   --background: #edf1f5;
   --paper: #ffffff;
@@ -272,3 +273,106 @@ body.arbitration-page { width: 800px; }
 .subscription-page .section:first-child td { font-weight: 600; }
 .subscription-page td:first-child { width: 43%; }
 .subscription-page .note { color: var(--muted); }
+
+/* Source: trader.css */
+body.trader-page { width: 1320px; }
+.trader-period { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-bottom: 12px; font-size: 20px; }
+.trader-period span { color: var(--muted); font-size: 18px; white-space: nowrap; }
+.trader-group { margin-top: 12px; }
+.trader-group h2 { margin: 0 0 8px; font-size: 25px; color: var(--accent); }
+.trader-grid { display: grid; grid-template-columns: repeat(var(--trader-columns, 5), minmax(0, 1fr)); gap: 8px; }
+.trader-item { min-width: 0; padding: 7px 9px; background: var(--soft); border: 1px solid var(--line); border-radius: 8px; }
+.trader-item h3 { margin: 0 0 5px; min-height: 2.4em; font-size: var(--data-font, 24px); line-height: 1.2; font-weight: 600; overflow-wrap: anywhere; }
+.trader-price { display: flex; justify-content: space-between; gap: 6px; font-size: calc(var(--data-font, 24px) * .75); line-height: 1.25; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.trader-price span, .trader-location { color: var(--muted); }
+.trader-location { font-size: 14px; margin-bottom: 4px; }
+.trader-empty { padding: 32px 0; font-size: 26px; text-align: center; color: var(--muted); }
+
+/* Source: riven_values.css */
+.riven-variant-head { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 4px 16px; margin-bottom: 10px; }
+.riven-layout { color: var(--accent); font-size: calc(var(--data-font) + 3px); }
+.riven-layout, .riven-level { text-align: right; white-space: nowrap; }
+.riven-values h2 { font-size: calc(var(--data-font) + 3px); white-space: nowrap; }
+.riven-family { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.riven-family-name { padding: 4px 8px; border-radius: 6px; background: var(--soft); color: var(--muted); font-size: var(--data-font); white-space: nowrap; }
+.riven-class, .riven-level { color: var(--muted); font-size: var(--data-font); }
+.riven-values-table { table-layout: auto; font-size: var(--data-font); }
+.riven-values-table td, .riven-values-table th { padding: 4px 6px; font-size: inherit; line-height: 1.18; white-space: nowrap; overflow-wrap: normal; font-variant-numeric: tabular-nums; }
+.riven-values-table th { color: var(--ink); }
+.riven-values-table .riven-section th { padding-top: 10px; color: var(--accent); }
+.riven-positive { color: #236b50; }
+.riven-negative { color: #9e4646; }
+
+/* Source: riven_market.css */
+.riven-market-filter { margin-bottom: 12px; color: var(--accent); font-size: var(--data-font); white-space: nowrap; }
+.riven-listings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.riven-listing { padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--soft); font-size: var(--data-font); line-height: 1.22; }
+.riven-listing-head, .riven-listing-price { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; white-space: nowrap; }
+.riven-listing-price { margin-top: 5px; color: var(--accent); }
+.riven-listing-meta { color: var(--muted); white-space: nowrap; }
+.riven-listing-stat { margin-top: 4px; white-space: nowrap; }
+.riven-listing-stat--positive { color: #236b50; }
+.riven-listing-stat--negative { color: #9e4646; }
+.riven-market-empty { font-size: var(--data-font); padding: 16px 0; }
+
+/* Source: trend.css */
+.trend-context { display: flex; gap: 16px; margin-bottom: 10px; color: var(--accent); font-size: 26px; }
+.trend-period + .trend-period { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.trend-period-head, .trend-summary { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; white-space: nowrap; }
+.trend-period-head h2 { font-size: 30px; }
+.trend-period-head > span { font-size: 23px; color: var(--muted); }
+.trend-summary { margin: 8px 0; font-size: 28px; }
+.trend-summary strong { color: var(--accent); }
+.trend-chart { display: block; width: 100%; height: auto; overflow: visible; }
+.trend-axis, .trend-axis-title { fill: var(--muted); font-size: 21px; }
+.trend-axis-title { fill: var(--ink); font-weight: 600; }
+.trend-grid { stroke: var(--line); stroke-width: 1.5; }
+.trend-price-line { stroke: var(--accent); stroke-width: 3; fill: none; }
+.trend-price-dot { fill: var(--accent); }
+.trend-volume-bar { fill: var(--accent); opacity: .45; }
+.trend-empty { padding: 24px 0; font-size: 26px; color: var(--muted); }
+
+/* Source: relics.css */
+.part-group + .part-group { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.part-heading { margin-bottom: 10px; font-size: var(--data-font); white-space: nowrap; }
+.part-heading span { color: var(--muted); }
+.parts-relics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.relic-chip { display: flex; align-items: baseline; gap: 8px; padding: 8px; border-radius: 8px; background: var(--soft); white-space: nowrap; }
+.relic-chip strong { font-size: var(--data-font); font-weight: 600; }
+.relic-tier { font-size: 20px; }
+.relic-chip--rare .relic-tier { color: #997321; }
+.relic-chip--uncommon .relic-tier { color: #687887; }
+.relic-chip--common .relic-tier { color: #99623c; }
+.relic-chip small { margin-left: auto; font-size: 17px; color: var(--muted); }
+.relic-context, .relic-empty { margin-bottom: 12px; color: var(--muted); font-size: var(--data-font); }
+.relic-rewards { table-layout: auto; font-size: var(--data-font); }
+.relic-rewards th, .relic-rewards td { padding: 12px 8px; font-size: inherit; line-height: 1.25; white-space: nowrap; overflow-wrap: normal; }
+.relic-price { color: var(--accent); font-weight: 600; }
+
+/* Source: riven_analysis.css */
+.analysis-page { font-size: var(--data-font, 32px); }
+.analysis-page h1 { font-size: 1.35em; }
+.analysis-page h2 { font-size: 1em; margin: 0 0 18px; }
+.analysis-table { width: 100%; border-collapse: collapse; table-layout: auto; font-size: 1em; }
+.analysis-table th, .analysis-table td { padding: 12px 10px; white-space: nowrap; text-align: right; }
+.analysis-table th { font-size: .72em; }
+.analysis-table th:first-child, .analysis-table td:first-child { text-align: left; }
+.analysis-grade { font-weight: 800; font-size: 1.2em; }
+.grade-S { color: #a36813; }
+.grade-A { color: #a23d8d; }
+.grade-B { color: #4269be; }
+.grade-C { color: #28766c; }
+.grade-D, .grade-E, .grade-F { color: #a55c59; }
+.analysis-page .notes { font-size: .67em; }
+
+/* Source: themes/default.css */
+:root {
+  color-scheme: light;
+  --background: #edf1f5;
+  --paper: #ffffff;
+  --ink: #243248;
+  --muted: #64748b;
+  --line: #e3e9f0;
+  --accent: #4d708f;
+  --soft: #f5f8fb;
+}

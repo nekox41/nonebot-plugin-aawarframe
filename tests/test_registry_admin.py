@@ -168,71 +168,35 @@ def test_old_aliases_and_mapping_changes_are_preserved(grq, tmp_path):
     query.close()
 
 
-def test_preview_catalog_has_no_synthetic_data():
+def test_preview_catalog_has_fixed_complete_cards():
+    from pathlib import Path
+
     from nonebot_plugin_aawarframe.admin.server import PREVIEW_CATALOG
+    from nonebot_plugin_aawarframe.rendering.preview_data import get_preview_card
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
 
-    assert len(PREVIEW_CATALOG) == 22
-    assert len({item[0] for item in PREVIEW_CATALOG}) == len(PREVIEW_CATALOG)
+    features = {item[0] for item in PREVIEW_CATALOG}
+    assert len(features) == 22
+    cards = {feature: get_preview_card(feature) for feature in features}
+    assert len({card.title for card in cards.values()}) == len(features)
+    assert all(card.source.startswith("AaWarframe") for card in cards.values())
+
+    renderer = CardRenderer()
+    assert renderer.css == (Path(__file__).parents[1] / "nonebot_plugin_aawarframe" / "rendering" / "css" / "default.css").read_text(encoding="utf-8")
+    for feature, card in cards.items():
+        source = renderer.template_source(card)
+        rendered = renderer.html(card)
+        assert "<!doctype html>" in source.lower(), feature
+        assert "{% extends" not in source and "{% block " not in source, feature
+        assert "<html" in rendered.lower() and "<style>" in rendered, feature
+        assert renderer._feature_name(card) == feature, feature
 
 
-async def test_admin_server_captures_complete_card_by_real_command(grq, tmp_path):
-    from nonebot_plugin_aawarframe.admin.server import AdminServer
-    from nonebot_plugin_aawarframe.models.common import Card, CycleDisplay
+async def test_preview_api_uses_fixed_card_and_returns_three_render_stages(grq, tmp_path):
     from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
 
     renderer = CardRenderer()
-    runtime = SimpleNamespace(renderer=renderer)
-    config = SimpleNamespace(aawarframe_cache_dir=tmp_path)
-    admin = AdminServer(runtime, config)
-    card = Card(
-        title="真实平原总览",
-        source="https://api.warframe.com/cdn/worldState.php",
-        cycle_items=[
-            CycleDisplay(name="夜灵平原", state="白天", next_state="黑夜", remaining="8 分钟")
-        ],
-    )
-    admin.record_preview("plains", "", card)
-    record = admin.preview_store.for_preview("cycles")
-    assert record["feature"] == "plains"
-    assert record["card"]["title"] == "真实平原总览"
-    assert record["card"]["cycle_items"][0]["name"] == "夜灵平原"
-    assert (tmp_path / "admin" / "preview-data.json").is_file()
-    await renderer.close()
-
-
-async def test_preview_api_renders_persisted_real_command_card(grq, tmp_path):
-    from nonebot_plugin_aawarframe.admin.preview_data import PreviewDataStore
-    from nonebot_plugin_aawarframe.models.common import Card
-    from nonebot_plugin_aawarframe.models.operations import OperationBoard
-
-    renderer = SimpleNamespace(
-        render=AsyncMock(return_value=[b"webp-preview"]),
-        metrics={},
-    )
-    store = PreviewDataStore(tmp_path / "admin" / "preview-data.json")
-    card = Card(
-        title="真实突击数据",
-        source="https://api.warframe.com/cdn/worldState.php",
-        operation_board=OperationBoard(kind="sortie"),
-    )
-    store.record("sortie", "sortie", "", card)
-    runtime = SimpleNamespace(grq=grq, renderer=renderer, admin=SimpleNamespace(preview_store=store))
-    app = create_app(runtime, "long-test-password-12345")
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://test") as client:
-        client.headers["Authorization"] = "Bearer long-test-password-12345"
-        response = await client.post("/api/previews", json={"template": "sortie"})
-        assert response.status_code == 200
-        assert response.json()["images"] == ["d2VicC1wcmV2aWV3"]
-        assert response.json()["data_feature"] == "sortie"
-        rendered_card = renderer.render.await_args.args[0]
-        assert rendered_card.title == "真实突击数据"
-        renderer.render.assert_awaited_once()
-
-
-async def test_preview_without_real_command_data_returns_conflict(grq, tmp_path):
-    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
-
-    renderer = CardRenderer()
+    renderer.render = AsyncMock(return_value=[b"webp-preview"])
     app = create_app(
         SimpleNamespace(grq=grq, renderer=renderer),
         "long-test-password-12345",
@@ -241,12 +205,20 @@ async def test_preview_without_real_command_data_returns_conflict(grq, tmp_path)
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
         client.headers["Authorization"] = "Bearer long-test-password-12345"
         response = await client.post("/api/previews", json={"template": "sortie"})
-        assert response.status_code == 409
-        assert "真实命令数据" in response.json()["detail"]
+        assert response.status_code == 200
+        data = response.json()
+        assert "<!doctype html>" in data["raw_template"].lower()
+        assert "{% extends" not in data["raw_template"]
+        assert "突击首领" in data["rendered_html"]
+        assert "<style>" in data["rendered_html"]
+        assert data["html_template"] == "operations.html"
+        assert data["theme"] == "default.css"
+        assert data["images"] == ["d2VicC1wcmV2aWV3"]
+        renderer.render.assert_awaited_once()
     await renderer.close()
 
 
-async def test_editor_persists_overrides_and_hot_reloads_renderer(grq, tmp_path):
+async def test_editor_persists_html_and_global_css_overrides(grq, tmp_path):
     from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
 
     renderer = CardRenderer()
@@ -258,140 +230,103 @@ async def test_editor_persists_overrides_and_hot_reloads_renderer(grq, tmp_path)
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://test") as client:
         client.headers["Authorization"] = "Bearer long-test-password-12345"
         files = (await client.get("/api/editor/files")).json()["items"]
-        assert any(item["name"] == "templates/card.html" for item in files)
-        source = (await client.get("/api/editor/file", params={"name": "css/base.css"})).json()
+        assert any(item["name"] == "html/card.html" for item in files)
+        assert any(item["name"] == "css/default.css" for item in files)
+        source = (await client.get("/api/editor/file", params={"name": "css/default.css"})).json()
         marker = "\\n/* webui-live-override */"
         changed = source["content"] + marker
         saved = await client.put(
             "/api/editor/file",
-            json={"name": "css/base.css", "content": changed, "revision": source["revision"]},
+            json={"name": "css/default.css", "content": changed, "revision": source["revision"]},
         )
         assert saved.status_code == 200
         assert "webui-live-override" in renderer.css
-        current = (await client.get("/api/editor/file", params={"name": "css/base.css"})).json()
+        current = (await client.get("/api/editor/file", params={"name": "css/default.css"})).json()
         assert current["overridden"] and current["content"] == changed
+        template = (await client.get("/api/editor/file", params={"name": "html/card.html"})).json()
         invalid = await client.put(
             "/api/editor/file",
-            json={"name": "templates/card.html", "content": "{% if broken %}",
-                  "revision": (await client.get("/api/editor/file", params={"name": "templates/card.html"})).json()["revision"]},
+            json={"name": "html/card.html", "content": "{% if broken %}", "revision": template["revision"]},
         )
         assert invalid.status_code == 422
-        reset = await client.delete("/api/editor/file", params={"name": "css/base.css"})
+        reset = await client.delete("/api/editor/file", params={"name": "css/default.css"})
         assert reset.status_code == 200
         assert "webui-live-override" not in renderer.css
     await renderer.close()
 
 
-async def test_versioned_templates_and_css_use_real_card_snapshot(grq, tmp_path):
-    from nonebot_plugin_aawarframe.admin.preview_data import PreviewDataStore
-    from nonebot_plugin_aawarframe.models.common import Card, CycleDisplay
+async def test_html_binding_and_global_theme_versions_can_be_deleted(grq, tmp_path):
+    from nonebot_plugin_aawarframe.rendering.preview_data import get_preview_card
     from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
 
     renderer = CardRenderer()
     admin_dir = tmp_path / "admin"
     override_dir = admin_dir / "overrides"
-    store = PreviewDataStore(admin_dir / "preview-data.json")
-    card = Card(
-        title="真实平原周期",
-        source="https://api.warframe.com/cdn/worldState.php",
-        cycle_items=[
-            CycleDisplay(
-                name="夜灵平原",
-                state="白天",
-                next_state="黑夜",
-                remaining="12 分钟",
-                remaining_short="12:00",
-            )
-        ],
-    )
-    store.record("plains", "cycles", "", card)
-    runtime = SimpleNamespace(grq=grq, renderer=renderer, admin=SimpleNamespace(preview_store=store))
-    app = create_app(runtime, "long-test-password-12345", override_dir)
-    async with httpx.AsyncClient(
-        transport=httpx.ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    app = create_app(SimpleNamespace(grq=grq, renderer=renderer), "long-test-password-12345", override_dir)
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
         client.headers["Authorization"] = "Bearer long-test-password-12345"
-        schema_response = await client.get("/api/editor/schema", params={"feature": "cycles"})
-        assert schema_response.status_code == 200
-        schema = schema_response.json()
-        assert schema["data_feature"] == "plains"
-        assert any(field["path"] == "card.cycle_items[0].name" for field in schema["fields"])
+        schema = await client.get("/api/editor/schema", params={"feature": "cycles"})
+        assert schema.status_code == 200
+        assert schema.json()["data_source"] == "rendering/preview_data.py"
+        assert any(field["path"] == "card.cycle_items[0].name" for field in schema.json()["fields"])
 
-        template = await client.post(
+        html = await client.post(
             "/api/editor/versions",
             json={
-                "kind": "html",
-                "feature": "cycles",
-                "name": "Tenno layout",
-                "content": (
-                    "<html><head></head><body>"
-                    "{{ card.cycle_items[0].name }}"
-                    "</body></html>"
-                ),
+                "kind": "html", "feature": "cycles", "name": "Tenno layout",
+                "content": "<!doctype html><html><head></head><body><h1>{{ card.title }}</h1></body></html>",
             },
         )
-        assert template.status_code == 200
-        template_name = template.json()["name"]
-        assert template_name == "templates/versions/cycles/tenno-layout.html"
+        assert html.status_code == 200
+        html_name = html.json()["name"]
+        assert html_name == "html/versions/cycles/tenno-layout.html"
 
         css = await client.post(
             "/api/editor/versions",
             json={
-                "kind": "css",
-                "feature": "cycles",
-                "name": "Soft colors",
-                "content": ".cycle { color: rgb(12, 34, 56); }",
+                "kind": "css", "feature": "global", "name": "Soft colors",
+                "content": "body { color: rgb(12, 34, 56); }",
             },
         )
         assert css.status_code == 200
         css_name = css.json()["name"]
-        assert css_name == "css/versions/cycles/soft-colors.css"
+        assert css_name == "css/soft-colors.css"
 
         selected = await client.put(
             "/api/previews/selection",
             json={
                 "feature": "cycles",
-                "template_version": template_name.removeprefix("templates/"),
-                "css_version": css_name.removeprefix("css/"),
+                "html_template": "versions/cycles/tenno-layout.html",
+                "theme": "soft-colors.css",
             },
         )
         assert selected.status_code == 200
+        assert renderer._template_name(get_preview_card("cycles")) == "versions/cycles/tenno-layout.html"
+        assert "rgb(12, 34, 56)" in renderer.css
+        assert "环境周期" in renderer.html(get_preview_card("cycles"))
 
-        persisted = store.for_preview("cycles")
-        restored_card = Card.model_validate(persisted["card"])
-        assert renderer._template_name(restored_card) == "versions/cycles/tenno-layout.html"
-        assert "rgb(12, 34, 56)" in renderer._css_for_card(restored_card)
-        assert "夜灵平原" in renderer.html(restored_card)
-
-        versions = (await client.get("/api/editor/files")).json()["items"]
-        assert any(item["name"] == template_name and item["version"] for item in versions)
-        assert any(item["name"] == css_name and item["version"] for item in versions)
+        preview_data = (await client.get("/api/previews")).json()
+        cycles = next(item for item in preview_data["items"] if item["id"] == "cycles")
+        assert cycles["selected_template"] == "versions/cycles/tenno-layout.html"
+        assert preview_data["selected_theme"] == "soft-colors.css"
 
         blocked = await client.put(
             "/api/editor/file",
-            json={"name": template_name, "content": "changed", "revision": "0" * 64},
+            json={"name": html_name, "content": "changed", "revision": "0" * 64},
         )
         assert blocked.status_code == 409
 
-        previews = (await client.get("/api/previews")).json()["items"]
-        cycles = next(item for item in previews if item["id"] == "cycles")
-        assert cycles["has_data"] is True
-        assert cycles["data_feature"] == "plains"
-        assert cycles["selected_template"] == "versions/cycles/tenno-layout.html"
-        assert cycles["selected_css"] == "versions/cycles/soft-colors.css"
+        deleted_html = await client.delete("/api/editor/file", params={"name": html_name})
+        assert deleted_html.status_code == 200
+        assert "cycles" not in deleted_html.json()["selections"]["templates"]
+        deleted_css = await client.delete("/api/editor/file", params={"name": css_name})
+        assert deleted_css.status_code == 200
+        assert deleted_css.json()["selections"]["theme"] == "default.css"
 
-    restored_store = PreviewDataStore(admin_dir / "preview-data.json")
     restored_renderer = CardRenderer()
-    restored_runtime = SimpleNamespace(
-        grq=grq,
-        renderer=restored_renderer,
-        admin=SimpleNamespace(preview_store=restored_store),
-    )
-    create_app(restored_runtime, "long-test-password-12345", override_dir)
-    restored_record = restored_store.for_preview("cycles")
-    assert Card.model_validate(restored_record["card"]).title == "真实平原周期"
-    assert restored_renderer._template_name(Card.model_validate(restored_record["card"])) == "versions/cycles/tenno-layout.html"
-    assert "rgb(12, 34, 56)" in restored_renderer._css_for_card(Card.model_validate(restored_record["card"]))
+    create_app(SimpleNamespace(grq=grq, renderer=restored_renderer), "long-test-password-12345", override_dir)
+    assert restored_renderer.theme == "default.css"
+    assert not restored_renderer.template_selections
     await restored_renderer.close()
     await renderer.close()
 

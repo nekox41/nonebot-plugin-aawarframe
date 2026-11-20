@@ -94,7 +94,7 @@
 
       <section id="previews-view" class="page-view" hidden>
         <div class="page-heading">
-          <div><p class="eyebrow">RENDER LAB / 02</p><h1>渲染预览</h1><p class="page-description">查看各个功能最终生成的图片卡片。预览使用本地示例数据，不会请求外部接口。</p></div>
+          <div><p class="eyebrow">RENDER LAB / 02</p><h1>渲染预览</h1><p class="page-description">使用项目内固定数据离线预览；每个功能独立绑定 HTML，所有功能共享一个 CSS 主题。</p></div>
           <button id="refresh-preview" class="button secondary">重新生成</button>
         </div>
         <div class="preview-workspace">
@@ -105,14 +105,19 @@
           </aside>
           <section class="preview-stage surface-card">
             <div class="section-heading preview-heading">
-              <div><p class="eyebrow">LIVE OUTPUT</p><h2 id="preview-title">选择一个功能</h2><p id="preview-description" class="muted">为当前功能选择 HTML 模板与 CSS 样式。</p><p id="preview-data-meta" class="preview-data-meta">预览使用机器人真实命令生成的数据。</p></div><span class="preview-format">WEBP</span>
+              <div><p class="eyebrow">LIVE OUTPUT</p><h2 id="preview-title">选择一个功能</h2><p id="preview-description" class="muted">选择功能 HTML 和全局 CSS 主题。</p><p id="preview-data-meta" class="preview-data-meta">数据来自项目内固定预览数据。</p></div><span class="preview-format">WEBP</span>
             </div>
             <div class="preview-selectors">
-              <label>HTML 模板<select id="preview-template-select" aria-label="选择 HTML 模板"></select></label>
-              <label>CSS 样式<select id="preview-css-select" aria-label="选择 CSS 样式"></select></label>
-              <button id="save-preview-selection" class="button primary" type="button" disabled>应用选择</button>
+              <label>当前功能 HTML 模板<select id="preview-template-select" aria-label="选择当前功能 HTML 模板"></select></label>
+              <label>全局 CSS 主题<select id="preview-theme-select" aria-label="选择全局 CSS 主题"></select></label>
+              <button id="save-preview-selection" class="button primary" type="button">应用选择</button>
             </div>
-            <div id="preview-image-wrap" class="preview-image-wrap"><div class="preview-placeholder"><span class="placeholder-glyph">▧</span><strong>等待真实命令数据</strong><p id="preview-empty-message">请先在机器人中执行对应功能命令，再刷新此页面。</p></div><img id="preview-image" alt="功能渲染图片预览" hidden></div>
+            <p id="preview-template-meta" class="preview-data-meta"></p>
+            <div class="preview-source-grid">
+              <section class="preview-source-panel"><h3>原始 HTML 模板</h3><pre id="preview-raw-template" class="source-code">选择一个功能以查看原始模板。</pre></section>
+              <section class="preview-source-panel"><h3>填充数据后的 HTML</h3><pre id="preview-rendered-html" class="source-code">填充后的 HTML 将显示在这里。</pre></section>
+            </div>
+            <div id="preview-image-wrap" class="preview-image-wrap"><div class="preview-placeholder"><span class="placeholder-glyph">▧</span><strong>正在等待预览</strong><p id="preview-empty-message">选择功能后会自动使用固定数据生成预览。</p></div><img id="preview-image" alt="功能渲染图片预览" hidden></div>
             <p id="preview-error" class="error" role="alert"></p>
           </section>
         </div>
@@ -142,7 +147,7 @@
       </section>
 
       <section id="editor-view" class="page-view" hidden>
-        <div class="page-heading"><div><p class="eyebrow">RENDER ENGINE / 04</p><h1>模板编辑器</h1><p class="page-description">编辑 HTML / Jinja 模板与 CSS。保存后立即热切换，后续图片渲染自动使用新内容。</p></div><span class="live-pill"><i></i> HOT RELOAD</span></div>
+        <div class="page-heading"><div><p class="eyebrow">RENDER ENGINE / 04</p><h1>模板编辑器</h1><p class="page-description">编辑独立 HTML 模板与全局 CSS 主题。HTML 按功能绑定，CSS 主题由所有功能共享。</p></div><span class="live-pill"><i></i> HOT RELOAD</span></div>
         <div class="editor-workspace">
           <aside class="editor-files surface-card">
             <div class="section-heading"><div><p class="eyebrow">SOURCE FILES</p><h2>模板文件</h2></div><span id="editor-file-count" class="subtle-count">—</span></div>
@@ -152,10 +157,10 @@
           <section class="editor-main surface-card">
             <div class="editor-toolbar">
               <div class="editor-file-meta"><strong id="editor-file-name">选择一个文件</strong><span id="editor-file-status" class="file-status">未选择</span></div>
-              <div class="editor-actions"><button id="editor-preview" class="button secondary" disabled>预览效果</button><button id="editor-reset" class="button secondary" disabled>恢复原版</button></div>
+              <div class="editor-actions"><button id="editor-preview" class="button secondary" disabled>预览效果</button><button id="editor-reset" class="button secondary" disabled>恢复原版</button><button id="editor-delete" class="button danger" disabled>删除自定义文件</button></div>
             </div>
             <div class="editor-data-panel">
-              <div class="editor-data-heading"><div><strong>功能数据与占位符</strong><p>字段来自最近一次真实命令结果；点击字段即可将对应 Jinja 占位符插入光标位置。</p></div><label>关联功能<select id="editor-feature" aria-label="选择模板关联功能"></select></label></div>
+              <div class="editor-data-heading"><div><strong>功能数据与占位符</strong><p>字段来自项目内固定的完整预览数据；点击字段即可将对应 Jinja 占位符插入光标位置。</p></div><label>关联功能<select id="editor-feature" aria-label="选择模板关联功能"></select></label></div>
               <div id="editor-fields" class="editor-fields"><p class="empty">选择功能以载入可用数据字段。</p></div>
             </div>
             <textarea id="editor-content" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="从左侧选择一个 HTML 或 CSS 文件…" disabled></textarea>

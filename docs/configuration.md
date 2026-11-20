@@ -47,7 +47,7 @@ AAWARFRAME_ADMIN_PASSWORD=请替换为自己的长随机密码
 - **模板编辑器**：数据字段和渲染预览直接取自机器人最近一次真实命令生成的完整 `Card`，不是手工模拟数据。每次成功生成卡片后，管理台会自动保存该命令的完整数据；可查看实际 Jinja 字段、插入占位符、创建多个 HTML/Jinja 与 CSS 版本，并按功能选择启用版本。尚未执行过的功能会提示先运行对应命令，不会用假数据填充。
 - **仲裁数据**：修改仲裁节点评级与每分钟生息精华记录。
 
-模板版本、CSS 版本和各功能的选择配置保存在 `AAWARFRAME_CACHE_DIR/admin/overrides/`；实际命令数据按命令功能完整保存在 `AAWARFRAME_CACHE_DIR/admin/preview-data.json`。两者均不会改写安装包文件，升级插件时会保留。实际预览数据会随着机器人执行命令持续更新；订阅列表等可能包含个人信息的内容不会写入预览数据文件。
+WebUI 的 HTML 覆盖、全局 CSS 主题和功能到 HTML 的绑定配置保存在 `AAWARFRAME_CACHE_DIR/admin/overrides/`，升级插件时会保留。预览数据随源码维护在 `rendering/preview_data.py`，每个功能都有固定的完整 `Card` 数据；预览完全离线，不要求先执行机器人命令，也不会触发外部查询。
 
 ## 一个简单的环境文件
 
@@ -65,3 +65,11 @@ AAWARFRAME_ADMIN_ENABLED=false
 ## 数据目录
 
 `AAWARFRAME_CACHE_DIR` 不只是临时缓存目录。订阅、资源索引和用户调整的数据也会保存在这里。迁移机器人或更换部署目录时，记得一并迁移这个目录。
+
+
+## 模板与主题结构
+
+- 完整 HTML 页面统一放在 `rendering/html/`，每个功能在 WebUI 中独立绑定一个 HTML 文件；HTML 文件不使用 `base.html` 继承。
+- 完整 CSS 主题统一放在 `rendering/css/`。每次渲染只加载一份 CSS；WebUI 的全局主题选择对所有功能生效。
+- 固定预览数据统一放在 `rendering/preview_data.py`，可直接通过正式的 `CardRenderer` 生成原始模板、填充后的 HTML 和最终图片。
+- 自定义 HTML 版本位于缓存目录的 `overrides/html/versions/<feature>/`；自定义 CSS 主题位于 `overrides/css/`。删除自定义 HTML 时会清理所有指向该文件的功能绑定。
