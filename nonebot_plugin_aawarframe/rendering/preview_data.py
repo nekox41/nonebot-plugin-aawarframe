@@ -111,8 +111,8 @@ PREVIEW_CARDS: dict[str, Card] = {
     "relics": _card(
         "古纪 A1 遗物奖励",
         relic_board=RelicBoard(name="古纪 A1", vaulted=False, rewards=[
-            RelicReward(ref="A1", name="Prime 部件蓝图", chances=[25.33, 11, 2], price=18.5),
-            RelicReward(ref="A1", name="Forma 蓝图", chances=[25.33, 11, 2], price=None, price_status="不可交易"),
+            RelicReward(ref="A1", name="Prime 部件蓝图", chances=[25.33, 11, 2, 0.33], price=18.5),
+            RelicReward(ref="A1", name="Forma 蓝图", chances=[25.33, 11, 2, 0.33], price=None, price_status="不可交易"),
         ]),
     ),
     "trend": _card(
