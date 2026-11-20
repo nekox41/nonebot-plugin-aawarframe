@@ -118,6 +118,8 @@ def _editor_paths(name: str, override_dir: Path):
         if feature not in _feature_ids() or (kind == "templates") != (extension == "html"):
             raise HTTPException(404, "找不到此模板或样式文件")
         version = override_dir / kind / "versions" / feature / f"{filename}.{extension}"
+        if not version.is_file():
+            raise HTTPException(404, "找不到此模板或样式文件")
         return version, version
     raise HTTPException(404, "找不到此模板或样式文件")
 
