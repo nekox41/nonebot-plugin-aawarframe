@@ -169,13 +169,27 @@ def test_old_aliases_and_mapping_changes_are_preserved(grq, tmp_path):
 
 
 def test_preview_catalog_has_fixed_complete_cards():
+    from pathlib import Path
+
     from nonebot_plugin_aawarframe.admin.server import PREVIEW_CATALOG
     from nonebot_plugin_aawarframe.rendering.preview_data import get_preview_card
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
 
     features = {item[0] for item in PREVIEW_CATALOG}
     assert len(features) == 22
-    assert len({get_preview_card(feature).title for feature in features}) == len(features)
-    assert all(get_preview_card(feature).source.startswith("AaWarframe") for feature in features)
+    cards = {feature: get_preview_card(feature) for feature in features}
+    assert len({card.title for card in cards.values()}) == len(features)
+    assert all(card.source.startswith("AaWarframe") for card in cards.values())
+
+    renderer = CardRenderer()
+    assert renderer.css == (Path(__file__).parents[1] / "nonebot_plugin_aawarframe" / "rendering" / "css" / "default.css").read_text(encoding="utf-8")
+    for feature, card in cards.items():
+        source = renderer.template_source(card)
+        rendered = renderer.html(card)
+        assert "<!doctype html>" in source.lower(), feature
+        assert "{% extends" not in source and "{% block " not in source, feature
+        assert "<html" in rendered.lower() and "<style>" in rendered, feature
+        assert renderer._feature_name(card) == feature, feature
 
 
 async def test_preview_api_uses_fixed_card_and_returns_three_render_stages(grq, tmp_path):
