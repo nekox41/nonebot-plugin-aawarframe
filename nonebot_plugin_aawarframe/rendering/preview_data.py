@@ -46,7 +46,6 @@ PREVIEW_CARDS: dict[str, Card] = {
     "card": _card(
         "通用信息卡片",
         sections=[Section(title="预览数据", columns=["项目", "内容"], rows=[["运行状态", "正常"], ["版本", "0.24.7"]], notes=["固定预览数据，不会请求外部接口。"])],
-        cycle_items=[CycleDisplay(name="夜灵平原", state="白天", next_state="黑夜", remaining="12 分钟", remaining_short="12:00", expiry=LATER, tone="day")],
     ),
     "cycles": _card(
         "环境周期",
