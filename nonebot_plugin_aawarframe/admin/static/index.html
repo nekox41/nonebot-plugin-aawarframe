@@ -105,14 +105,14 @@
           </aside>
           <section class="preview-stage surface-card">
             <div class="section-heading preview-heading">
-              <div><p class="eyebrow">LIVE OUTPUT</p><h2 id="preview-title">选择一个功能</h2><p id="preview-description" class="muted">为当前功能选择 HTML 模板与 CSS 样式。</p></div><span class="preview-format">WEBP</span>
+              <div><p class="eyebrow">LIVE OUTPUT</p><h2 id="preview-title">选择一个功能</h2><p id="preview-description" class="muted">为当前功能选择 HTML 模板与 CSS 样式。</p><p id="preview-data-meta" class="preview-data-meta">预览使用机器人真实命令生成的数据。</p></div><span class="preview-format">WEBP</span>
             </div>
             <div class="preview-selectors">
               <label>HTML 模板<select id="preview-template-select" aria-label="选择 HTML 模板"></select></label>
               <label>CSS 样式<select id="preview-css-select" aria-label="选择 CSS 样式"></select></label>
               <button id="save-preview-selection" class="button primary" type="button">应用选择</button>
             </div>
-            <div id="preview-image-wrap" class="preview-image-wrap"><div class="preview-placeholder"><span class="placeholder-glyph">▧</span><strong>等待预览</strong><p>从左侧选择一个功能模板。</p></div><img id="preview-image" alt="功能渲染图片预览" hidden></div>
+            <div id="preview-image-wrap" class="preview-image-wrap"><div class="preview-placeholder"><span class="placeholder-glyph">▧</span><strong>等待真实命令数据</strong><p id="preview-empty-message">请先在机器人中执行对应功能命令，再刷新此页面。</p></div><img id="preview-image" alt="功能渲染图片预览" hidden></div>
             <p id="preview-error" class="error" role="alert"></p>
           </section>
         </div>
