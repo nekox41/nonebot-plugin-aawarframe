@@ -582,6 +582,12 @@ async function loadEditorSchema(feature) {
     }
     if (!editorSchema.length) list.append(node('p', '当前功能没有可用字段。', 'empty'));
   } catch (error) {
+    if (error && error.status === 409) {
+      editorSchema = [];
+      const list = $('editor-fields');
+      list.replaceChildren(node('p', error.message, 'empty'));
+      return;
+    }
     showError('editor-error', error);
   }
 }
