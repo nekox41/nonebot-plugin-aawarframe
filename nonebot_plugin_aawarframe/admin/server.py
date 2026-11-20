@@ -145,8 +145,17 @@ def _version_items(override_dir: Path, kind: str, feature: str) -> list[dict[str
     ]
 
 
-def _sample_fields(card: Card) -> list[dict[str, str]]:
-    sample = card.model_dump(mode="json")
+def _sample_fields(card: Card, renderer) -> list[dict[str, str]]:
+    context = renderer.template_context(card)
+    sample = {
+        "card": card.model_dump(mode="json"),
+        "page": context["page"],
+        "total": context["total"],
+        "trend_charts": [
+            [period.model_dump(mode="json"), chart]
+            for period, chart in context["trend_charts"]
+        ],
+    }
     fields: list[dict[str, str]] = []
 
     def visit(path: str, value, depth: int = 0):
@@ -167,13 +176,7 @@ def _sample_fields(card: Card) -> list[dict[str, str]]:
             visit(f"{path}[0]", value[0], depth + 1)
 
     for key, value in sample.items():
-        visit("card." + key, value)
-    for key, value in (("page", 1), ("total", 1), ("trend_charts", [])):
-        fields.append({
-            "path": key,
-            "placeholder": "{{ " + key + " }}",
-            "example": json.dumps(value, ensure_ascii=False),
-        })
+        visit(key if key != "card" else "card", value)
     return fields
 
 def create_app(runtime, token: str, override_dir: Path | None = None):
@@ -509,7 +512,7 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
                 "data_feature": record["feature"],
                 "data_arguments": record["arguments"],
                 "data_updated_at": record["updated_at"],
-                "fields": _sample_fields(card),
+                "fields": _sample_fields(card, runtime.renderer),
             }
 
         @app.get("/api/editor/files", dependencies=auth)
