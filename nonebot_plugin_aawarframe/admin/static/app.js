@@ -487,7 +487,8 @@ let editorMode = 'idle';
 let selectedKind = null;
 
 function editorHasUnsavedChanges() {
-  return $('editor-content').value !== editorOriginal;
+  return $('editor-content').value !== editorOriginal
+    || (editorMode === 'new' && Boolean($('editor-new-name').value.trim()));
 }
 
 async function loadEditorFiles() {
@@ -645,6 +646,8 @@ async function saveEditorFile() {
       });
       editorFiles = (await api('editor/files')).items || [];
       drawEditorFiles();
+      editorMode = 'idle';
+      $('editor-new-name').value = '';
       $('editor-message').textContent = '新文件已创建。';
       await selectEditorFile(data.name);
       toast('文件已创建并保存。');
