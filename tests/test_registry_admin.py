@@ -175,6 +175,32 @@ def test_preview_catalog_has_no_synthetic_data():
     assert len({item[0] for item in PREVIEW_CATALOG}) == len(PREVIEW_CATALOG)
 
 
+def test_admin_server_captures_complete_card_by_real_command(grq, tmp_path):
+    from nonebot_plugin_aawarframe.admin.server import AdminServer
+    from nonebot_plugin_aawarframe.models.common import Card, CycleDisplay
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+
+    renderer = CardRenderer()
+    runtime = SimpleNamespace(renderer=renderer)
+    config = SimpleNamespace(aawarframe_cache_dir=tmp_path)
+    admin = AdminServer(runtime, config)
+    card = Card(
+        title="真实平原总览",
+        source="https://api.warframe.com/cdn/worldState.php",
+        cycle_items=[
+            CycleDisplay(name="夜灵平原", state="白天", next_state="黑夜", remaining="8 分钟")
+        ],
+    )
+    admin.record_preview("plains", "", card)
+    record = admin.preview_store.for_preview("cycles")
+    assert record["feature"] == "plains"
+    assert record["card"]["title"] == "真实平原总览"
+    assert record["card"]["cycle_items"][0]["name"] == "夜灵平原"
+    assert (tmp_path / "admin" / "preview-data.json").is_file()
+    import asyncio
+    asyncio.run(renderer.close())
+
+
 async def test_preview_api_renders_persisted_real_command_card(grq, tmp_path):
     from nonebot_plugin_aawarframe.admin.preview_data import PreviewDataStore
     from nonebot_plugin_aawarframe.models.common import Card
