@@ -2,7 +2,6 @@
 # Date: 2026-11-15
 # Author: Aameow
 
-import asyncio
 import logging
 
 
