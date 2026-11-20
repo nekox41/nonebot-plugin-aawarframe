@@ -320,3 +320,27 @@ label{display:block;font-size:12px;font-weight:650;color:#4a5664;margin:18px 0 7
 .button.danger{color:#a33d3d;border-color:#e6c5c5;background:#fff8f8}
 .button.danger:hover:not(:disabled){background:#ffeded}
 @media(max-width:900px){.preview-source-grid{grid-template-columns:1fr}}
+
+
+/* Separate HTML template and CSS theme file libraries */
+.editor-files{display:flex;flex-direction:column;gap:17px}
+.editor-file-group{min-width:0}
+.editor-file-group-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.editor-file-group-heading .eyebrow{margin:0 0 4px;font-size:8px}
+.editor-file-group-heading h2{font-size:13px}
+.editor-file-group-heading .subtle-count{display:block;margin-top:4px;font-size:9px}
+.editor-file-group-heading .small-button{flex:none;padding:7px 9px;font-size:9px}
+.editor-file-divider{height:1px;background:var(--line);margin:0 -2px}
+.editor-file-list{max-height:330px;overflow:auto}
+.editor-new-file-row{display:grid;grid-template-columns:100px minmax(0,1fr);gap:8px 12px;align-items:center;padding:13px 17px;border-bottom:1px solid var(--line);background:#fbfcfd}
+.editor-new-file-row label{font-size:10px;font-weight:700;color:#6f7d8b}
+.editor-new-file-row input{width:100%;min-width:0;border:1px solid #e3e8ed;border-radius:8px;padding:9px 10px;background:#fff;color:#3e4b59;font:inherit;font-size:11px}
+.editor-new-file-row small{grid-column:2;font-size:9px;color:#98a3af}
+@media(max-width:900px){
+  .editor-files{min-height:0}
+  .editor-file-list{max-height:230px}
+}
+@media(max-width:650px){
+  .editor-new-file-row{grid-template-columns:1fr;gap:7px}
+  .editor-new-file-row small{grid-column:1}
+}

@@ -47,6 +47,12 @@ class EditorInput(BaseModel):
     revision: str = Field(min_length=64, max_length=64)
 
 
+class EditorCreateInput(BaseModel):
+    kind: Literal["html", "css"]
+    name: str = Field(min_length=1, max_length=80)
+    content: str = Field(max_length=1_000_000)
+
+
 class PreviewInput(BaseModel):
     template: str = Field(min_length=1, max_length=80)
 
@@ -119,6 +125,10 @@ def _editor_paths(name: str, override_dir: Path):
             feature, filename = match.groups()
             if feature not in _feature_ids():
                 raise HTTPException(404, "找不到此 HTML 模板")
+            path = override_dir / "html" / relative
+            if path.is_file():
+                return path, path
+        if re.fullmatch(r"custom/[\w-]+\.html", relative):
             path = override_dir / "html" / relative
             if path.is_file():
                 return path, path
@@ -255,6 +265,10 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
     @app.get("/app.js")
     async def javascript():
         return FileResponse(STATIC / "app.js", media_type="text/javascript")
+
+    @app.get("/favicon.svg")
+    async def favicon():
+        return FileResponse(STATIC / "favicon.svg", media_type="image/svg+xml")
 
     @app.get("/style.css")
     async def stylesheet():
@@ -524,6 +538,16 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
                             "kind": "html", "overridden": True, "version": True,
                             "revision": _file_revision(content),
                         })
+            standalone_html = override_dir / "html" / "custom"
+            if standalone_html.is_dir():
+                for path in sorted(standalone_html.glob("*.html")):
+                    if path.is_file():
+                        content = path.read_text(encoding="utf-8")
+                        result.append({
+                            "name": "html/custom/" + path.name,
+                            "kind": "html", "overridden": True, "custom": True,
+                            "revision": _file_revision(content),
+                        })
             custom_css = override_dir / "css"
             if custom_css.is_dir():
                 for path in sorted(custom_css.glob("*.css")):
@@ -574,17 +598,14 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
         @app.delete("/api/editor/file", dependencies=auth)
         async def delete_editor_file(name: str):
             source, override = _editor_paths(name, override_dir)
-            if "/versions/" in name:
+            if "/versions/" in name or name.startswith("html/custom/"):
                 if not override.is_file():
                     raise HTTPException(404, "自定义文件不存在")
-                relative = override.relative_to(override_dir / ("html" if name.startswith("html/") else "css")).as_posix()
+                relative = override.relative_to(override_dir / "html").as_posix()
                 override.unlink()
-                if name.startswith("html/"):
-                    for feature, selected in list(selections["templates"].items()):
-                        if selected == relative:
-                            selections["templates"].pop(feature, None)
-                elif selections["theme"] == override.name:
-                    selections["theme"] = "default.css"
+                for feature, selected in list(selections["templates"].items()):
+                    if selected == relative:
+                        selections["templates"].pop(feature, None)
             elif override.exists():
                 override.unlink()
                 if name.startswith("css/") and selections["theme"] == override.name:
@@ -597,6 +618,46 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
             runtime.renderer.configure_admin_overrides(override_dir)
             runtime.renderer.configure_admin_selections(selections["templates"], selections["theme"])
             return {"ok": True, "deleted": True, "selections": selections}
+
+        @app.post("/api/editor/files", dependencies=auth)
+        async def create_editor_file(payload: EditorCreateInput):
+            if "\x00" in payload.content:
+                raise HTTPException(400, "文件内容包含无效字符")
+            extension = ".html" if payload.kind == "html" else ".css"
+            raw_name = payload.name.strip()
+            if raw_name.casefold().endswith(extension):
+                raw_name = raw_name[:-len(extension)]
+            slug = re.sub(r"[^\w-]+", "-", raw_name.casefold()).strip("-_")[:48]
+            if not slug:
+                raise HTTPException(422, "文件名必须包含至少一个字母或数字")
+            filename = slug + extension
+            if payload.kind == "html":
+                if "{% extends" in payload.content or "{% block " in payload.content:
+                    raise HTTPException(422, "HTML 模板必须是独立完整页面，不支持 extends/block 继承。")
+                if "<html" not in payload.content.casefold():
+                    raise HTTPException(422, "HTML 模板必须包含完整的 html 文档结构。")
+                try:
+                    runtime.renderer.environment.from_string(payload.content)
+                except TemplateSyntaxError as exc:
+                    raise HTTPException(422, f"Jinja 模板语法错误：{exc.message}") from exc
+                directory = override_dir / "html" / "custom"
+                relative = "html/custom/" + filename
+            else:
+                if filename in EDITOR_CSS or filename in LEGACY_CSS_FRAGMENTS:
+                    raise HTTPException(409, "该文件名为内置主题或保留文件名，请使用其他名称。")
+                directory = override_dir / "css"
+                relative = "css/" + filename
+            target = directory / filename
+            if target.exists():
+                raise HTTPException(409, "同名文件已存在，请更换文件名。")
+            directory.mkdir(parents=True, exist_ok=True)
+            temporary = target.with_name(target.name + ".tmp")
+            temporary.write_text(payload.content, encoding="utf-8")
+            temporary.chmod(0o600)
+            temporary.replace(target)
+            runtime.renderer.configure_admin_overrides(override_dir)
+            runtime.renderer.configure_admin_selections(selections["templates"], selections["theme"])
+            return {"ok": True, "name": relative, "revision": _file_revision(payload.content)}
 
         @app.post("/api/editor/versions", dependencies=auth)
         async def create_editor_version(payload: EditorVersionInput):
