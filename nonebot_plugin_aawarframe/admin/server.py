@@ -24,7 +24,7 @@ from jinja2 import TemplateSyntaxError
 from pydantic import BaseModel, Field
 
 from ..models.common import Card
-from .preview_data import PreviewDataStore
+from ..rendering.preview_data import get_preview_card
 
 logger = logging.getLogger(__name__)
 STATIC = Path(__file__).parent / "static"
@@ -53,28 +53,25 @@ class PreviewInput(BaseModel):
 
 class PreviewSelectionInput(BaseModel):
     feature: str = Field(min_length=1, max_length=80)
-    template_version: str = Field(default="", max_length=240)
-    css_version: str = Field(default="", max_length=240)
+    html_template: str = Field(min_length=1, max_length=240)
+    theme: str = Field(min_length=1, max_length=120)
 
 
 class EditorVersionInput(BaseModel):
     kind: Literal["html", "css"]
-    feature: str = Field(min_length=1, max_length=80)
+    feature: str = Field(default="global", min_length=1, max_length=80)
     name: str = Field(min_length=1, max_length=80)
     content: str = Field(max_length=1_000_000)
 
 
 EDITOR_TEMPLATES = {
-    "arbitration.html", "archimedea.html", "attributes.html", "base.html",
-    "bounties.html", "bounty_rewards.html", "card.html", "challenge_bounties.html",
-    "commands.html", "fissures.html", "market.html", "nightwave.html",
-    "operations.html", "relics.html", "riven_analysis.html", "riven_market.html",
-    "riven_values.html", "trend.html", "void_trader.html", "weekly.html",
+    "arbitration.html", "archimedea.html", "attributes.html", "bounties.html",
+    "card.html", "challenge_bounties.html", "commands.html", "fissures.html",
+    "market.html", "nightwave.html", "operations.html", "relics.html",
+    "riven_analysis.html", "riven_market.html", "riven_values.html", "trend.html",
+    "void_trader.html", "weekly.html",
 }
-EDITOR_CSS = {
-    "base.css", "trader.css", "riven_values.css", "riven_market.css",
-    "trend.css", "relics.css", "riven_analysis.css", "themes/default.css",
-}
+EDITOR_CSS = {"default.css"}
 PREVIEW_CATALOG = [
     ("card", "通用信息卡片", "card.html", "基础信息、表格和说明"),
     ("cycles", "环境周期", "card.html", "地球、夜灵平原等周期状态"),
@@ -105,44 +102,51 @@ def _feature_ids() -> set[str]:
     return {item[0] for item in PREVIEW_CATALOG}
 
 
+def _rendering_roots():
+    root = Path(__file__).parents[1] / "rendering"
+    return root / "html", root / "css"
+
+
 def _editor_paths(name: str, override_dir: Path):
-    templates = Path(__file__).parents[1] / "rendering" / "templates"
-    styles = Path(__file__).parents[1] / "rendering" / "assets" / "css"
-    if name.startswith("templates/") and name.removeprefix("templates/") in EDITOR_TEMPLATES:
-        relative = name.removeprefix("templates/")
-        return templates / relative, override_dir / "templates" / relative
-    if name.startswith("css/") and name.removeprefix("css/") in EDITOR_CSS:
+    html_root, css_root = _rendering_roots()
+    if name.startswith("html/"):
+        relative = name.removeprefix("html/")
+        if relative in EDITOR_TEMPLATES:
+            return html_root / relative, override_dir / "html" / relative
+        match = re.fullmatch(r"versions/([a-z0-9_-]+)/([\\w-]+)\\.html", relative)
+        if match:
+            feature, filename = match.groups()
+            if feature not in _feature_ids():
+                raise HTTPException(404, "找不到此 HTML 模板")
+            path = override_dir / "html" / relative
+            if path.is_file():
+                return path, path
+    if name.startswith("css/"):
         relative = name.removeprefix("css/")
-        return styles / relative, override_dir / "css" / relative
-    match = re.fullmatch(r"(templates|css)/versions/([a-z0-9_-]+)/([\w-]+)\.(html|css)", name)
-    if match:
-        kind, feature, filename, extension = match.groups()
-        if feature not in _feature_ids() or (kind == "templates") != (extension == "html"):
-            raise HTTPException(404, "找不到此模板或样式文件")
-        version = override_dir / kind / "versions" / feature / f"{filename}.{extension}"
-        if not version.is_file():
-            raise HTTPException(404, "找不到此模板或样式文件")
-        return version, version
-    raise HTTPException(404, "找不到此模板或样式文件")
+        if re.fullmatch(r"[\\w-]+\\.css", relative):
+            package = css_root / relative
+            custom = override_dir / "css" / relative
+            if package.is_file() or custom.is_file():
+                return (package if package.is_file() else custom), custom
+    raise HTTPException(404, "找不到此 HTML 模板或 CSS 主题")
 
 
-def _file_revision(content: str) -> str:
-    return hashlib.sha256(content.encode("utf-8")).hexdigest()
+def _html_options(override_dir: Path) -> list[dict[str, str]]:
+    html_root, _ = _rendering_roots()
+    names = {path.name for path in html_root.glob("*.html") if path.is_file()}
+    custom_root = override_dir / "html"
+    if custom_root.exists():
+        names.update(path.relative_to(custom_root).as_posix() for path in custom_root.rglob("*.html") if path.is_file())
+    return [{"id": name, "title": name} for name in sorted(names)]
 
 
-def _version_items(override_dir: Path, kind: str, feature: str) -> list[dict[str, str]]:
-    extension = "html" if kind == "templates" else "css"
-    root = override_dir / kind / "versions" / feature
-    if not root.is_dir():
-        return []
-    return [
-        {
-            "id": f"versions/{feature}/{path.name}",
-            "title": path.stem,
-        }
-        for path in sorted(root.glob(f"*.{extension}"))
-        if path.is_file()
-    ]
+def _theme_options(override_dir: Path) -> list[dict[str, str]]:
+    _, css_root = _rendering_roots()
+    names = {path.name for path in css_root.glob("*.css") if path.is_file()}
+    custom_root = override_dir / "css"
+    if custom_root.exists():
+        names.update(path.name for path in custom_root.glob("*.css") if path.is_file())
+    return [{"id": name, "title": name} for name in sorted(names)]
 
 
 def _sample_fields(card: Card, renderer) -> list[dict[str, str]]:
