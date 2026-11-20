@@ -369,17 +369,24 @@ function drawArbitration() {
 $('arbitration-filter').addEventListener('input', drawArbitration);
 
 /* Render previews */
+function fillSelect(select, options, selected) {
+  select.replaceChildren();
+  for (const item of options) {
+    const option = node('option', item.title);
+    option.value = item.id;
+    select.append(option);
+  }
+  select.value = selected || '';
+}
 async function loadPreviews() {
   $('preview-error').textContent = '';
   try {
     previewItems = (await api('previews')).items || [];
     $('preview-count').textContent = previewItems.length + ' 项';
     drawPreviewList();
-    if (selectedPreview && previewItems.some(item => item.id === selectedPreview.id)) {
-      await selectPreview(selectedPreview.id);
-    } else if (previewItems.length) {
-      await selectPreview(previewItems[0].id);
-    }
+    const current = selectedPreview && previewItems.find(item => item.id === selectedPreview.id);
+    const next = current || previewItems.find(item => item.has_data) || previewItems[0];
+    if (next) await selectPreview(next.id);
   } catch (error) {
     showError('preview-error', error);
   }
@@ -395,6 +402,7 @@ function drawPreviewList() {
     const button = node('button', undefined, 'preview-option' + (selectedPreview && selectedPreview.id === item.id ? ' active' : ''));
     button.type = 'button';
     button.append(node('strong', item.title), node('small', item.description));
+    button.append(node('small', item.has_data ? '已捕获真实命令数据' : '等待实际命令数据', item.has_data ? 'preview-data-ready' : 'preview-data-missing'));
     button.addEventListener('click', () => selectPreview(item.id));
     list.append(button);
   }
@@ -419,25 +427,97 @@ async function selectPreview(id) {
   drawPreviewList();
   if (!selectedPreview) return;
   $('preview-title').textContent = selectedPreview.title;
-  $('preview-description').textContent = selectedPreview.description + ' · ' + selectedPreview.template;
+  $('preview-description').textContent = selectedPreview.description + ' · 默认模板：' + selectedPreview.template;
+  const templateOptions = selectedPreview.template_versions || [
+    { id: '', title: '内置模板 · ' + selectedPreview.template }
+  ];
+  const cssOptions = selectedPreview.css_versions || [{ id: '', title: '默认样式' }];
+  fillSelect($('preview-template-select'), templateOptions, selectedPreview.selected_template || '');
+  fillSelect($('preview-css-select'), cssOptions, selectedPreview.selected_css || '');
   $('preview-image').hidden = true;
   $('preview-image-wrap').querySelector('.preview-placeholder').hidden = false;
+  $('save-preview-selection').disabled = !selectedPreview.has_data;
+  $('preview-error').textContent = '';
+  if (!selectedPreview.has_data) {
+    $('preview-data-meta').textContent = '尚未捕获此功能的真实命令结果。';
+    $('preview-empty-message').textContent = '请先在机器人中执行对应命令，然后点击右上角刷新预览。不会使用模拟数据替代。';
+    return;
+  }
+  const command = selectedPreview.data_feature + (selectedPreview.data_arguments ? ' ' + selectedPreview.data_arguments : '');
+  const updated = selectedPreview.data_updated_at ? new Date(selectedPreview.data_updated_at).toLocaleString() : '未知';
+  $('preview-data-meta').textContent = '真实数据：' + command + ' · 更新时间：' + updated;
+  $('preview-empty-message').textContent = '正在使用最近一次真实命令结果生成预览…';
   const success = await renderPreview(id, $('preview-image'), 'preview-error');
   if (success) $('preview-image-wrap').querySelector('.preview-placeholder').hidden = true;
+  else $('preview-empty-message').textContent = '真实数据已保存，但当前模板渲染失败。请检查模板或数据字段。';
+}
+async function applyPreviewSelection() {
+  if (!selectedPreview || !selectedPreview.has_data) return;
+  const button = $('save-preview-selection');
+  button.disabled = true;
+  $('preview-error').textContent = '';
+  try {
+    const templateVersion = $('preview-template-select').value;
+    const cssVersion = $('preview-css-select').value;
+    await api('previews/selection', 'PUT', {
+      feature: selectedPreview.id,
+      template_version: templateVersion,
+      css_version: cssVersion
+    });
+    selectedPreview.selected_template = templateVersion;
+    selectedPreview.selected_css = cssVersion;
+    toast('已应用此功能的模板与 CSS 版本。');
+    const success = await renderPreview(selectedPreview.id, $('preview-image'), 'preview-error');
+    if (success) $('preview-image-wrap').querySelector('.preview-placeholder').hidden = true;
+  } catch (error) {
+    showError('preview-error', error);
+  } finally {
+    button.disabled = !selectedPreview.has_data;
+  }
 }
 $('preview-filter').addEventListener('input', drawPreviewList);
-$('refresh-preview').addEventListener('click', () => {
-  if (selectedPreview) selectPreview(selectedPreview.id);
-});
+$('refresh-preview').addEventListener('click', loadPreviews);
+$('save-preview-selection').addEventListener('click', applyPreviewSelection);
 
 /* Live template editor */
+let editorSchema = [];
+let selectedEditorFeature = 'card';
+function featureForFile(name) {
+  const version = name.match(/(?:templates|css)\/versions\/([^/]+)\//);
+  if (version) return version[1];
+  if (name.startsWith('css/')) {
+    const cssName = name.replace('css/', '');
+    if (cssName === 'trader.css') return 'void_trader';
+    if (cssName === 'riven_values.css') return 'riven_values';
+    if (cssName === 'riven_market.css') return 'riven_market';
+    if (cssName === 'trend.css') return 'trend';
+    if (cssName === 'relics.css') return 'relics';
+    if (cssName === 'riven_analysis.css') return 'riven_analysis';
+    return 'card';
+  }
+  const file = name.replace('templates/', '').replace('.html', '');
+  if (file === 'base' || file === 'card') return 'card';
+  if (file === 'bounty_rewards') return 'bounties';
+  if (file === 'operations') return 'sortie';
+  return previewItems.some(item => item.id === file) ? file : 'card';
+}
 async function loadEditorFiles() {
   $('editor-error').textContent = '';
   try {
+    if (!previewItems.length) previewItems = (await api('previews')).items || [];
     editorFiles = (await api('editor/files')).items || [];
     $('editor-file-count').textContent = editorFiles.length + ' 个文件';
+    const featureSelect = $('editor-feature');
+    featureSelect.replaceChildren();
+    for (const item of previewItems) {
+      const option = node('option', item.title);
+      option.value = item.id;
+      featureSelect.append(option);
+    }
+    featureSelect.value = selectedEditorFeature;
     drawEditorFiles();
     if (!selectedFile && editorFiles.length) await selectEditorFile(editorFiles[0].name);
+    else await loadEditorSchema(selectedEditorFeature);
   } catch (error) {
     showError('editor-error', error);
   }
@@ -459,16 +539,57 @@ function drawEditorFiles() {
   if (!rows.length) list.append(node('p', '没有匹配的文件。', 'empty'));
 }
 function updateEditorState() {
+  const file = editorFiles.find(item => item.name === selectedFile);
+  const isVersion = Boolean(file && file.version);
   const dirty = $('editor-content').value !== editorOriginal;
-  $('editor-save').disabled = !selectedFile || !dirty;
-  $('editor-reset').disabled = !selectedFile || !editorOverridden();
+  $('editor-save').disabled = !selectedFile || !$('editor-version-name').value.trim() || !$('editor-content').value;
+  $('editor-reset').disabled = !selectedFile || !editorOverridden() || isVersion;
   $('editor-preview').disabled = !selectedFile;
-  $('editor-file-status').textContent = dirty ? '有未保存修改' : (editorOverridden() ? '已应用自定义覆盖' : '使用安装包原版');
+  $('editor-file-status').textContent = dirty ? '有未保存修改' : (isVersion ? '历史版本（只读保存）' : (editorOverridden() ? '使用本地覆盖' : '使用安装包原版'));
   $('editor-file-status').classList.toggle('modified', dirty);
 }
 function editorOverridden() {
   const file = editorFiles.find(item => item.name === selectedFile);
   return Boolean(file && file.overridden);
+}
+async function loadEditorSchema(feature) {
+  if (!feature) return;
+  try {
+    const data = await api('editor/schema?' + new URLSearchParams({ feature }));
+    editorSchema = data.fields || [];
+    const list = $('editor-fields');
+    list.replaceChildren();
+    for (const field of editorSchema) {
+      const button = node('button', undefined, 'editor-field');
+      button.type = 'button';
+      button.title = field.placeholder;
+      button.append(node('code', field.path));
+      button.append(node('small', field.example));
+      button.addEventListener('click', () => {
+        const textarea = $('editor-content');
+        if (textarea.disabled) {
+          toast('请先选择一个模板文件。');
+          return;
+        }
+        const value = field.placeholder;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        textarea.setRangeText(value, start, end, 'end');
+        textarea.focus();
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      list.append(button);
+    }
+    if (!editorSchema.length) list.append(node('p', '当前功能没有可用字段。', 'empty'));
+  } catch (error) {
+    if (error && error.status === 409) {
+      editorSchema = [];
+      const list = $('editor-fields');
+      list.replaceChildren(node('p', error.message, 'empty'));
+      return;
+    }
+    showError('editor-error', error);
+  }
 }
 async function selectEditorFile(name) {
   if (selectedFile && name !== selectedFile && $('editor-content').value !== editorOriginal) {
@@ -480,50 +601,60 @@ async function selectEditorFile(name) {
     selectedFile = name;
     editorRevision = data.revision;
     editorOriginal = data.content;
+    selectedEditorFeature = featureForFile(name);
+    $('editor-feature').value = selectedEditorFeature;
     $('editor-file-name').textContent = name;
     $('editor-content').disabled = false;
     $('editor-content').value = data.content;
+    $('editor-version-name').value = '';
     drawEditorFiles();
     updateEditorState();
     $('editor-message').textContent = '';
     $('editor-preview-panel').hidden = true;
+    await loadEditorSchema(selectedEditorFeature);
   } catch (error) {
     showError('editor-error', error);
   }
 }
 $('editor-content').addEventListener('input', updateEditorState);
 $('editor-filter').addEventListener('input', drawEditorFiles);
-
-async function saveEditorFile() {
+$('editor-version-name').addEventListener('input', updateEditorState);
+$('editor-feature').addEventListener('change', () => {
+  selectedEditorFeature = $('editor-feature').value;
+  loadEditorSchema(selectedEditorFeature);
+});
+async function saveEditorVersion() {
   if (!selectedFile) return;
   const button = $('editor-save');
   button.disabled = true;
   $('editor-error').textContent = '';
-  $('editor-message').textContent = '正在保存…';
+  $('editor-message').textContent = '正在创建独立版本…';
   try {
-    const data = await api('editor/file', 'PUT', {
-      name: selectedFile, content: $('editor-content').value, revision: editorRevision
+    const kind = selectedFile.startsWith('css/') ? 'css' : 'html';
+    const data = await api('editor/versions', 'POST', {
+      kind,
+      feature: selectedEditorFeature,
+      name: $('editor-version-name').value.trim(),
+      content: $('editor-content').value
     });
-    editorRevision = data.revision;
     editorOriginal = $('editor-content').value;
-    const file = editorFiles.find(item => item.name === selectedFile);
-    if (file) { file.overridden = true; file.revision = data.revision; }
+    editorFiles = (await api('editor/files')).items || [];
+    $('editor-file-count').textContent = editorFiles.length + ' 个文件';
+    selectedFile = data.name;
     drawEditorFiles();
-    updateEditorState();
-    $('editor-message').textContent = '已热更新';
-    toast('已保存，后续渲染将立即使用新模板。');
-    await previewEditorFile();
+    await selectEditorFile(data.name);
+    $('editor-message').textContent = '已创建新版本；原有版本保持不变。';
+    toast('新版本已保存，可在渲染预览中选择启用。');
   } catch (error) {
     $('editor-message').textContent = '';
     showError('editor-error', error);
-    if (error.status === 409) toast('文件版本已变化，请重新载入。');
   } finally {
     updateEditorState();
   }
 }
 async function resetEditorFile() {
   if (!selectedFile || !editorOverridden()) return;
-  if (!window.confirm('恢复这个文件的安装包原版？自定义覆盖将被删除。')) return;
+  if (!window.confirm('恢复这个文件的安装包原版？本地覆盖将被删除。')) return;
   $('editor-reset').disabled = true;
   try {
     await api('editor/file?' + new URLSearchParams({ name: selectedFile }), 'DELETE');
@@ -538,15 +669,14 @@ async function resetEditorFile() {
   }
 }
 function previewKeyForFile(name) {
-  if (name.startsWith('css/')) return 'card';
-  const file = name.replace('templates/', '').replace('.html', '');
-  if (file === 'base') return 'card';
-  if (file === 'bounty_rewards') return 'bounties';
-  if (file === 'operations') return 'sortie';
-  return previewItems.some(item => item.id === file) ? file : 'card';
+  return featureForFile(name);
 }
 async function previewEditorFile() {
   if (!selectedFile) return;
+  if ($('editor-content').value !== editorOriginal) {
+    toast('请先另存为新版本，再预览当前修改。');
+    return;
+  }
   if (!previewItems.length) {
     try {
       previewItems = (await api('previews')).items || [];
@@ -555,13 +685,33 @@ async function previewEditorFile() {
       return;
     }
   }
-  $('editor-preview-panel').hidden = false;
-  $('editor-preview-image').hidden = true;
-  const key = previewKeyForFile(selectedFile);
-  const success = await renderPreview(key, $('editor-preview-image'), 'editor-error');
-  if (success) $('editor-preview-panel').hidden = false;
+  const feature = selectedEditorFeature;
+  try {
+    const templateVersion = selectedFile.startsWith('templates/versions/')
+      ? selectedFile.replace('templates/', '')
+      : (selectedFile.startsWith('templates/') ? '' : undefined);
+    const cssVersion = selectedFile.startsWith('css/versions/')
+      ? selectedFile.replace('css/', '')
+      : (selectedFile.startsWith('css/') ? '' : undefined);
+    const preview = previewItems.find(item => item.id === feature);
+    await api('previews/selection', 'PUT', {
+      feature,
+      template_version: templateVersion === undefined ? (preview.selected_template || '') : templateVersion,
+      css_version: cssVersion === undefined ? (preview.selected_css || '') : cssVersion
+    });
+    if (preview) {
+      if (templateVersion !== undefined) preview.selected_template = templateVersion;
+      if (cssVersion !== undefined) preview.selected_css = cssVersion;
+    }
+    $('editor-preview-panel').hidden = false;
+    $('editor-preview-image').hidden = true;
+    const success = await renderPreview(feature, $('editor-preview-image'), 'editor-error');
+    if (success) $('editor-preview-panel').hidden = false;
+  } catch (error) {
+    showError('editor-error', error);
+  }
 }
-$('editor-save').addEventListener('click', saveEditorFile);
+$('editor-save').addEventListener('click', saveEditorVersion);
 $('editor-reset').addEventListener('click', resetEditorFile);
 $('editor-preview').addEventListener('click', previewEditorFile);
 $('close-editor-preview').addEventListener('click', () => $('editor-preview-panel').hidden = true);

@@ -270,3 +270,42 @@ label{display:block;font-size:12px;font-weight:650;color:#4a5664;margin:18px 0 7
   .page-footer{font-size:8px}
   .login-card{padding:28px 23px}
 }
+
+
+/* Per-feature template and CSS selection */
+.preview-heading{align-items:flex-start}
+.preview-selectors{display:grid;grid-template-columns:minmax(150px,1fr) minmax(150px,1fr) auto;gap:10px;align-items:end;margin:0 0 15px}
+.preview-selectors label,.editor-data-heading label,.editor-version-save label{display:flex;flex-direction:column;gap:6px;margin:0;font-size:10px;font-weight:700;color:#6f7d8b}
+.preview-selectors select,.editor-data-heading select,.editor-version-save input{width:100%;min-width:0;border:1px solid #e3e8ed;border-radius:8px;padding:9px 10px;background:#fff;color:#3e4b59;font:inherit;font-size:11px}
+.preview-selectors .button{white-space:nowrap}
+
+/* Data placeholder browser */
+.editor-data-panel{padding:15px 17px;border-bottom:1px solid var(--line);background:#fbfcfd}
+.editor-data-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:12px}
+.editor-data-heading strong{font-size:11px;color:#44515f}
+.editor-data-heading p{font-size:9px;color:#98a3af;margin-top:4px}
+.editor-data-heading label{min-width:180px;max-width:260px}
+.editor-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;max-height:190px;overflow:auto}
+.editor-field{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;text-align:left;border:1px solid #e8edf1;border-radius:7px;background:#fff;padding:8px 9px}
+.editor-field:hover{border-color:#cbd4ff;background:#f8f9ff}
+.editor-field code{font-size:9px;color:#536bc5;overflow-wrap:anywhere;white-space:normal}
+.editor-field small{font-size:8px;color:#9aa5b0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.editor-version-save{display:grid;grid-template-columns:minmax(130px,1fr) minmax(160px,1.5fr) auto;gap:10px;align-items:end;padding:12px 17px;border-top:1px solid var(--line);background:#fbfcfd}
+.editor-version-save label{grid-column:1;align-self:center}
+.editor-version-save input{grid-column:2}
+.editor-version-save .button{grid-column:3;white-space:nowrap}
+@media(max-width:760px){
+  .preview-selectors{grid-template-columns:1fr}
+  .preview-selectors .button{width:100%}
+  .editor-data-heading{align-items:stretch;flex-direction:column}
+  .editor-data-heading label{max-width:none}
+  .editor-version-save{grid-template-columns:1fr}
+  .editor-version-save label,.editor-version-save input,.editor-version-save .button{grid-column:1}
+}
+
+
+/* Provenance of live command data used by preview and editor */
+.preview-data-meta{margin-top:6px;font-size:9px;color:#8793a0;line-height:1.5;overflow-wrap:anywhere}
+.preview-data-ready{color:#4e8b70!important}
+.preview-data-missing{color:#a0a8b2!important}
+.preview-option .preview-data-ready,.preview-option .preview-data-missing{font-size:8px;margin-top:4px}

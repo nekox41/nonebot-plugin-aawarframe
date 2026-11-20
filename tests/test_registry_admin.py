@@ -168,32 +168,82 @@ def test_old_aliases_and_mapping_changes_are_preserved(grq, tmp_path):
     query.close()
 
 
-@pytest.mark.parametrize("template", [
-    "card", "cycles", "fissures", "arbitration", "market", "sortie", "archon", "invasions",
-    "parts", "relics",
-    "trend", "riven_analysis", "attributes", "commands", "riven_market", "riven_values",
-    "void_trader", "weekly", "nightwave", "archimedea", "bounties", "challenge_bounties",
-])
-def test_preview_catalog_cards_are_valid(template):
-    from nonebot_plugin_aawarframe.admin.server import _preview_card
+def test_preview_catalog_has_no_synthetic_data():
+    from nonebot_plugin_aawarframe.admin.server import PREVIEW_CATALOG
 
-    card = _preview_card(template)
-    assert card.title
-    assert card.source == "AAWarframe · WebUI 预览"
+    assert len(PREVIEW_CATALOG) == 22
+    assert len({item[0] for item in PREVIEW_CATALOG}) == len(PREVIEW_CATALOG)
 
 
-async def test_preview_api_renders_local_sample_without_upstream_requests(grq):
+async def test_admin_server_captures_complete_card_by_real_command(grq, tmp_path):
+    from nonebot_plugin_aawarframe.admin.server import AdminServer
+    from nonebot_plugin_aawarframe.models.common import Card, CycleDisplay
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+
+    renderer = CardRenderer()
+    runtime = SimpleNamespace(renderer=renderer)
+    config = SimpleNamespace(aawarframe_cache_dir=tmp_path)
+    admin = AdminServer(runtime, config)
+    card = Card(
+        title="真实平原总览",
+        source="https://api.warframe.com/cdn/worldState.php",
+        cycle_items=[
+            CycleDisplay(name="夜灵平原", state="白天", next_state="黑夜", remaining="8 分钟")
+        ],
+    )
+    admin.record_preview("plains", "", card)
+    record = admin.preview_store.for_preview("cycles")
+    assert record["feature"] == "plains"
+    assert record["card"]["title"] == "真实平原总览"
+    assert record["card"]["cycle_items"][0]["name"] == "夜灵平原"
+    assert (tmp_path / "admin" / "preview-data.json").is_file()
+    await renderer.close()
+
+
+async def test_preview_api_renders_persisted_real_command_card(grq, tmp_path):
+    from nonebot_plugin_aawarframe.admin.preview_data import PreviewDataStore
+    from nonebot_plugin_aawarframe.models.common import Card
+    from nonebot_plugin_aawarframe.models.operations import OperationBoard
+
     renderer = SimpleNamespace(
         render=AsyncMock(return_value=[b"webp-preview"]),
         metrics={},
     )
-    app = create_app(SimpleNamespace(grq=grq, renderer=renderer), "long-test-password-12345")
+    store = PreviewDataStore(tmp_path / "admin" / "preview-data.json")
+    card = Card(
+        title="真实突击数据",
+        source="https://api.warframe.com/cdn/worldState.php",
+        operation_board=OperationBoard(kind="sortie"),
+    )
+    store.record("sortie", "sortie", "", card)
+    runtime = SimpleNamespace(grq=grq, renderer=renderer, admin=SimpleNamespace(preview_store=store))
+    app = create_app(runtime, "long-test-password-12345")
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://test") as client:
         client.headers["Authorization"] = "Bearer long-test-password-12345"
         response = await client.post("/api/previews", json={"template": "sortie"})
         assert response.status_code == 200
         assert response.json()["images"] == ["d2VicC1wcmV2aWV3"]
+        assert response.json()["data_feature"] == "sortie"
+        rendered_card = renderer.render.await_args.args[0]
+        assert rendered_card.title == "真实突击数据"
         renderer.render.assert_awaited_once()
+
+
+async def test_preview_without_real_command_data_returns_conflict(grq, tmp_path):
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+
+    renderer = CardRenderer()
+    app = create_app(
+        SimpleNamespace(grq=grq, renderer=renderer),
+        "long-test-password-12345",
+        tmp_path / "admin" / "overrides",
+    )
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        client.headers["Authorization"] = "Bearer long-test-password-12345"
+        response = await client.post("/api/previews", json={"template": "sortie"})
+        assert response.status_code == 409
+        assert "真实命令数据" in response.json()["detail"]
+    await renderer.close()
 
 
 async def test_editor_persists_overrides_and_hot_reloads_renderer(grq, tmp_path):
@@ -230,3 +280,146 @@ async def test_editor_persists_overrides_and_hot_reloads_renderer(grq, tmp_path)
         assert reset.status_code == 200
         assert "webui-live-override" not in renderer.css
     await renderer.close()
+
+
+async def test_versioned_templates_and_css_use_real_card_snapshot(grq, tmp_path):
+    from nonebot_plugin_aawarframe.admin.preview_data import PreviewDataStore
+    from nonebot_plugin_aawarframe.models.common import Card, CycleDisplay
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+
+    renderer = CardRenderer()
+    admin_dir = tmp_path / "admin"
+    override_dir = admin_dir / "overrides"
+    store = PreviewDataStore(admin_dir / "preview-data.json")
+    card = Card(
+        title="真实平原周期",
+        source="https://api.warframe.com/cdn/worldState.php",
+        cycle_items=[
+            CycleDisplay(
+                name="夜灵平原",
+                state="白天",
+                next_state="黑夜",
+                remaining="12 分钟",
+                remaining_short="12:00",
+            )
+        ],
+    )
+    store.record("plains", "cycles", "", card)
+    runtime = SimpleNamespace(grq=grq, renderer=renderer, admin=SimpleNamespace(preview_store=store))
+    app = create_app(runtime, "long-test-password-12345", override_dir)
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        client.headers["Authorization"] = "Bearer long-test-password-12345"
+        schema_response = await client.get("/api/editor/schema", params={"feature": "cycles"})
+        assert schema_response.status_code == 200
+        schema = schema_response.json()
+        assert schema["data_feature"] == "plains"
+        assert any(field["path"] == "card.cycle_items[0].name" for field in schema["fields"])
+
+        template = await client.post(
+            "/api/editor/versions",
+            json={
+                "kind": "html",
+                "feature": "cycles",
+                "name": "Tenno layout",
+                "content": (
+                    "<html><head></head><body>"
+                    "{{ card.cycle_items[0].name }}"
+                    "</body></html>"
+                ),
+            },
+        )
+        assert template.status_code == 200
+        template_name = template.json()["name"]
+        assert template_name == "templates/versions/cycles/tenno-layout.html"
+
+        css = await client.post(
+            "/api/editor/versions",
+            json={
+                "kind": "css",
+                "feature": "cycles",
+                "name": "Soft colors",
+                "content": ".cycle { color: rgb(12, 34, 56); }",
+            },
+        )
+        assert css.status_code == 200
+        css_name = css.json()["name"]
+        assert css_name == "css/versions/cycles/soft-colors.css"
+
+        selected = await client.put(
+            "/api/previews/selection",
+            json={
+                "feature": "cycles",
+                "template_version": template_name.removeprefix("templates/"),
+                "css_version": css_name.removeprefix("css/"),
+            },
+        )
+        assert selected.status_code == 200
+
+        persisted = store.for_preview("cycles")
+        restored_card = Card.model_validate(persisted["card"])
+        assert renderer._template_name(restored_card) == "versions/cycles/tenno-layout.html"
+        assert "rgb(12, 34, 56)" in renderer._css_for_card(restored_card)
+        assert "夜灵平原" in renderer.html(restored_card)
+
+        versions = (await client.get("/api/editor/files")).json()["items"]
+        assert any(item["name"] == template_name and item["version"] for item in versions)
+        assert any(item["name"] == css_name and item["version"] for item in versions)
+
+        blocked = await client.put(
+            "/api/editor/file",
+            json={"name": template_name, "content": "changed", "revision": "0" * 64},
+        )
+        assert blocked.status_code == 409
+
+        previews = (await client.get("/api/previews")).json()["items"]
+        cycles = next(item for item in previews if item["id"] == "cycles")
+        assert cycles["has_data"] is True
+        assert cycles["data_feature"] == "plains"
+        assert cycles["selected_template"] == "versions/cycles/tenno-layout.html"
+        assert cycles["selected_css"] == "versions/cycles/soft-colors.css"
+
+    restored_store = PreviewDataStore(admin_dir / "preview-data.json")
+    restored_renderer = CardRenderer()
+    restored_runtime = SimpleNamespace(
+        grq=grq,
+        renderer=restored_renderer,
+        admin=SimpleNamespace(preview_store=restored_store),
+    )
+    create_app(restored_runtime, "long-test-password-12345", override_dir)
+    restored_record = restored_store.for_preview("cycles")
+    assert Card.model_validate(restored_record["card"]).title == "真实平原周期"
+    assert restored_renderer._template_name(Card.model_validate(restored_record["card"])) == "versions/cycles/tenno-layout.html"
+    assert "rgb(12, 34, 56)" in restored_renderer._css_for_card(Card.model_validate(restored_record["card"]))
+    await restored_renderer.close()
+    await renderer.close()
+
+
+async def test_admin_server_uses_plain_http(grq, tmp_path, monkeypatch):
+    import asyncio
+
+    from nonebot_plugin_aawarframe.admin import server as admin_module
+    from nonebot_plugin_aawarframe.admin.server import AdminServer
+
+    class DummyServer:
+        def __init__(self, config):
+            self.config = config
+            self.should_exit = False
+
+        async def serve(self):
+            while not self.should_exit:
+                await asyncio.sleep(0)
+
+    monkeypatch.setattr(admin_module, "EmbeddedServer", DummyServer)
+    config = SimpleNamespace(
+        aawarframe_cache_dir=tmp_path,
+        aawarframe_admin_password=None,
+        aawarframe_admin_host="127.0.0.1",
+        aawarframe_admin_port=8087,
+    )
+    admin = AdminServer(SimpleNamespace(grq=grq, renderer=None), config)
+    admin.start()
+    assert admin.server.config.ssl_certfile is None
+    assert admin.server.config.ssl_keyfile is None
+    await admin.close()

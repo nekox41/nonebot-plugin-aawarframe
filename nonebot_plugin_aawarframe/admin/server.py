@@ -1,4 +1,4 @@
-# 作用：提供带口令认证的 HTTPS 管理 API 和网页管理台。
+# 作用：提供带口令认证的 HTTP 管理 API 和网页管理台。
 # 编写日期：2026-11-13
 # 作者：Aameow
 
@@ -6,15 +6,13 @@ import asyncio
 import base64
 import hashlib
 import hmac
+import json
 import logging
 import os
+import re
 import secrets
-import ssl
-import subprocess
 from collections import OrderedDict, deque
 from contextlib import contextmanager
-from datetime import datetime, timedelta, timezone
-from ipaddress import ip_address
 from pathlib import Path
 from time import monotonic
 from typing import Literal
@@ -24,6 +22,9 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 from jinja2 import TemplateSyntaxError
 from pydantic import BaseModel, Field
+
+from ..models.common import Card
+from .preview_data import PreviewDataStore
 
 logger = logging.getLogger(__name__)
 STATIC = Path(__file__).parent / "static"
@@ -48,6 +49,19 @@ class EditorInput(BaseModel):
 
 class PreviewInput(BaseModel):
     template: str = Field(min_length=1, max_length=80)
+
+
+class PreviewSelectionInput(BaseModel):
+    feature: str = Field(min_length=1, max_length=80)
+    template_version: str = Field(default="", max_length=240)
+    css_version: str = Field(default="", max_length=240)
+
+
+class EditorVersionInput(BaseModel):
+    kind: Literal["html", "css"]
+    feature: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=80)
+    content: str = Field(max_length=1_000_000)
 
 
 EDITOR_TEMPLATES = {
@@ -87,6 +101,10 @@ PREVIEW_CATALOG = [
 ]
 
 
+def _feature_ids() -> set[str]:
+    return {item[0] for item in PREVIEW_CATALOG}
+
+
 def _editor_paths(name: str, override_dir: Path):
     templates = Path(__file__).parents[1] / "rendering" / "templates"
     styles = Path(__file__).parents[1] / "rendering" / "assets" / "css"
@@ -96,6 +114,15 @@ def _editor_paths(name: str, override_dir: Path):
     if name.startswith("css/") and name.removeprefix("css/") in EDITOR_CSS:
         relative = name.removeprefix("css/")
         return styles / relative, override_dir / "css" / relative
+    match = re.fullmatch(r"(templates|css)/versions/([a-z0-9_-]+)/([\w-]+)\.(html|css)", name)
+    if match:
+        kind, feature, filename, extension = match.groups()
+        if feature not in _feature_ids() or (kind == "templates") != (extension == "html"):
+            raise HTTPException(404, "找不到此模板或样式文件")
+        version = override_dir / kind / "versions" / feature / f"{filename}.{extension}"
+        if not version.is_file():
+            raise HTTPException(404, "找不到此模板或样式文件")
+        return version, version
     raise HTTPException(404, "找不到此模板或样式文件")
 
 
@@ -103,172 +130,60 @@ def _file_revision(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
-def _preview_card(template: str):
-    from ..models.arbitration import ArbitrationBoard, ArbitrationEntry
-    from ..models.bounties import BountyDisplay
-    from ..models.common import Card, CycleDisplay, FissureDisplay, Section
-    from ..models.market import MarketBoard
-    from ..models.operations import InvasionDisplay, OperationBoard, OperationTask
-    from ..models.relics import PartRelics, PartsBoard, RelicBoard, RelicReference, RelicReward
-    from ..models.riven_market import RivenListing, RivenMarketBoard
-    from ..models.riven_values import RivenAttribute, RivenValuesBoard
-    from ..models.trend import TrendBoard, TrendPeriod, TrendPoint
-    from ..models.void_trader import TraderBoard, TraderGroup, TraderItem
+def _version_items(override_dir: Path, kind: str, feature: str) -> list[dict[str, str]]:
+    extension = "html" if kind == "templates" else "css"
+    root = override_dir / kind / "versions" / feature
+    if not root.is_dir():
+        return []
+    return [
+        {
+            "id": f"versions/{feature}/{path.name}",
+            "title": path.stem,
+        }
+        for path in sorted(root.glob(f"*.{extension}"))
+        if path.is_file()
+    ]
 
-    now = datetime.now(timezone.utc)
-    base = {
-        "title": "Warframe · 示例预览",
-        "source": "AAWarframe · WebUI 预览",
-        "fetched_at": now,
-        "sections": [
-            Section(
-                title="示例信息",
-                columns=["项目", "内容"],
-                rows=[["数据状态", "正常"], ["更新时间", "刚刚"]],
-                notes=["这是本地生成的示例，不会触发外部数据请求。"],
-            )
+
+def _sample_fields(card: Card, renderer) -> list[dict[str, str]]:
+    context = renderer.template_context(card)
+    sample = {
+        "card": card.model_dump(mode="json"),
+        "page": context["page"],
+        "total": context["total"],
+        "trend_charts": [
+            [period.model_dump(mode="json"), chart]
+            for period, chart in context["trend_charts"]
         ],
     }
-    if template == "cycles":
-        base["cycle_items"] = [
-            CycleDisplay(name="夜灵平原", state="白天", next_state="黑夜",
-                         remaining="18 分钟", remaining_short="18:00",
-                         expiry=now + timedelta(minutes=18), tone="day"),
-            CycleDisplay(name="金星", state="温暖", next_state="寒冷",
-                         remaining="22 分钟", remaining_short="22:00",
-                         expiry=now + timedelta(minutes=22), tone="warm"),
-        ]
-    elif template == "fissures":
-        base.update(title="虚空裂缝", fissure_mode="normal", item_total=1,
-                    fissure_items=[FissureDisplay(
-                        tier="古纪", tier_key="VoidT1", node="防御 · 泰亚",
-                        planet="地球", mission="防御", faction="Grineer",
-                        remaining="24 分钟", remaining_short="24:00",
-                        expiry=now + timedelta(minutes=24))])
-    elif template == "arbitration":
-        base["arbitration_board"] = ArbitrationBoard(current=True, entries=[
-            ArbitrationEntry(node_id="SolNode1", node="泰亚", planet="地球",
-                             mission="防御", faction="Grineer", time=now,
-                             remaining="42:00", label="当前", grade="S",
-                             vitus_per_minute=2.5)])
-    elif template == "market":
-        base["market_board"] = MarketBoard(name="圣装战甲部件",
-                                            description="PC / 跨平台在线挂单")
-    elif template in {"sortie", "archon", "invasions"}:
-        tasks = [
-            OperationTask(number=1, mission="生存", node="卡吕普索",
-                          planet="土星", modifier="敌人护盾增强"),
-            OperationTask(number=2, mission="防御", node="泰亚", planet="地球"),
-            OperationTask(number=3, mission="间谍", node="阿马尔", planet="木星"),
-        ]
-        if template == "invasions":
-            base["operation_board"] = OperationBoard(
-                kind="invasions",
-                invasions=[InvasionDisplay(
-                    node="塞德娜 · 卡律布狄斯", planet="塞德娜",
-                    attacker="Grineer", defender="Corpus",
-                    attacker_percent=62.5, defender_percent=37.5,
-                    attacker_rewards=["Forma 蓝图"], defender_rewards=["Orokin 电池"],
-                )],
-            )
-        else:
-            base["operation_board"] = OperationBoard(
-                kind=template,
-                boss="夜灵水力使" if template == "archon" else "突击指挥官",
-                faction="Grineer",
-                reward="琥珀执刑官源力石" if template == "archon" else "",
-                tone="gold" if template == "archon" else "",
-                tasks=tasks,
-            )
-    elif template == "parts":
-        base["parts_board"] = PartsBoard(parts=[
-            PartRelics(name="圣装武器部件", quantity=1, relics=[
-                RelicReference(name="Lith A1", rarity="rare", vaulted=False),
-                RelicReference(name="Meso B7", rarity="uncommon", vaulted=True),
-            ])
-        ])
-    elif template == "relics":
-        base["relic_board"] = RelicBoard(
-            name="Lith A1", vaulted=False,
-            rewards=[
-                RelicReward(ref="Lith A1", name="圣装战甲蓝图",
-                            chances=[25.33, 23.33, 20, 16.67], price=8.5),
-                RelicReward(ref="Lith A1", name="圣装武器部件",
-                            chances=[25.33, 23.33, 20, 16.67], price=14),
-            ])
-    elif template == "trend":
-        base["trend_board"] = TrendBoard(name="圣装部件", periods=[
-            TrendPeriod(title="近 7 天", volume=128, average=14.6, points=[
-                TrendPoint(time=now - timedelta(days=1), volume=12, price=13.5),
-                TrendPoint(time=now, volume=18, price=15.2),
-            ])])
-    elif template == "riven_analysis":
-        base.update(title="紫卡分析 · 示例武器", analysis_mode=True,
-                    sections=[Section(title="词条评估",
-                                      columns=["词条", "数值", "基准", "评级"],
-                                      rows=[["暴击几率", "+120%", "+100%", "S"],
-                                            ["多重射击", "+90%", "+100%", "A"]])])
-    elif template == "attributes":
-        base["attribute_rows"] = [("CC", "暴击几率"), ("CD", "暴击伤害"),
-                                  ("MS", "多重射击")]
-    elif template == "commands":
-        base["command_names"] = ["平原", "裂缝", "突击", "仲裁", "wm", "遗物", "紫卡分析"]
-    elif template == "riven_market":
-        base["riven_market_board"] = RivenMarketBoard(
-            weapon="示例武器", positive_filter="暴击几率 · 多重射击",
-            negative_filter="无负面",
-            listings=[RivenListing(
-                seller="Tenno", status="游戏中", price=120, price_type="固定价格",
-                rank=8, mastery=16, rolls=3,
-                positives=["暴击几率 +120%", "多重射击 +90%"], negatives=[])])
-    elif template == "riven_values":
-        base["riven_values_board"] = RivenValuesBoard(
-            layout="2", name="伯斯顿", weapon_class="步枪",
-            variants=["伯斯顿", "伯斯顿 Prime"],
-            ordinary=[RivenAttribute(name="暴击几率", positive="+90%", negative="—")])
-    elif template == "void_trader":
-        base["trader_board"] = TraderBoard(
-            location="中继站 · 示例货单", time=now + timedelta(days=2),
-            groups=[TraderGroup(name="武器与装备",
-                                items=[TraderItem(name="圣装武器部件",
-                                                  ducats=100, credits=50000)])])
-    elif template == "weekly":
-        base.update(title="每周轮换", weekly_mode=True,
-                    sections=[Section(title="本周奖励", columns=["项目", "奖励", "状态"],
-                                      rows=[["钢铁之路", "装饰品", "可领取"],
-                                            ["灵化武器", "进化材料", "轮换中"]],
-                                      highlighted_rows=[0])])
-    elif template == "nightwave":
-        base.update(title="午夜电波", nightwave_mode=True,
-                    sections=[Section(title="本周挑战",
-                                      rows=[["完成 3 次任务", "完成任意任务目标",
-                                             "4500", "6 天", "每周"]])])
-    elif template == "archimedea":
-        base.update(title="深层科研", archimedea_mode=True,
-                    archimedea_activation=now - timedelta(days=2),
-                    archimedea_expiry=now + timedelta(days=5),
-                    archimedea_remaining="5 天",
-                    sections=[Section(title="偏差条件", rows=[
-                        ["偏差", "敌人护甲提升", "敌人获得额外护甲。"],
-                        ["精英风险", "能量限制", "能量补给效率降低。"]])])
-    elif template in {"bounties", "challenge_bounties"}:
-        base.update(
-            title="赏金任务", bounty_mode=template == "bounties",
-            bounty_challenge_mode=template == "challenge_bounties",
-            bounty_region="夜灵平原 · 希图斯", bounty_currency="基础声望",
-            bounty_remaining="42 分钟", bounty_expiry=now + timedelta(minutes=42),
-            bounty_items=[BountyDisplay(
-                index=1, name="高风险赏金", kind="常规", min_level=20,
-                max_level=40, stages=5, standing=1000, mastery=0, rotation="A",
-                node="地球", mission="解放营地", faction="Grineer",
-                objectives=["清理敌人", "保护目标"])])
-    elif template == "base":
-        base["title"] = "卡片基础模板"
-    return Card(**base)
+    fields: list[dict[str, str]] = []
 
+    def visit(path: str, value, depth: int = 0):
+        example = json.dumps(value, ensure_ascii=False, default=str)
+        if len(example) > 100:
+            example = example[:97] + "..."
+        fields.append({
+            "path": path,
+            "placeholder": "{{ " + path + " }}",
+            "example": example,
+        })
+        if depth >= 6:
+            return
+        if isinstance(value, dict):
+            for key, child in value.items():
+                visit(f"{path}.{key}", child, depth + 1)
+        elif isinstance(value, list) and value:
+            visit(f"{path}[0]", value[0], depth + 1)
+
+    for key, value in sample.items():
+        visit(key if key != "card" else "card", value)
+    return fields
 
 def create_app(runtime, token: str, override_dir: Path | None = None):
     grq = runtime.grq
+    preview_store = getattr(getattr(runtime, "admin", None), "preview_store", None)
+    if preview_store is None and override_dir is not None:
+        preview_store = PreviewDataStore(override_dir.parent / "preview-data.json")
     digest = hashlib.sha256(token.encode()).digest()
     failures = OrderedDict()
 
@@ -340,6 +255,7 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
         return FileResponse(STATIC / "style.css", media_type="text/css")
 
     auth = [Depends(authenticate)]
+    selections = {"templates": {}, "css": {}}
 
     @app.get("/api/session", dependencies=auth)
     async def session():
@@ -465,10 +381,30 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
 
     @app.get("/api/previews", dependencies=auth)
     async def previews():
-        return {"items": [
-            {"id": key, "title": title, "template": template, "description": description}
-            for key, title, template, description in PREVIEW_CATALOG
-        ]}
+        items = []
+        for key, title, template, description in PREVIEW_CATALOG:
+            item = {"id": key, "title": title, "template": template, "description": description}
+            if override_dir is not None:
+                item["template_versions"] = [
+                    {"id": "", "title": "内置模板 · " + template},
+                    *_version_items(override_dir, "templates", key),
+                ]
+                item["css_versions"] = [
+                    {"id": "", "title": "默认样式"},
+                    *_version_items(override_dir, "css", key),
+                ]
+            item["selected_template"] = selections["templates"].get(key, "")
+            item["selected_css"] = selections["css"].get(key, "")
+            record = preview_store.for_preview(key) if preview_store else None
+            item["has_data"] = record is not None
+            if record:
+                item["data_feature"] = record["feature"]
+                item["data_arguments"] = record["arguments"]
+                item["data_updated_at"] = record["updated_at"]
+                item["data_title"] = record["card"].get("title", "")
+                item["data_status"] = record["card"].get("status", "")
+            items.append(item)
+        return {"items": items}
 
     @app.post("/api/previews", dependencies=auth)
     async def render_preview(payload: PreviewInput):
@@ -476,21 +412,108 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
             raise HTTPException(404, "找不到此预览项目")
         if not getattr(runtime, "renderer", None):
             raise HTTPException(503, "图片渲染器尚未启动")
+        record = preview_store.for_preview(payload.template) if preview_store else None
+        if record is None:
+            raise HTTPException(
+                409,
+                "尚无此功能的真实命令数据。请先在机器人中执行对应命令，再刷新管理台预览。",
+            )
         try:
-            images = await runtime.renderer.render(_preview_card(payload.template))
+            card = Card.model_validate(record["card"])
+            images = await runtime.renderer.render(card)
         except Exception as exc:
             logger.exception("管理台图片预览失败：%s", payload.template)
             raise HTTPException(503, "预览渲染失败：" + str(exc)[:160]) from exc
         if not images:
             raise HTTPException(503, "渲染器没有返回图片")
-        return {"template": payload.template,
-                "images": [base64.b64encode(image).decode("ascii") for image in images],
-                "media_type": "image/webp"}
+        return {
+            "template": payload.template,
+            "data_feature": record["feature"],
+            "data_arguments": record["arguments"],
+            "data_updated_at": record["updated_at"],
+            "images": [base64.b64encode(image).decode("ascii") for image in images],
+            "media_type": "image/webp",
+        }
 
     if override_dir is not None:
         override_dir.mkdir(parents=True, exist_ok=True)
+        selection_file = override_dir / "selections.json"
+        if selection_file.is_file():
+            try:
+                loaded = json.loads(selection_file.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict):
+                    for key in ("templates", "css"):
+                        if isinstance(loaded.get(key), dict):
+                            selections[key] = loaded[key]
+            except (OSError, ValueError):
+                logger.warning("管理台模板选择配置无法读取，将使用默认模板。")
+        for key in ("templates", "css"):
+            selections[key] = {
+                feature: value
+                for feature, value in selections[key].items()
+                if feature in _feature_ids() and isinstance(value, str)
+            }
+        for feature in _feature_ids():
+            valid_templates = {
+                item["id"] for item in _version_items(override_dir, "templates", feature)
+            }
+            valid_css = {
+                item["id"] for item in _version_items(override_dir, "css", feature)
+            }
+            if selections["templates"].get(feature, "") not in valid_templates | {""}:
+                selections["templates"].pop(feature, None)
+            if selections["css"].get(feature, "") not in valid_css | {""}:
+                selections["css"].pop(feature, None)
         if getattr(runtime, "renderer", None):
             runtime.renderer.configure_admin_overrides(override_dir)
+            runtime.renderer.configure_admin_selections(
+                selections["templates"], selections["css"]
+            )
+
+        @app.get("/api/previews/selection", dependencies=auth)
+        async def preview_selections():
+            return selections
+
+        @app.put("/api/previews/selection", dependencies=auth)
+        async def save_preview_selection(payload: PreviewSelectionInput):
+            if payload.feature not in _feature_ids():
+                raise HTTPException(404, "找不到此预览功能")
+            template_versions = {item["id"] for item in _version_items(override_dir, "templates", payload.feature)}
+            css_versions = {item["id"] for item in _version_items(override_dir, "css", payload.feature)}
+            if payload.template_version and payload.template_version not in template_versions:
+                raise HTTPException(404, "找不到所选模板版本")
+            if payload.css_version and payload.css_version not in css_versions:
+                raise HTTPException(404, "找不到所选 CSS 版本")
+            selections["templates"][payload.feature] = payload.template_version
+            selections["css"][payload.feature] = payload.css_version
+            temporary = selection_file.with_name(selection_file.name + ".tmp")
+            temporary.write_text(json.dumps(selections, ensure_ascii=False, indent=2), encoding="utf-8")
+            temporary.chmod(0o600)
+            temporary.replace(selection_file)
+            runtime.renderer.configure_admin_selections(
+                selections["templates"], selections["css"]
+            )
+            return {"ok": True, "template_version": payload.template_version,
+                    "css_version": payload.css_version}
+
+        @app.get("/api/editor/schema", dependencies=auth)
+        async def editor_schema(feature: str):
+            if feature not in _feature_ids():
+                raise HTTPException(404, "找不到此功能")
+            record = preview_store.for_preview(feature) if preview_store else None
+            if record is None:
+                raise HTTPException(
+                    409,
+                    "尚无此功能的真实命令数据。请先在机器人中执行对应命令。",
+                )
+            card = Card.model_validate(record["card"])
+            return {
+                "feature": feature,
+                "data_feature": record["feature"],
+                "data_arguments": record["arguments"],
+                "data_updated_at": record["updated_at"],
+                "fields": _sample_fields(card, runtime.renderer),
+            }
 
         @app.get("/api/editor/files", dependencies=auth)
         async def editor_files():
@@ -507,6 +530,19 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
                 content = override.read_text(encoding="utf-8") if override.is_file() else source.read_text(encoding="utf-8")
                 result.append({"name": relative, "kind": "css",
                                "overridden": override.is_file(), "revision": _file_revision(content)})
+            for kind, extension in (("templates", "html"), ("css", "css")):
+                root = override_dir / kind / "versions"
+                if root.is_dir():
+                    for path in sorted(root.glob(f"*/*.{extension}")):
+                        relative = path.relative_to(override_dir).as_posix()
+                        content = path.read_text(encoding="utf-8")
+                        result.append({
+                            "name": relative,
+                            "kind": "html" if kind == "templates" else "css",
+                            "overridden": True,
+                            "version": True,
+                            "revision": _file_revision(content),
+                        })
             return {"items": result}
 
         @app.get("/api/editor/file", dependencies=auth)
@@ -519,6 +555,8 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
 
         @app.put("/api/editor/file", dependencies=auth)
         async def save_editor_file(payload: EditorInput):
+            if "/versions/" in payload.name:
+                raise HTTPException(409, "已保存的版本不可覆盖，请使用“另存为新版本”。")
             source, override = _editor_paths(payload.name, override_dir)
             current_path = override if override.is_file() else source
             current_content = current_path.read_text(encoding="utf-8")
@@ -541,11 +579,51 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
 
         @app.delete("/api/editor/file", dependencies=auth)
         async def reset_editor_file(name: str):
+            if "/versions/" in name:
+                raise HTTPException(409, "版本文件不可删除，以保留历史模板。")
             _, override = _editor_paths(name, override_dir)
             if override.exists():
                 override.unlink()
             runtime.renderer.configure_admin_overrides(override_dir)
+            runtime.renderer.configure_admin_selections(
+                selections["templates"], selections["css"]
+            )
             return {"ok": True, "overridden": False}
+
+        @app.post("/api/editor/versions", dependencies=auth)
+        async def create_editor_version(payload: EditorVersionInput):
+            if payload.feature not in _feature_ids():
+                raise HTTPException(404, "找不到此功能")
+            if "\x00" in payload.content:
+                raise HTTPException(400, "文件内容包含无效字符")
+            slug = re.sub(r"[^\w-]+", "-", payload.name.casefold()).strip("-_")[:48]
+            if not slug:
+                slug = "custom"
+            kind = "templates" if payload.kind == "html" else "css"
+            extension = payload.kind
+            directory = override_dir / kind / "versions" / payload.feature
+            directory.mkdir(parents=True, exist_ok=True)
+            target = directory / f"{slug}.{extension}"
+            suffix = 2
+            while target.exists():
+                target = directory / f"{slug}-{suffix}.{extension}"
+                suffix += 1
+            if payload.kind == "html":
+                try:
+                    runtime.renderer.environment.from_string(payload.content)
+                except TemplateSyntaxError as exc:
+                    raise HTTPException(422, f"Jinja 模板语法错误：{exc.message}") from exc
+            temporary = target.with_name(target.name + ".tmp")
+            temporary.write_text(payload.content, encoding="utf-8")
+            temporary.chmod(0o600)
+            temporary.replace(target)
+            runtime.renderer.configure_admin_overrides(override_dir)
+            runtime.renderer.configure_admin_selections(
+                selections["templates"], selections["css"]
+            )
+            relative = target.relative_to(override_dir).as_posix()
+            return {"ok": True, "name": kind + "/" + relative.removeprefix(kind + "/"),
+                    "revision": _file_revision(payload.content)}
 
     return app
 
@@ -562,6 +640,16 @@ class AdminServer:
         self.runtime, self.config = runtime, config
         self.server = None
         self.task = None
+        self.preview_store = PreviewDataStore(
+            config.aawarframe_cache_dir / "admin" / "preview-data.json"
+        )
+
+    def record_preview(self, feature: str, arguments: str, card: Card) -> None:
+        if feature == "list_subscriptions":
+            return
+        preview_id = self.runtime.renderer._feature_name(card)
+        if preview_id in _feature_ids():
+            self.preview_store.record(feature, preview_id, arguments, card)
 
     def start(self):
         config = self.config
@@ -579,53 +667,12 @@ class AdminServer:
             token = token_file.read_text().strip()
         if len(token) < 16:
             raise ValueError("管理口令至少需要 16 个字符")
-        cert = config.aawarframe_admin_cert or directory / "cert.pem"
-        key = config.aawarframe_admin_key or directory / "key.pem"
-        if bool(config.aawarframe_admin_cert) != bool(config.aawarframe_admin_key):
-            raise ValueError("必须同时配置管理台证书和私钥")
-        if not config.aawarframe_admin_cert and not (cert.exists() and key.exists()):
-            host = config.aawarframe_admin_public_host or "localhost"
-            try:
-                ip_address(host)
-                san = "IP:" + host
-            except ValueError:
-                if not all(c.isalnum() or c in "-." for c in host):
-                    raise ValueError("管理台域名无效") from None
-                san = "DNS:" + host
-            subprocess.run(
-                [
-                    "openssl",
-                    "req",
-                    "-x509",
-                    "-newkey",
-                    "rsa:2048",
-                    "-nodes",
-                    "-keyout",
-                    str(key),
-                    "-out",
-                    str(cert),
-                    "-days",
-                    "365",
-                    "-subj",
-                    "/CN=" + host,
-                    "-addext",
-                    "subjectAltName=" + san,
-                ],
-                check=True,
-                capture_output=True,
-                timeout=20,
-            )
-            key.chmod(0o600)
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        context.load_cert_chain(cert, key)
         app = create_app(self.runtime, token, directory / "overrides")
         self.server = EmbeddedServer(
             uvicorn.Config(
                 app,
                 host=config.aawarframe_admin_host,
                 port=config.aawarframe_admin_port,
-                ssl_certfile=str(cert),
-                ssl_keyfile=str(key),
                 access_log=True,
                 proxy_headers=False,
                 log_config=None,
@@ -635,14 +682,14 @@ class AdminServer:
         )
         self.task = asyncio.create_task(self._serve(), name="aawarframe-admin")
         self.task.add_done_callback(self._done)
-        logger.info("管理台 HTTPS 端口 %s；口令文件：%s", config.aawarframe_admin_port, token_file)
+        logger.info("管理台 HTTP 端口 %s；口令文件：%s", config.aawarframe_admin_port, token_file)
 
     async def _serve(self):
         try:
             await self.server.serve()
         except SystemExit as exc:
             # 管理端口冲突不应终止机器人主进程。
-            raise RuntimeError("管理台未能启动，请检查端口和证书") from exc
+            raise RuntimeError("管理台未能启动，请检查端口和监听地址") from exc
 
     def _done(self, task):
         if not task.cancelled() and task.exception():

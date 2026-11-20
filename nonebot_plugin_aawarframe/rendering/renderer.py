@@ -21,7 +21,7 @@ from .charts import trend_chart
 from .viewmodels import paginate
 
 ROOT = Path(__file__).parent
-RENDER_CACHE_VERSION = 2
+RENDER_CACHE_VERSION = 3
 VOLATILE_FIELDS = {
     "fetched_at",
     "render_cache_until",
@@ -54,6 +54,8 @@ class CardRenderer:
         cache_clock: Callable[[], float] = monotonic,
     ):
         self.template_override_dir: Path | None = None
+        self.template_selections: dict[str, str] = {}
+        self.css_selections: dict[str, str] = {}
         self.environment = Environment(
             loader=FileSystemLoader(ROOT / "templates"),
             autoescape=select_autoescape(default=True),
@@ -106,11 +108,25 @@ class CardRenderer:
         self.cache.entries.clear()
         self.page_cache.entries.clear()
 
+    def configure_admin_selections(
+        self, templates: dict[str, str] | None = None, css: dict[str, str] | None = None
+    ) -> None:
+        self.template_selections = dict(templates or {})
+        self.css_selections = dict(css or {})
+        self.environment.cache.clear()
+        self.asset_fingerprint = self._asset_fingerprint()
+        self.cache.entries.clear()
+        self.page_cache.entries.clear()
+
     def _asset_fingerprint(self) -> str:
         digest = sha256()
         digest.update(str(RENDER_CACHE_VERSION).encode())
         digest.update(self.theme.encode())
         digest.update(self.css.encode())
+        digest.update(json.dumps(
+            {"templates": self.template_selections, "css": self.css_selections},
+            ensure_ascii=False, sort_keys=True,
+        ).encode("utf-8"))
         roots = [ROOT / "templates"]
         if self.template_override_dir:
             roots.insert(0, self.template_override_dir / "templates")
@@ -119,6 +135,13 @@ class CardRenderer:
                 for path in sorted(root.rglob("*")):
                     if path.is_file():
                         digest.update(path.relative_to(root).as_posix().encode())
+                        digest.update(path.read_bytes())
+        if self.template_override_dir:
+            css_versions = self.template_override_dir / "css" / "versions"
+            if css_versions.exists():
+                for path in sorted(css_versions.rglob("*.css")):
+                    if path.is_file():
+                        digest.update(path.relative_to(css_versions).as_posix().encode())
                         digest.update(path.read_bytes())
         return digest.hexdigest()
 
@@ -140,7 +163,52 @@ class CardRenderer:
             "max_concurrent_renders": self.max_concurrent_renders,
         }
 
+    def _feature_name(self, card: Card) -> str:
+        if card.analysis_mode:
+            return "riven_analysis"
+        if card.parts_board:
+            return "parts"
+        if card.relic_board:
+            return "relics"
+        if card.trend_board:
+            return "trend"
+        if card.attribute_rows:
+            return "attributes"
+        if card.command_names:
+            return "commands"
+        if card.riven_market_board:
+            return "riven_market"
+        if card.riven_values_board:
+            return "riven_values"
+        if card.trader_board:
+            return "void_trader"
+        if card.arbitration_board:
+            return "arbitration"
+        if card.market_board:
+            return "market"
+        if card.operation_board:
+            kind = card.operation_board.kind
+            return kind if kind in {"sortie", "archon", "invasions"} else "sortie"
+        if card.weekly_mode:
+            return "weekly"
+        if card.nightwave_mode:
+            return "nightwave"
+        if card.archimedea_mode:
+            return "archimedea"
+        if card.bounty_challenge_mode:
+            return "challenge_bounties"
+        if card.bounty_mode:
+            return "bounties"
+        if card.fissure_mode:
+            return "fissures"
+        if card.cycle_items:
+            return "cycles"
+        return "card"
+
     def _template_name(self, card: Card) -> str:
+        selected = self.template_selections.get(self._feature_name(card))
+        if selected:
+            return selected
         if card.analysis_mode:
             return "riven_analysis.html"
         if card.parts_board or card.relic_board:
@@ -177,17 +245,34 @@ class CardRenderer:
             return "fissures.html"
         return "card.html"
 
+    def _css_for_card(self, card: Card) -> str:
+        selected = self.css_selections.get(self._feature_name(card))
+        if not selected or not self.template_override_dir:
+            return self.css
+        root = (self.template_override_dir / "css").resolve()
+        path = (root / selected).resolve()
+        if not path.is_relative_to(root) or not path.is_file():
+            return self.css
+        return self.css + "\n" + path.read_text(encoding="utf-8")
+
+    def template_context(
+        self, card: Card, page: int | None = None, total: int | None = None
+    ) -> dict:
+        return {
+            "card": card,
+            "page": page or card.page_number or 1,
+            "total": total or card.total_pages or 1,
+            "trend_charts": [
+                (period, trend_chart(period)) for period in card.trend_board.periods
+            ] if card.trend_board else [],
+        }
+
     def html(self, card: Card, page: int | None = None, total: int | None = None) -> str:
         template = self._template_name(card)
         document = self.environment.get_template(template).render(
-            card=card,
-            page=page or card.page_number or 1,
-            total=total or card.total_pages or 1,
-            trend_charts=[
-                (period, trend_chart(period)) for period in card.trend_board.periods
-            ] if card.trend_board else [],
+            **self.template_context(card, page, total)
         )
-        return document.replace("</head>", "<style>" + self.css + "</style></head>", 1)
+        return document.replace("</head>", "<style>" + self._css_for_card(card) + "</style></head>", 1)
 
     def _deadlines(self, card: Card) -> list[tuple[str, datetime]]:
         deadlines: list[tuple[str, datetime]] = []
