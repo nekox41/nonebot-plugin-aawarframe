@@ -110,7 +110,7 @@
             <div class="preview-selectors">
               <label>HTML 模板<select id="preview-template-select" aria-label="选择 HTML 模板"></select></label>
               <label>CSS 样式<select id="preview-css-select" aria-label="选择 CSS 样式"></select></label>
-              <button id="save-preview-selection" class="button primary" type="button">应用选择</button>
+              <button id="save-preview-selection" class="button primary" type="button" disabled>应用选择</button>
             </div>
             <div id="preview-image-wrap" class="preview-image-wrap"><div class="preview-placeholder"><span class="placeholder-glyph">▧</span><strong>等待真实命令数据</strong><p id="preview-empty-message">请先在机器人中执行对应功能命令，再刷新此页面。</p></div><img id="preview-image" alt="功能渲染图片预览" hidden></div>
             <p id="preview-error" class="error" role="alert"></p>
@@ -155,7 +155,7 @@
               <div class="editor-actions"><button id="editor-preview" class="button secondary" disabled>预览效果</button><button id="editor-reset" class="button secondary" disabled>恢复原版</button></div>
             </div>
             <div class="editor-data-panel">
-              <div class="editor-data-heading"><div><strong>功能数据与占位符</strong><p>选择功能后，点击字段即可将 Jinja 占位符插入光标位置。</p></div><label>关联功能<select id="editor-feature" aria-label="选择模板关联功能"></select></label></div>
+              <div class="editor-data-heading"><div><strong>功能数据与占位符</strong><p>字段来自最近一次真实命令结果；点击字段即可将对应 Jinja 占位符插入光标位置。</p></div><label>关联功能<select id="editor-feature" aria-label="选择模板关联功能"></select></label></div>
               <div id="editor-fields" class="editor-fields"><p class="empty">选择功能以载入可用数据字段。</p></div>
             </div>
             <textarea id="editor-content" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="从左侧选择一个 HTML 或 CSS 文件…" disabled></textarea>
