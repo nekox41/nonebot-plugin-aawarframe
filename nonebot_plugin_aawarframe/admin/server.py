@@ -112,7 +112,7 @@ def _editor_paths(name: str, override_dir: Path):
     if name.startswith("css/") and name.removeprefix("css/") in EDITOR_CSS:
         relative = name.removeprefix("css/")
         return styles / relative, override_dir / "css" / relative
-    match = re.fullmatch(r"(templates|css)/versions/([a-z0-9_-]+)/([a-z0-9_-]+)\.(html|css)", name)
+    match = re.fullmatch(r"(templates|css)/versions/([a-z0-9_-]+)/([\w-]+)\.(html|css)", name)
     if match:
         kind, feature, filename, extension = match.groups()
         if feature not in _feature_ids() or (kind == "templates") != (extension == "html"):
@@ -720,7 +720,7 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
                 raise HTTPException(404, "找不到此功能")
             if "\x00" in payload.content:
                 raise HTTPException(400, "文件内容包含无效字符")
-            slug = re.sub(r"[^a-z0-9_-]+", "-", payload.name.casefold()).strip("-_")[:48]
+            slug = re.sub(r"[^\w-]+", "-", payload.name.casefold()).strip("-_")[:48]
             if not slug:
                 slug = "custom"
             kind = "templates" if payload.kind == "html" else "css"
