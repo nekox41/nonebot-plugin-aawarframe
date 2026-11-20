@@ -230,3 +230,112 @@ async def test_editor_persists_overrides_and_hot_reloads_renderer(grq, tmp_path)
         assert reset.status_code == 200
         assert "webui-live-override" not in renderer.css
     await renderer.close()
+
+
+async def test_versioned_templates_and_css_are_selectable(grq, tmp_path):
+    from nonebot_plugin_aawarframe.admin.server import _preview_card
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+
+    renderer = CardRenderer()
+    override_dir = tmp_path / "admin-overrides"
+    app = create_app(
+        SimpleNamespace(grq=grq, renderer=renderer),
+        "long-test-password-12345",
+        override_dir,
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        client.headers["Authorization"] = "Bearer long-test-password-12345"
+        schema = (await client.get("/api/editor/schema", params={"feature": "cycles"})).json()
+        assert any(field["path"] == "card.cycle_items[0].name" for field in schema["fields"])
+
+        template = await client.post(
+            "/api/editor/versions",
+            json={
+                "kind": "html",
+                "feature": "cycles",
+                "name": "Tenno layout",
+                "content": (
+                    "<html><head></head><body>"
+                    "{{ card.cycle_items[0].name }}"
+                    "</body></html>"
+                ),
+            },
+        )
+        assert template.status_code == 200
+        template_name = template.json()["name"]
+        assert template_name == "templates/versions/cycles/tenno-layout.html"
+
+        css = await client.post(
+            "/api/editor/versions",
+            json={
+                "kind": "css",
+                "feature": "cycles",
+                "name": "Soft colors",
+                "content": ".cycle { color: rgb(12, 34, 56); }",
+            },
+        )
+        assert css.status_code == 200
+        css_name = css.json()["name"]
+        assert css_name == "css/versions/cycles/soft-colors.css"
+
+        selected = await client.put(
+            "/api/previews/selection",
+            json={
+                "feature": "cycles",
+                "template_version": template_name.removeprefix("templates/"),
+                "css_version": css_name.removeprefix("css/"),
+            },
+        )
+        assert selected.status_code == 200
+
+        card = _preview_card("cycles")
+        assert renderer._template_name(card) == "versions/cycles/tenno-layout.html"
+        assert "rgb(12, 34, 56)" in renderer._css_for_card(card)
+        assert "夜灵平原" in renderer.html(card)
+
+        versions = (await client.get("/api/editor/files")).json()["items"]
+        assert any(item["name"] == template_name and item["version"] for item in versions)
+        assert any(item["name"] == css_name and item["version"] for item in versions)
+
+        blocked = await client.put(
+            "/api/editor/file",
+            json={"name": template_name, "content": "changed", "revision": "0" * 64},
+        )
+        assert blocked.status_code == 409
+
+        previews = (await client.get("/api/previews")).json()["items"]
+        cycles = next(item for item in previews if item["id"] == "cycles")
+        assert cycles["selected_template"] == "versions/cycles/tenno-layout.html"
+        assert cycles["selected_css"] == "versions/cycles/soft-colors.css"
+    await renderer.close()
+
+
+async def test_admin_server_uses_plain_http(grq, tmp_path, monkeypatch):
+    import asyncio
+
+    from nonebot_plugin_aawarframe.admin import server as admin_module
+    from nonebot_plugin_aawarframe.admin.server import AdminServer
+
+    class DummyServer:
+        def __init__(self, config):
+            self.config = config
+            self.should_exit = False
+
+        async def serve(self):
+            while not self.should_exit:
+                await asyncio.sleep(0)
+
+    monkeypatch.setattr(admin_module, "EmbeddedServer", DummyServer)
+    config = SimpleNamespace(
+        aawarframe_cache_dir=tmp_path,
+        aawarframe_admin_password=None,
+        aawarframe_admin_host="127.0.0.1",
+        aawarframe_admin_port=8087,
+    )
+    admin = AdminServer(SimpleNamespace(grq=grq, renderer=None), config)
+    admin.start()
+    assert admin.server.config.ssl_certfile is None
+    assert admin.server.config.ssl_keyfile is None
+    await admin.close()
