@@ -16,6 +16,9 @@ let searchVersion = 0;
 let pendingDelete = null;
 let previewItems = [];
 let selectedPreview = null;
+let htmlOptions = [];
+let themeOptions = [];
+let selectedTheme = 'default.css';
 let editorFiles = [];
 let selectedFile = null;
 let editorRevision = '';
@@ -368,7 +371,7 @@ function drawArbitration() {
 }
 $('arbitration-filter').addEventListener('input', drawArbitration);
 
-/* Render previews */
+/* Render previews: one HTML binding per feature, one global CSS theme. */
 function fillSelect(select, options, selected) {
   select.replaceChildren();
   for (const item of options) {
@@ -381,11 +384,16 @@ function fillSelect(select, options, selected) {
 async function loadPreviews() {
   $('preview-error').textContent = '';
   try {
-    previewItems = (await api('previews')).items || [];
+    const data = await api('previews');
+    previewItems = data.items || [];
+    htmlOptions = data.html_options || [];
+    themeOptions = data.theme_options || [];
+    selectedTheme = data.selected_theme || 'default.css';
     $('preview-count').textContent = previewItems.length + ' 项';
+    fillSelect($('preview-theme-select'), themeOptions, selectedTheme);
     drawPreviewList();
     const current = selectedPreview && previewItems.find(item => item.id === selectedPreview.id);
-    const next = current || previewItems.find(item => item.has_data) || previewItems[0];
+    const next = current || previewItems[0];
     if (next) await selectPreview(next.id);
   } catch (error) {
     showError('preview-error', error);
@@ -402,7 +410,7 @@ function drawPreviewList() {
     const button = node('button', undefined, 'preview-option' + (selectedPreview && selectedPreview.id === item.id ? ' active' : ''));
     button.type = 'button';
     button.append(node('strong', item.title), node('small', item.description));
-    button.append(node('small', item.has_data ? '已捕获真实命令数据' : '等待实际命令数据', item.has_data ? 'preview-data-ready' : 'preview-data-missing'));
+    button.append(node('small', '固定离线预览数据 · ' + (item.selected_template || item.template), 'preview-data-ready'));
     button.addEventListener('click', () => selectPreview(item.id));
     list.append(button);
   }
@@ -413,6 +421,9 @@ async function renderPreview(id, targetImage, errorId) {
   error.textContent = '';
   try {
     const result = await api('previews', 'POST', { template: id });
+    $('preview-raw-template').textContent = result.raw_template || '';
+    $('preview-rendered-html').textContent = result.rendered_html || '';
+    $('preview-template-meta').textContent = 'HTML：' + result.html_template + ' · CSS：' + result.theme;
     const source = 'data:' + (result.media_type || 'image/webp') + ';base64,' + result.images[0];
     targetImage.src = source;
     targetImage.hidden = false;
@@ -427,52 +438,44 @@ async function selectPreview(id) {
   drawPreviewList();
   if (!selectedPreview) return;
   $('preview-title').textContent = selectedPreview.title;
-  $('preview-description').textContent = selectedPreview.description + ' · 默认模板：' + selectedPreview.template;
-  const templateOptions = selectedPreview.template_versions || [
-    { id: '', title: '内置模板 · ' + selectedPreview.template }
-  ];
-  const cssOptions = selectedPreview.css_versions || [{ id: '', title: '默认样式' }];
-  fillSelect($('preview-template-select'), templateOptions, selectedPreview.selected_template || '');
-  fillSelect($('preview-css-select'), cssOptions, selectedPreview.selected_css || '');
+  $('preview-description').textContent = selectedPreview.description + ' · 功能绑定独立 HTML，所有功能共享全局 CSS。';
+  fillSelect($('preview-template-select'), htmlOptions, selectedPreview.selected_template || selectedPreview.template);
+  fillSelect($('preview-theme-select'), themeOptions, selectedTheme);
   $('preview-image').hidden = true;
   $('preview-image-wrap').querySelector('.preview-placeholder').hidden = false;
-  $('save-preview-selection').disabled = !selectedPreview.has_data;
+  $('save-preview-selection').disabled = false;
   $('preview-error').textContent = '';
-  if (!selectedPreview.has_data) {
-    $('preview-data-meta').textContent = '尚未捕获此功能的真实命令结果。';
-    $('preview-empty-message').textContent = '请先在机器人中执行对应命令，然后点击右上角刷新预览。不会使用模拟数据替代。';
-    return;
-  }
-  const command = selectedPreview.data_feature + (selectedPreview.data_arguments ? ' ' + selectedPreview.data_arguments : '');
-  const updated = selectedPreview.data_updated_at ? new Date(selectedPreview.data_updated_at).toLocaleString() : '未知';
-  $('preview-data-meta').textContent = '真实数据：' + command + ' · 更新时间：' + updated;
-  $('preview-empty-message').textContent = '正在使用最近一次真实命令结果生成预览…';
+  $('preview-data-meta').textContent = '数据来源：项目内固定预览数据 · rendering/preview_data.py';
+  $('preview-empty-message').textContent = '正在使用固定数据生成原始模板、填充后的 HTML 和最终图片…';
   const success = await renderPreview(id, $('preview-image'), 'preview-error');
   if (success) $('preview-image-wrap').querySelector('.preview-placeholder').hidden = true;
-  else $('preview-empty-message').textContent = '真实数据已保存，但当前模板渲染失败。请检查模板或数据字段。';
+  else $('preview-empty-message').textContent = '固定预览数据渲染失败，请检查 HTML 模板或 CSS 主题。';
 }
 async function applyPreviewSelection() {
-  if (!selectedPreview || !selectedPreview.has_data) return;
+  if (!selectedPreview) return;
   const button = $('save-preview-selection');
   button.disabled = true;
   $('preview-error').textContent = '';
   try {
-    const templateVersion = $('preview-template-select').value;
-    const cssVersion = $('preview-css-select').value;
+    const htmlTemplate = $('preview-template-select').value;
+    const theme = $('preview-theme-select').value;
     await api('previews/selection', 'PUT', {
       feature: selectedPreview.id,
-      template_version: templateVersion,
-      css_version: cssVersion
+      html_template: htmlTemplate,
+      theme
     });
-    selectedPreview.selected_template = templateVersion;
-    selectedPreview.selected_css = cssVersion;
-    toast('已应用此功能的模板与 CSS 版本。');
+    selectedPreview.selected_template = htmlTemplate;
+    selectedTheme = theme;
+    for (const item of previewItems) item.selected_theme = theme;
+    fillSelect($('preview-theme-select'), themeOptions, selectedTheme);
+    toast('已更新当前功能的 HTML 绑定和全局 CSS 主题。');
     const success = await renderPreview(selectedPreview.id, $('preview-image'), 'preview-error');
     if (success) $('preview-image-wrap').querySelector('.preview-placeholder').hidden = true;
+    drawPreviewList();
   } catch (error) {
     showError('preview-error', error);
   } finally {
-    button.disabled = !selectedPreview.has_data;
+    button.disabled = false;
   }
 }
 $('preview-filter').addEventListener('input', drawPreviewList);
@@ -483,22 +486,13 @@ $('save-preview-selection').addEventListener('click', applyPreviewSelection);
 let editorSchema = [];
 let selectedEditorFeature = 'card';
 function featureForFile(name) {
-  const version = name.match(/(?:templates|css)\/versions\/([^/]+)\//);
+  const version = name.match(/^html\/versions\/([^/]+)\//);
   if (version) return version[1];
-  if (name.startsWith('css/')) {
-    const cssName = name.replace('css/', '');
-    if (cssName === 'trader.css') return 'void_trader';
-    if (cssName === 'riven_values.css') return 'riven_values';
-    if (cssName === 'riven_market.css') return 'riven_market';
-    if (cssName === 'trend.css') return 'trend';
-    if (cssName === 'relics.css') return 'relics';
-    if (cssName === 'riven_analysis.css') return 'riven_analysis';
-    return 'card';
-  }
-  const file = name.replace('templates/', '').replace('.html', '');
-  if (file === 'base' || file === 'card') return 'card';
-  if (file === 'bounty_rewards') return 'bounties';
+  if (name.startsWith('css/')) return selectedEditorFeature || 'card';
+  const file = name.replace(/^html\//, '').replace('.html', '');
+  if (file === 'card') return 'card';
   if (file === 'operations') return 'sortie';
+  if (file === 'relics') return 'relics';
   return previewItems.some(item => item.id === file) ? file : 'card';
 }
 async function loadEditorFiles() {
