@@ -115,7 +115,7 @@ async def dispatch(
     except Exception:
         logger.exception("查询 %s 失败", feature)
         return Message(MessageSegment.text("数据源暂时不可用，请稍后重试。"))
-    if runtime.admin is not None:
+    if getattr(runtime, "admin", None) is not None:
         try:
             await asyncio.to_thread(runtime.admin.record_preview, feature, arguments, card)
         except Exception:
