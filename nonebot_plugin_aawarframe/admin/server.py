@@ -113,7 +113,7 @@ def _editor_paths(name: str, override_dir: Path):
         relative = name.removeprefix("html/")
         if relative in EDITOR_TEMPLATES:
             return html_root / relative, override_dir / "html" / relative
-        match = re.fullmatch(r"versions/([a-z0-9_-]+)/([\\w-]+)\\.html", relative)
+        match = re.fullmatch(r"versions/([a-z0-9_-]+)/([\w-]+)\.html", relative)
         if match:
             feature, filename = match.groups()
             if feature not in _feature_ids():
@@ -123,7 +123,7 @@ def _editor_paths(name: str, override_dir: Path):
                 return path, path
     if name.startswith("css/"):
         relative = name.removeprefix("css/")
-        if re.fullmatch(r"[\\w-]+\\.css", relative):
+        if re.fullmatch(r"[\w-]+\.css", relative):
             package = css_root / relative
             custom = override_dir / "css" / relative
             if package.is_file() or custom.is_file():
@@ -582,6 +582,8 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
                     selections["theme"] = "default.css"
             elif override.exists():
                 override.unlink()
+                if name.startswith("css/") and selections["theme"] == override.name:
+                    selections["theme"] = "default.css"
             else:
                 raise HTTPException(409, "内置文件不能直接删除；只能删除自定义版本或恢复本地覆盖。")
             persist_selections()
