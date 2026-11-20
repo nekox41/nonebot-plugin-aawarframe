@@ -255,15 +255,22 @@ class CardRenderer:
             return self.css
         return self.css + "\n" + path.read_text(encoding="utf-8")
 
+    def template_context(
+        self, card: Card, page: int | None = None, total: int | None = None
+    ) -> dict:
+        return {
+            "card": card,
+            "page": page or card.page_number or 1,
+            "total": total or card.total_pages or 1,
+            "trend_charts": [
+                (period, trend_chart(period)) for period in card.trend_board.periods
+            ] if card.trend_board else [],
+        }
+
     def html(self, card: Card, page: int | None = None, total: int | None = None) -> str:
         template = self._template_name(card)
         document = self.environment.get_template(template).render(
-            card=card,
-            page=page or card.page_number or 1,
-            total=total or card.total_pages or 1,
-            trend_charts=[
-                (period, trend_chart(period)) for period in card.trend_board.periods
-            ] if card.trend_board else [],
+            **self.template_context(card, page, total)
         )
         return document.replace("</head>", "<style>" + self._css_for_card(card) + "</style></head>", 1)
 
