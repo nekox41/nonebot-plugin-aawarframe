@@ -193,4 +193,4 @@ def get_preview_card(feature: str) -> Card:
     """Return an isolated Card instance for a stable, offline feature preview."""
     if feature not in PREVIEW_CARDS:
         raise KeyError(feature)
-    return Card.model_validate(PREVIEW_CARDS[feature].model_dump(mode="python"))
+    return Card.model_validate(PREVIEW_CARDS[feature].model_dump(mode="python", by_alias=True))
