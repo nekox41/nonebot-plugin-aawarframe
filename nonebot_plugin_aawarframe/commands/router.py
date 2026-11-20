@@ -51,12 +51,7 @@ async def dispatch(
             if feature == "list_subscriptions":
                 card = runtime.subscriptions.list_card(subscriber)
                 if card is not None:
-                    if runtime.admin is not None:
-        try:
-            await asyncio.to_thread(runtime.admin.record_preview, feature, arguments, card)
-        except Exception:
-            logger.exception("保存 %s 的实际预览数据失败", feature)
-    return await response(card, runtime)
+                    return await response(card, runtime)
             return Message(MessageSegment.text(text))
         if feature == "riven_analysis":
             if image is None:
@@ -120,6 +115,11 @@ async def dispatch(
     except Exception:
         logger.exception("查询 %s 失败", feature)
         return Message(MessageSegment.text("数据源暂时不可用，请稍后重试。"))
+    if runtime.admin is not None:
+        try:
+            await asyncio.to_thread(runtime.admin.record_preview, feature, arguments, card)
+        except Exception:
+            logger.exception("保存 %s 的实际预览数据失败", feature)
     return await response(card, runtime)
 
 
