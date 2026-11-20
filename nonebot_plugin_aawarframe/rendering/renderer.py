@@ -253,7 +253,7 @@ class CardRenderer:
         path = (root / selected).resolve()
         if not path.is_relative_to(root) or not path.is_file():
             return self.css
-        return self.css + "\\n" + path.read_text(encoding="utf-8")
+        return self.css + "\n" + path.read_text(encoding="utf-8")
 
     def html(self, card: Card, page: int | None = None, total: int | None = None) -> str:
         template = self._template_name(card)
