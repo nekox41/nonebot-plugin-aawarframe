@@ -431,90 +431,38 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
         }
 
     if override_dir is not None:
-                item["template_versions"] = [
-                    {"id": "", "title": "内置模板 · " + template},
-                    *_version_items(override_dir, "templates", key),
-                ]
-                item["css_versions"] = [
-                    {"id": "", "title": "默认样式"},
-                    *_version_items(override_dir, "css", key),
-                ]
-            item["selected_template"] = selections["templates"].get(key, "")
-            item["selected_css"] = selections["css"].get(key, "")
-            record = preview_store.for_preview(key) if preview_store else None
-            item["has_data"] = record is not None
-            if record:
-                item["data_feature"] = record["feature"]
-                item["data_arguments"] = record["arguments"]
-                item["data_updated_at"] = record["updated_at"]
-                item["data_title"] = record["card"].get("title", "")
-                item["data_status"] = record["card"].get("status", "")
-            items.append(item)
-        return {"items": items}
-
-    @app.post("/api/previews", dependencies=auth)
-    async def render_preview(payload: PreviewInput):
-        if payload.template not in {item[0] for item in PREVIEW_CATALOG}:
-            raise HTTPException(404, "找不到此预览项目")
-        if not getattr(runtime, "renderer", None):
-            raise HTTPException(503, "图片渲染器尚未启动")
-        record = preview_store.for_preview(payload.template) if preview_store else None
-        if record is None:
-            raise HTTPException(
-                409,
-                "尚无此功能的真实命令数据。请先在机器人中执行对应命令，再刷新管理台预览。",
-            )
-        try:
-            card = Card.model_validate(record["card"])
-            images = await runtime.renderer.render(card)
-        except Exception as exc:
-            logger.exception("管理台图片预览失败：%s", payload.template)
-            raise HTTPException(503, "预览渲染失败：" + str(exc)[:160]) from exc
-        if not images:
-            raise HTTPException(503, "渲染器没有返回图片")
-        return {
-            "template": payload.template,
-            "data_feature": record["feature"],
-            "data_arguments": record["arguments"],
-            "data_updated_at": record["updated_at"],
-            "images": [base64.b64encode(image).decode("ascii") for image in images],
-            "media_type": "image/webp",
-        }
-
-    if override_dir is not None:
         override_dir.mkdir(parents=True, exist_ok=True)
         selection_file = override_dir / "selections.json"
         if selection_file.is_file():
             try:
                 loaded = json.loads(selection_file.read_text(encoding="utf-8"))
                 if isinstance(loaded, dict):
-                    for key in ("templates", "css"):
-                        if isinstance(loaded.get(key), dict):
-                            selections[key] = loaded[key]
+                    templates = loaded.get("templates")
+                    if isinstance(templates, dict):
+                        selections["templates"] = templates
+                    if isinstance(loaded.get("theme"), str):
+                        selections["theme"] = loaded["theme"]
             except (OSError, ValueError):
-                logger.warning("管理台模板选择配置无法读取，将使用默认模板。")
-        for key in ("templates", "css"):
-            selections[key] = {
-                feature: value
-                for feature, value in selections[key].items()
-                if feature in _feature_ids() and isinstance(value, str)
-            }
-        for feature in _feature_ids():
-            valid_templates = {
-                item["id"] for item in _version_items(override_dir, "templates", feature)
-            }
-            valid_css = {
-                item["id"] for item in _version_items(override_dir, "css", feature)
-            }
-            if selections["templates"].get(feature, "") not in valid_templates | {""}:
-                selections["templates"].pop(feature, None)
-            if selections["css"].get(feature, "") not in valid_css | {""}:
-                selections["css"].pop(feature, None)
+                logger.warning("管理台 HTML/CSS 选择配置无法读取，将使用默认配置。")
+        html_names = {item["id"] for item in _html_options(override_dir)}
+        theme_names = {item["id"] for item in _theme_options(override_dir)}
+        selections["templates"] = {
+            feature: value for feature, value in selections["templates"].items()
+            if feature in _feature_ids() and isinstance(value, str) and value in html_names
+        }
+        if selections["theme"] not in theme_names:
+            selections["theme"] = "default.css"
         if getattr(runtime, "renderer", None):
             runtime.renderer.configure_admin_overrides(override_dir)
             runtime.renderer.configure_admin_selections(
-                selections["templates"], selections["css"]
+                selections["templates"], selections["theme"]
             )
+
+        def persist_selections():
+            temporary = selection_file.with_name(selection_file.name + ".tmp")
+            temporary.write_text(json.dumps(selections, ensure_ascii=False, indent=2), encoding="utf-8")
+            temporary.chmod(0o600)
+            temporary.replace(selection_file)
 
         @app.get("/api/previews/selection", dependencies=auth)
         async def preview_selections():
@@ -524,40 +472,25 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
         async def save_preview_selection(payload: PreviewSelectionInput):
             if payload.feature not in _feature_ids():
                 raise HTTPException(404, "找不到此预览功能")
-            template_versions = {item["id"] for item in _version_items(override_dir, "templates", payload.feature)}
-            css_versions = {item["id"] for item in _version_items(override_dir, "css", payload.feature)}
-            if payload.template_version and payload.template_version not in template_versions:
-                raise HTTPException(404, "找不到所选模板版本")
-            if payload.css_version and payload.css_version not in css_versions:
-                raise HTTPException(404, "找不到所选 CSS 版本")
-            selections["templates"][payload.feature] = payload.template_version
-            selections["css"][payload.feature] = payload.css_version
-            temporary = selection_file.with_name(selection_file.name + ".tmp")
-            temporary.write_text(json.dumps(selections, ensure_ascii=False, indent=2), encoding="utf-8")
-            temporary.chmod(0o600)
-            temporary.replace(selection_file)
-            runtime.renderer.configure_admin_selections(
-                selections["templates"], selections["css"]
-            )
-            return {"ok": True, "template_version": payload.template_version,
-                    "css_version": payload.css_version}
+            if payload.html_template not in {item["id"] for item in _html_options(override_dir)}:
+                raise HTTPException(404, "找不到所选 HTML 模板")
+            if payload.theme not in {item["id"] for item in _theme_options(override_dir)}:
+                raise HTTPException(404, "找不到所选 CSS 主题")
+            selections["templates"][payload.feature] = payload.html_template
+            selections["theme"] = payload.theme
+            persist_selections()
+            runtime.renderer.configure_admin_selections(selections["templates"], selections["theme"])
+            return {"ok": True, "feature": payload.feature,
+                    "html_template": payload.html_template, "theme": payload.theme}
 
         @app.get("/api/editor/schema", dependencies=auth)
         async def editor_schema(feature: str):
             if feature not in _feature_ids():
                 raise HTTPException(404, "找不到此功能")
-            record = preview_store.for_preview(feature) if preview_store else None
-            if record is None:
-                raise HTTPException(
-                    409,
-                    "尚无此功能的真实命令数据。请先在机器人中执行对应命令。",
-                )
-            card = Card.model_validate(record["card"])
+            card = get_preview_card(feature)
             return {
                 "feature": feature,
-                "data_feature": record["feature"],
-                "data_arguments": record["arguments"],
-                "data_updated_at": record["updated_at"],
+                "data_source": "rendering/preview_data.py",
                 "fields": _sample_fields(card, runtime.renderer),
             }
 
@@ -565,7 +498,7 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
         async def editor_files():
             result = []
             for name in sorted(EDITOR_TEMPLATES):
-                relative = "templates/" + name
+                relative = "html/" + name
                 source, override = _editor_paths(relative, override_dir)
                 content = override.read_text(encoding="utf-8") if override.is_file() else source.read_text(encoding="utf-8")
                 result.append({"name": relative, "kind": "html",
@@ -576,17 +509,24 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
                 content = override.read_text(encoding="utf-8") if override.is_file() else source.read_text(encoding="utf-8")
                 result.append({"name": relative, "kind": "css",
                                "overridden": override.is_file(), "revision": _file_revision(content)})
-            for kind, extension in (("templates", "html"), ("css", "css")):
-                root = override_dir / kind / "versions"
-                if root.is_dir():
-                    for path in sorted(root.glob(f"*/*.{extension}")):
-                        relative = path.relative_to(override_dir).as_posix()
+            custom_html = override_dir / "html" / "versions"
+            if custom_html.is_dir():
+                for path in sorted(custom_html.rglob("*.html")):
+                    if path.is_file():
                         content = path.read_text(encoding="utf-8")
                         result.append({
-                            "name": relative,
-                            "kind": "html" if kind == "templates" else "css",
-                            "overridden": True,
-                            "version": True,
+                            "name": "html/" + path.relative_to(override_dir / "html").as_posix(),
+                            "kind": "html", "overridden": True, "version": True,
+                            "revision": _file_revision(content),
+                        })
+            custom_css = override_dir / "css"
+            if custom_css.is_dir():
+                for path in sorted(custom_css.glob("*.css")):
+                    if path.is_file() and path.name not in EDITOR_CSS:
+                        content = path.read_text(encoding="utf-8")
+                        result.append({
+                            "name": "css/" + path.name, "kind": "css",
+                            "overridden": True, "theme": True,
                             "revision": _file_revision(content),
                         })
             return {"items": result}
@@ -602,7 +542,7 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
         @app.put("/api/editor/file", dependencies=auth)
         async def save_editor_file(payload: EditorInput):
             if "/versions/" in payload.name:
-                raise HTTPException(409, "已保存的版本不可覆盖，请使用“另存为新版本”。")
+                raise HTTPException(409, "已保存的 HTML 版本不可覆盖，请另存为新版本。")
             source, override = _editor_paths(payload.name, override_dir)
             current_path = override if override.is_file() else source
             current_content = current_path.read_text(encoding="utf-8")
@@ -610,7 +550,9 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
                 raise HTTPException(409, "文件已在其他位置更新，请重新载入后再保存。")
             if "\x00" in payload.content:
                 raise HTTPException(400, "文件内容包含无效字符")
-            if payload.name.startswith("templates/"):
+            if payload.name.startswith("html/"):
+                if "{% extends" in payload.content or "{% block " in payload.content:
+                    raise HTTPException(422, "HTML 模板必须是独立完整页面，不支持 extends/block 继承。")
                 try:
                     runtime.renderer.environment.from_string(payload.content)
                 except TemplateSyntaxError as exc:
@@ -621,55 +563,68 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
             temporary.chmod(0o600)
             temporary.replace(override)
             runtime.renderer.configure_admin_overrides(override_dir)
+            runtime.renderer.configure_admin_selections(selections["templates"], selections["theme"])
             return {"ok": True, "revision": _file_revision(payload.content), "overridden": True}
 
         @app.delete("/api/editor/file", dependencies=auth)
-        async def reset_editor_file(name: str):
+        async def delete_editor_file(name: str):
+            source, override = _editor_paths(name, override_dir)
             if "/versions/" in name:
-                raise HTTPException(409, "版本文件不可删除，以保留历史模板。")
-            _, override = _editor_paths(name, override_dir)
-            if override.exists():
+                if not override.is_file():
+                    raise HTTPException(404, "自定义文件不存在")
+                relative = override.relative_to(override_dir / ("html" if name.startswith("html/") else "css")).as_posix()
                 override.unlink()
+                if name.startswith("html/"):
+                    for feature, selected in list(selections["templates"].items()):
+                        if selected == relative:
+                            selections["templates"].pop(feature, None)
+                elif selections["theme"] == override.name:
+                    selections["theme"] = "default.css"
+            elif override.exists():
+                override.unlink()
+            else:
+                raise HTTPException(409, "内置文件不能直接删除；只能删除自定义版本或恢复本地覆盖。")
+            persist_selections()
             runtime.renderer.configure_admin_overrides(override_dir)
-            runtime.renderer.configure_admin_selections(
-                selections["templates"], selections["css"]
-            )
-            return {"ok": True, "overridden": False}
+            runtime.renderer.configure_admin_selections(selections["templates"], selections["theme"])
+            return {"ok": True, "deleted": True, "selections": selections}
 
         @app.post("/api/editor/versions", dependencies=auth)
         async def create_editor_version(payload: EditorVersionInput):
-            if payload.feature not in _feature_ids():
+            if payload.kind == "html" and payload.feature not in _feature_ids():
                 raise HTTPException(404, "找不到此功能")
             if "\x00" in payload.content:
                 raise HTTPException(400, "文件内容包含无效字符")
-            slug = re.sub(r"[^\w-]+", "-", payload.name.casefold()).strip("-_")[:48]
-            if not slug:
-                slug = "custom"
-            kind = "templates" if payload.kind == "html" else "css"
-            extension = payload.kind
-            directory = override_dir / kind / "versions" / payload.feature
+            slug = re.sub(r"[^\w-]+", "-", payload.name.casefold()).strip("-_")[:48] or "custom"
+            if payload.kind == "html":
+                if "{% extends" in payload.content or "{% block " in payload.content:
+                    raise HTTPException(422, "HTML 模板必须是独立完整页面，不支持 extends/block 继承。")
+                if "<html" not in payload.content.casefold():
+                    raise HTTPException(422, "HTML 模板必须包含完整的 html 文档结构。")
+                try:
+                    runtime.renderer.environment.from_string(payload.content)
+                except TemplateSyntaxError as exc:
+                    raise HTTPException(422, f"Jinja 模板语法错误：{exc.message}") from exc
+                directory = override_dir / "html" / "versions" / payload.feature
+                extension = "html"
+            else:
+                directory = override_dir / "css"
+                extension = "css"
             directory.mkdir(parents=True, exist_ok=True)
             target = directory / f"{slug}.{extension}"
             suffix = 2
             while target.exists():
                 target = directory / f"{slug}-{suffix}.{extension}"
                 suffix += 1
-            if payload.kind == "html":
-                try:
-                    runtime.renderer.environment.from_string(payload.content)
-                except TemplateSyntaxError as exc:
-                    raise HTTPException(422, f"Jinja 模板语法错误：{exc.message}") from exc
             temporary = target.with_name(target.name + ".tmp")
             temporary.write_text(payload.content, encoding="utf-8")
             temporary.chmod(0o600)
             temporary.replace(target)
             runtime.renderer.configure_admin_overrides(override_dir)
-            runtime.renderer.configure_admin_selections(
-                selections["templates"], selections["css"]
-            )
+            runtime.renderer.configure_admin_selections(selections["templates"], selections["theme"])
             relative = target.relative_to(override_dir).as_posix()
-            return {"ok": True, "name": kind + "/" + relative.removeprefix(kind + "/"),
-                    "revision": _file_revision(payload.content)}
+            return {"ok": True, "name": relative, "revision": _file_revision(payload.content)}
+
 
     return app
 
