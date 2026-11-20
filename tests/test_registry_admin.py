@@ -175,7 +175,7 @@ def test_preview_catalog_has_no_synthetic_data():
     assert len({item[0] for item in PREVIEW_CATALOG}) == len(PREVIEW_CATALOG)
 
 
-def test_admin_server_captures_complete_card_by_real_command(grq, tmp_path):
+async def test_admin_server_captures_complete_card_by_real_command(grq, tmp_path):
     from nonebot_plugin_aawarframe.admin.server import AdminServer
     from nonebot_plugin_aawarframe.models.common import Card, CycleDisplay
     from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
@@ -197,8 +197,7 @@ def test_admin_server_captures_complete_card_by_real_command(grq, tmp_path):
     assert record["card"]["title"] == "真实平原总览"
     assert record["card"]["cycle_items"][0]["name"] == "夜灵平原"
     assert (tmp_path / "admin" / "preview-data.json").is_file()
-    import asyncio
-    asyncio.run(renderer.close())
+    await renderer.close()
 
 
 async def test_preview_api_renders_persisted_real_command_card(grq, tmp_path):
