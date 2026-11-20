@@ -192,7 +192,7 @@ async def test_preview_api_renders_persisted_real_command_card(grq, tmp_path):
     )
     store.record("sortie", "sortie", "", card)
     runtime = SimpleNamespace(grq=grq, renderer=renderer, admin=SimpleNamespace(preview_store=store))
-    app = create_app(runtime, "long-test-password-12345", tmp_path / "admin" / "overrides")
+    app = create_app(runtime, "long-test-password-12345")
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://test") as client:
         client.headers["Authorization"] = "Bearer long-test-password-12345"
         response = await client.post("/api/previews", json={"template": "sortie"})
