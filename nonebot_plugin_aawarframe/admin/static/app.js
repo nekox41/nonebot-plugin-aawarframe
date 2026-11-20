@@ -482,164 +482,187 @@ $('preview-filter').addEventListener('input', drawPreviewList);
 $('refresh-preview').addEventListener('click', loadPreviews);
 $('save-preview-selection').addEventListener('click', applyPreviewSelection);
 
-/* Live template editor */
-let editorSchema = [];
-let selectedEditorFeature = 'card';
-function featureForFile(name) {
-  const version = name.match(/^html\/versions\/([^/]+)\//);
-  if (version) return version[1];
-  if (name.startsWith('css/')) return selectedEditorFeature || 'card';
-  const file = name.replace(/^html\//, '').replace('.html', '');
-  if (file === 'card') return 'card';
-  if (file === 'operations') return 'sortie';
-  if (file === 'relics') return 'relics';
-  return previewItems.some(item => item.id === file) ? file : 'card';
+/* Template editor: manage HTML and CSS files only. Bindings and theme selection live in previews. */
+let editorMode = 'idle';
+let selectedKind = null;
+
+function editorHasUnsavedChanges() {
+  return $('editor-content').value !== editorOriginal;
 }
+
 async function loadEditorFiles() {
   $('editor-error').textContent = '';
   try {
-    if (!previewItems.length) previewItems = (await api('previews')).items || [];
     editorFiles = (await api('editor/files')).items || [];
-    $('editor-file-count').textContent = editorFiles.length + ' 个文件';
-    const featureSelect = $('editor-feature');
-    featureSelect.replaceChildren();
-    for (const item of previewItems) {
-      const option = node('option', item.title);
-      option.value = item.id;
-      featureSelect.append(option);
-    }
-    featureSelect.value = selectedEditorFeature;
     drawEditorFiles();
-    if (!selectedFile && editorFiles.length) await selectEditorFile(editorFiles[0].name);
-    else await loadEditorSchema(selectedEditorFeature);
+    if (selectedFile && !editorFiles.some(item => item.name === selectedFile)) {
+      clearEditorSelection();
+    } else if (selectedFile) {
+      const file = editorFiles.find(item => item.name === selectedFile);
+      if (file) updateEditorState();
+    } else if (editorMode !== 'new') {
+      clearEditorSelection();
+    }
   } catch (error) {
     showError('editor-error', error);
   }
 }
+
 function drawEditorFiles() {
   const key = $('editor-filter').value.trim().toLocaleLowerCase();
-  const list = $('editor-file-list');
-  list.replaceChildren();
-  const rows = editorFiles.filter(item => item.name.toLocaleLowerCase().includes(key));
-  for (const item of rows) {
-    const button = node('button', undefined, 'editor-file-option' + (selectedFile === item.name ? ' active' : ''));
-    button.type = 'button';
-    button.append(node('span', item.kind === 'html' ? 'HTML' : 'CSS', 'file-type'));
-    button.append(node('span', item.name.replace(/^(html|css)\//, ''), 'editor-file-name'));
-    if (item.overridden) button.append(node('i', undefined, 'override-dot'));
-    button.addEventListener('click', () => selectEditorFile(item.name));
-    list.append(button);
-  }
-  if (!rows.length) list.append(node('p', '没有匹配的文件。', 'empty'));
-}
-function updateEditorState() {
-  const file = editorFiles.find(item => item.name === selectedFile);
-  const isVersion = Boolean(file && file.version);
-  const dirty = $('editor-content').value !== editorOriginal;
-  $('editor-save').disabled = !selectedFile || !$('editor-version-name').value.trim() || !$('editor-content').value;
-  $('editor-reset').disabled = !selectedFile || !editorOverridden() || isVersion;
-  $('editor-delete').disabled = !file || !(file.version || file.theme);
-  $('editor-preview').disabled = !selectedFile;
-  $('editor-file-status').textContent = dirty ? '有未保存修改' : (isVersion ? '历史版本（只读保存）' : (editorOverridden() ? '使用本地覆盖' : '使用安装包原版'));
-  $('editor-file-status').classList.toggle('modified', dirty);
-}
-function editorOverridden() {
-  const file = editorFiles.find(item => item.name === selectedFile);
-  return Boolean(file && file.overridden);
-}
-async function loadEditorSchema(feature) {
-  if (!feature) return;
-  try {
-    const data = await api('editor/schema?' + new URLSearchParams({ feature }));
-    editorSchema = data.fields || [];
-    const list = $('editor-fields');
+  const drawGroup = (kind, targetId, countId) => {
+    const list = $(targetId);
     list.replaceChildren();
-    for (const field of editorSchema) {
-      const button = node('button', undefined, 'editor-field');
+    const all = editorFiles.filter(item => item.kind === kind);
+    const rows = all.filter(item => item.name.toLocaleLowerCase().includes(key));
+    $(countId).textContent = all.length + ' 个文件';
+    for (const item of rows) {
+      const button = node('button', undefined, 'editor-file-option' + (selectedFile === item.name ? ' active' : ''));
       button.type = 'button';
-      button.title = field.placeholder;
-      button.append(node('code', field.path));
-      button.append(node('small', field.example));
-      button.addEventListener('click', () => {
-        const textarea = $('editor-content');
-        if (textarea.disabled) {
-          toast('请先选择一个模板文件。');
-          return;
-        }
-        const value = field.placeholder;
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        textarea.setRangeText(value, start, end, 'end');
-        textarea.focus();
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-      });
+      button.append(node('span', kind === 'html' ? 'HTML' : 'CSS', 'file-type'));
+      button.append(node('span', item.name.replace(/^(html|css)\//, ''), 'editor-file-name'));
+      if (item.overridden) button.append(node('i', undefined, 'override-dot'));
+      button.addEventListener('click', () => selectEditorFile(item.name));
       list.append(button);
     }
-    if (!editorSchema.length) list.append(node('p', '当前功能没有可用字段。', 'empty'));
-  } catch (error) {
-    if (error && error.status === 409) {
-      editorSchema = [];
-      const list = $('editor-fields');
-      list.replaceChildren(node('p', error.message, 'empty'));
-      return;
-    }
-    showError('editor-error', error);
-  }
+    if (!rows.length) list.append(node('p', key ? '没有匹配的文件。' : '暂无文件。', 'empty'));
+  };
+  drawGroup('html', 'editor-html-list', 'editor-html-count');
+  drawGroup('css', 'editor-css-list', 'editor-css-count');
 }
+
+function clearEditorSelection() {
+  selectedFile = null;
+  selectedKind = null;
+  editorMode = 'idle';
+  editorRevision = '';
+  editorOriginal = '';
+  $('editor-file-name').textContent = '选择一个文件';
+  $('editor-file-status').textContent = '未选择';
+  $('editor-content').value = '';
+  $('editor-content').disabled = true;
+  $('editor-new-file-row').hidden = true;
+  $('editor-new-name').value = '';
+  $('editor-message').textContent = '';
+  updateEditorState();
+  drawEditorFiles();
+}
+
+function updateEditorState() {
+  const file = editorFiles.find(item => item.name === selectedFile);
+  const isNew = editorMode === 'new';
+  const dirty = editorHasUnsavedChanges();
+  const canSave = isNew
+    ? Boolean($('editor-new-name').value.trim() && $('editor-content').value.trim())
+    : Boolean(selectedFile && dirty);
+  $('editor-save').disabled = !canSave;
+  $('editor-save').textContent = isNew ? '创建并保存' : '保存修改';
+  $('editor-reset').hidden = isNew || !file || !file.overridden || file.custom || file.version || file.theme;
+  $('editor-reset').disabled = $('editor-reset').hidden;
+  $('editor-delete').hidden = isNew || !file || !(file.custom || file.version || file.theme);
+  $('editor-delete').disabled = $('editor-delete').hidden;
+  $('editor-new-file-row').hidden = !isNew;
+  if (isNew) {
+    $('editor-file-status').textContent = selectedKind === 'html' ? '新建 HTML 模板' : '新建 CSS 主题';
+  } else if (selectedFile) {
+    $('editor-file-status').textContent = dirty
+      ? '有未保存修改'
+      : (file && file.overridden ? '本地自定义文件' : '安装包内置文件');
+  } else {
+    $('editor-file-status').textContent = '未选择';
+  }
+  $('editor-file-status').classList.toggle('modified', dirty);
+}
+
 async function selectEditorFile(name) {
-  if (selectedFile && name !== selectedFile && $('editor-content').value !== editorOriginal) {
+  if ((editorMode === 'new' || selectedFile) && editorHasUnsavedChanges()) {
     if (!window.confirm('当前文件有未保存修改，确定放弃并切换文件吗？')) return;
   }
   $('editor-error').textContent = '';
   try {
     const data = await api('editor/file?' + new URLSearchParams({ name }));
     selectedFile = name;
+    selectedKind = name.startsWith('css/') ? 'css' : 'html';
+    editorMode = 'edit';
     editorRevision = data.revision;
     editorOriginal = data.content;
-    selectedEditorFeature = featureForFile(name);
-    $('editor-feature').value = selectedEditorFeature;
     $('editor-file-name').textContent = name;
     $('editor-content').disabled = false;
     $('editor-content').value = data.content;
-    $('editor-version-name').value = '';
+    $('editor-new-name').value = '';
+    $('editor-new-file-row').hidden = true;
+    $('editor-message').textContent = '';
     drawEditorFiles();
     updateEditorState();
-    $('editor-message').textContent = '';
-    $('editor-preview-panel').hidden = true;
-    await loadEditorSchema(selectedEditorFeature);
   } catch (error) {
     showError('editor-error', error);
   }
 }
+
+function startNewEditorFile(kind) {
+  if ((editorMode === 'new' || selectedFile) && editorHasUnsavedChanges()) {
+    if (!window.confirm('当前文件有未保存修改，确定放弃并新建文件吗？')) return;
+  }
+  selectedFile = null;
+  selectedKind = kind;
+  editorMode = 'new';
+  editorRevision = '';
+  editorOriginal = kind === 'html'
+    ? '<!doctype html>\n<html lang="zh-CN">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width,initial-scale=1">\n  <title>{{ card.title }}</title>\n</head>\n<body>\n  <main>\n    <h1>{{ card.title }}</h1>\n  </main>\n</body>\n</html>\n'
+    : '/* Aa Warframe custom theme */\n';
+  $('editor-file-name').textContent = kind === 'html' ? '新建 HTML 模板' : '新建 CSS 主题';
+  $('editor-content').disabled = false;
+  $('editor-content').value = editorOriginal;
+  $('editor-new-name').value = '';
+  $('editor-new-file-row').hidden = false;
+  $('editor-new-file-hint').textContent = kind === 'html'
+    ? '保存时会自动添加 .html 扩展名；新模板不需要预先绑定功能。'
+    : '保存时会自动添加 .css 扩展名；主题启用与切换请在渲染预览中完成。';
+  $('editor-message').textContent = '';
+  $('editor-error').textContent = '';
+  drawEditorFiles();
+  updateEditorState();
+  $('editor-new-name').focus();
+}
+
 $('editor-content').addEventListener('input', updateEditorState);
 $('editor-filter').addEventListener('input', drawEditorFiles);
-$('editor-version-name').addEventListener('input', updateEditorState);
-$('editor-feature').addEventListener('change', () => {
-  selectedEditorFeature = $('editor-feature').value;
-  loadEditorSchema(selectedEditorFeature);
-});
-async function saveEditorVersion() {
-  if (!selectedFile) return;
+$('editor-new-name').addEventListener('input', updateEditorState);
+$('editor-new-html').addEventListener('click', () => startNewEditorFile('html'));
+$('editor-new-css').addEventListener('click', () => startNewEditorFile('css'));
+
+async function saveEditorFile() {
   const button = $('editor-save');
   button.disabled = true;
   $('editor-error').textContent = '';
-  $('editor-message').textContent = '正在创建独立版本…';
+  $('editor-message').textContent = '正在保存文件…';
   try {
-    const kind = selectedFile.startsWith('css/') ? 'css' : 'html';
-    const data = await api('editor/versions', 'POST', {
-      kind,
-      feature: selectedEditorFeature,
-      name: $('editor-version-name').value.trim(),
-      content: $('editor-content').value
+    if (editorMode === 'new') {
+      const data = await api('editor/files', 'POST', {
+        kind: selectedKind,
+        name: $('editor-new-name').value.trim(),
+        content: $('editor-content').value
+      });
+      editorFiles = (await api('editor/files')).items || [];
+      drawEditorFiles();
+      $('editor-message').textContent = '新文件已创建。';
+      await selectEditorFile(data.name);
+      toast('文件已创建并保存。');
+      return;
+    }
+    if (!selectedFile) return;
+    const data = await api('editor/file', 'PUT', {
+      name: selectedFile,
+      content: $('editor-content').value,
+      revision: editorRevision
     });
+    editorRevision = data.revision;
     editorOriginal = $('editor-content').value;
     editorFiles = (await api('editor/files')).items || [];
-    $('editor-file-count').textContent = editorFiles.length + ' 个文件';
-    selectedFile = data.name;
     drawEditorFiles();
-    await selectEditorFile(data.name);
-    $('editor-message').textContent = '已创建新版本；原有版本保持不变。';
-    toast('新版本已保存，可在渲染预览中选择启用。');
+    updateEditorState();
+    $('editor-message').textContent = '保存成功。';
+    toast('文件修改已保存。');
   } catch (error) {
     $('editor-message').textContent = '';
     showError('editor-error', error);
@@ -647,91 +670,41 @@ async function saveEditorVersion() {
     updateEditorState();
   }
 }
+
 async function resetEditorFile() {
-  if (!selectedFile || !editorOverridden()) return;
-  if (!window.confirm('恢复这个文件的安装包原版？本地覆盖将被删除。')) return;
+  const file = editorFiles.find(item => item.name === selectedFile);
+  if (!selectedFile || !file || !file.overridden || file.custom || file.version || file.theme) return;
+  if (!window.confirm('恢复这个文件的安装包内置版本？本地覆盖将被删除。')) return;
   $('editor-reset').disabled = true;
   try {
     await api('editor/file?' + new URLSearchParams({ name: selectedFile }), 'DELETE');
-    const file = editorFiles.find(item => item.name === selectedFile);
-    if (file) file.overridden = false;
+    editorFiles = (await api('editor/files')).items || [];
     await selectEditorFile(selectedFile);
-    toast('已恢复安装包原版。');
+    toast('已恢复安装包内置版本。');
   } catch (error) {
     showError('editor-error', error);
   } finally {
     updateEditorState();
   }
 }
-function previewKeyForFile(name) {
-  return featureForFile(name);
-}
-async function previewEditorFile() {
-  if (!selectedFile) return;
-  if ($('editor-content').value !== editorOriginal) {
-    toast('请先另存为新版本，再预览当前修改。');
-    return;
-  }
-  if (!previewItems.length || !htmlOptions.length || !themeOptions.length) {
-    try {
-      const data = await api('previews');
-      previewItems = data.items || [];
-      htmlOptions = data.html_options || [];
-      themeOptions = data.theme_options || [];
-      selectedTheme = data.selected_theme || 'default.css';
-    } catch (error) {
-      showError('editor-error', error);
-      return;
-    }
-  }
-  const feature = selectedEditorFeature;
-  try {
-    const preview = previewItems.find(item => item.id === feature);
-    const htmlTemplate = selectedFile.startsWith('html/')
-      ? selectedFile.replace(/^html\//, '')
-      : (preview.selected_template || preview.template);
-    const theme = selectedFile.startsWith('css/')
-      ? selectedFile.replace(/^css\//, '')
-      : selectedTheme;
-    await api('previews/selection', 'PUT', { feature, html_template: htmlTemplate, theme });
-    if (preview) preview.selected_template = htmlTemplate;
-    selectedTheme = theme;
-    $('editor-preview-panel').hidden = false;
-    $('editor-preview-image').hidden = true;
-    const success = await renderPreview(feature, $('editor-preview-image'), 'editor-error');
-    if (success) $('editor-preview-panel').hidden = false;
-  } catch (error) {
-    showError('editor-error', error);
-  }
-}
+
 async function deleteEditorFile() {
   const file = editorFiles.find(item => item.name === selectedFile);
-  if (!file || !(file.version || file.theme)) return;
-  if (!window.confirm('确定删除自定义文件「' + selectedFile + '」？所有指向该 HTML 的功能绑定会被清理。')) return;
+  if (!file || !(file.custom || file.version || file.theme)) return;
+  if (!window.confirm('确定删除自定义文件「' + selectedFile + '」？如果预览中正在使用它，对应选择会自动恢复默认。')) return;
   try {
     await api('editor/file?' + new URLSearchParams({ name: selectedFile }), 'DELETE');
     editorFiles = (await api('editor/files')).items || [];
-    $('editor-file-count').textContent = editorFiles.length + ' 个文件';
-    selectedFile = null;
-    editorRevision = '';
-    editorOriginal = '';
-    $('editor-file-name').textContent = '选择一个文件';
-    $('editor-content').value = '';
-    $('editor-content').disabled = true;
-    $('editor-file-status').textContent = '未选择';
-    drawEditorFiles();
-    updateEditorState();
-    await loadPreviews();
-    toast('自定义文件已删除，关联选择已同步清理。');
+    clearEditorSelection();
+    toast('自定义文件已删除。');
   } catch (error) {
     showError('editor-error', error);
   }
 }
-$('editor-save').addEventListener('click', saveEditorVersion);
+
+$('editor-save').addEventListener('click', saveEditorFile);
 $('editor-reset').addEventListener('click', resetEditorFile);
 $('editor-delete').addEventListener('click', deleteEditorFile);
-$('editor-preview').addEventListener('click', previewEditorFile);
-$('close-editor-preview').addEventListener('click', () => $('editor-preview-panel').hidden = true);
 
 /* Restore an existing session when the page is reopened. */
 if (token) {
