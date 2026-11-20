@@ -1,0 +1,53 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; font-src 'none'; img-src data:">
+  <title>{{ card.title }}</title>
+</head>
+<body class="{% if card.source == 'AAWarframe · 订阅提醒' %}subscription-page {% endif %}{% if card.analysis_mode or card.parts_board or card.relic_board or card.trend_board or card.attribute_rows or card.riven_market_board or card.command_names or card.riven_values_board or card.trader_board or card.arbitration_board or card.market_board or card.fissure_mode or card.cycle_items or card.bounty_mode or card.archimedea_mode or card.nightwave_mode or card.weekly_mode or card.operation_board %}compact-page {% endif %}{% if card.analysis_mode %}analysis-page{% elif card.parts_board or card.relic_board %}relic-page{% elif card.trend_board %}trend-page{% elif card.attribute_rows %}attributes-page{% elif card.riven_market_board %}riven-market-page{% elif card.command_names %}commands-page{% elif card.riven_values_board %}riven-values-page{% elif card.trader_board %}trader-page{% elif card.arbitration_board %}arbitration-page{% elif card.market_board %}market-page{% elif card.operation_board %}operation-page{% elif card.weekly_mode %}weekly-page{% elif card.nightwave_mode %}nightwave-page{% elif card.archimedea_mode %}archimedea-page{% elif card.fissure_mode %}fissure-page{% elif card.cycle_items %}cycle-page{% elif card.bounty_mode %}bounty-page{% endif %}">
+<main class="card{% if card.fissure_mode %} card--fissures{% endif %}">
+  {% block header %}<header class="card__header">
+    <div><div class="eyebrow">WARFRAME · 国际服</div><h1>{{ card.title }}</h1></div>
+    <span class="header-label">{% if card.nightwave_mode %}午夜电波{% elif card.archimedea_mode %}科研轮换{% elif card.cycle_items %}环境周期{% elif card.fissure_mode %}虚空裂缝{% elif card.source == 'AAWarframe · 订阅提醒' %}订阅提醒{% else %}游戏查询{% endif %}</span>
+  </header>{% endblock %}
+  <div class="card__content">
+  {% if card.stale %}<p class="notice notice--warning">暂未更新，当前显示上次记录。</p>{% endif %}
+  
+{% if card.parts_board %}
+{% for part in card.parts_board.parts %}
+<section class="part-group">
+  <h2 class="part-heading">{{ part.name }} <span>×{{ part.quantity }}</span></h2>
+  <div class="parts-relics">
+  {% for relic in part.relics %}
+    <div class="relic-chip relic-chip--{{ relic.rarity }}"><span class="relic-tier">{{ {'rare':'金', 'uncommon':'银', 'common':'铜'}.get(relic.rarity, '') }}</span><strong>{{ relic.name }}</strong>{% if relic.vaulted %}<small>入库</small>{% endif %}</div>
+  {% endfor %}
+  </div>
+  {% if not part.relics %}<p class="relic-empty">无遗物掉落</p>{% endif %}
+</section>
+{% endfor %}
+{% else %}
+<div class="relic-context">{{ '已入库' if card.relic_board.vaulted else '未入库' }} · WM 在线卖价</div>
+<table class="relic-rewards">
+  <thead><tr><th>奖励</th><th>完整</th><th>优良</th><th>无暇</th><th>光辉</th><th>售价 / 白金</th></tr></thead>
+  <tbody>{% for reward in card.relic_board.rewards %}
+  <tr>
+    <td>{{ reward.name }}{% if reward.quantity > 1 %} ×{{ reward.quantity }}{% endif %}</td>
+    {% for chance in reward.chances %}<td>{{ ('%.2f'|format(chance)).rstrip('0').rstrip('.') ~ '%' if chance is not none else '—' }}</td>{% endfor %}
+    <td class="relic-price">{{ ('%.2f'|format(reward.price)).rstrip('0').rstrip('.') if reward.price is not none else reward.price_status }}</td>
+  </tr>
+  {% endfor %}</tbody>
+</table>
+{% endif %}
+
+  {% if card.notes %}<aside class="notes">{% for note in card.notes %}<p class="note">{{ note }}</p>{% endfor %}</aside>{% endif %}
+  </div>
+  {% block footer %}<footer class="card__footer">
+    <div class="footer-meta">{% if not card.bounty_mode %}<span>更新于 {{ (card.fetched_at | beijing).strftime('%m-%d %H:%M') }}</span>{% endif %}<span>北京时间{% if total > 1 %} · {{ page }} / {{ total }} 页{% endif %}</span></div>
+    <strong class="signature">By. Aameow</strong>
+  </footer>{% endblock %}
+</main>
+</body>
+</html>
