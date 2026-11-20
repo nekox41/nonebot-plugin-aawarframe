@@ -384,11 +384,9 @@ async function loadPreviews() {
     previewItems = (await api('previews')).items || [];
     $('preview-count').textContent = previewItems.length + ' 项';
     drawPreviewList();
-    if (selectedPreview && previewItems.some(item => item.id === selectedPreview.id)) {
-      await selectPreview(selectedPreview.id);
-    } else if (previewItems.length) {
-      await selectPreview(previewItems[0].id);
-    }
+    const current = selectedPreview && previewItems.find(item => item.id === selectedPreview.id);
+    const next = current || previewItems.find(item => item.has_data) || previewItems[0];
+    if (next) await selectPreview(next.id);
   } catch (error) {
     showError('preview-error', error);
   }
@@ -404,6 +402,7 @@ function drawPreviewList() {
     const button = node('button', undefined, 'preview-option' + (selectedPreview && selectedPreview.id === item.id ? ' active' : ''));
     button.type = 'button';
     button.append(node('strong', item.title), node('small', item.description));
+    button.append(node('small', item.has_data ? '已捕获真实命令数据' : '等待实际命令数据', item.has_data ? 'preview-data-ready' : 'preview-data-missing'));
     button.addEventListener('click', () => selectPreview(item.id));
     list.append(button);
   }
@@ -437,11 +436,23 @@ async function selectPreview(id) {
   fillSelect($('preview-css-select'), cssOptions, selectedPreview.selected_css || '');
   $('preview-image').hidden = true;
   $('preview-image-wrap').querySelector('.preview-placeholder').hidden = false;
+  $('save-preview-selection').disabled = !selectedPreview.has_data;
+  $('preview-error').textContent = '';
+  if (!selectedPreview.has_data) {
+    $('preview-data-meta').textContent = '尚未捕获此功能的真实命令结果。';
+    $('preview-empty-message').textContent = '请先在机器人中执行对应命令，然后点击右上角刷新预览。不会使用模拟数据替代。';
+    return;
+  }
+  const command = selectedPreview.data_feature + (selectedPreview.data_arguments ? ' ' + selectedPreview.data_arguments : '');
+  const updated = selectedPreview.data_updated_at ? new Date(selectedPreview.data_updated_at).toLocaleString() : '未知';
+  $('preview-data-meta').textContent = '真实数据：' + command + ' · 更新时间：' + updated;
+  $('preview-empty-message').textContent = '正在使用最近一次真实命令结果生成预览…';
   const success = await renderPreview(id, $('preview-image'), 'preview-error');
   if (success) $('preview-image-wrap').querySelector('.preview-placeholder').hidden = true;
+  else $('preview-empty-message').textContent = '真实数据已保存，但当前模板渲染失败。请检查模板或数据字段。';
 }
 async function applyPreviewSelection() {
-  if (!selectedPreview) return;
+  if (!selectedPreview || !selectedPreview.has_data) return;
   const button = $('save-preview-selection');
   button.disabled = true;
   $('preview-error').textContent = '';
@@ -456,18 +467,16 @@ async function applyPreviewSelection() {
     selectedPreview.selected_template = templateVersion;
     selectedPreview.selected_css = cssVersion;
     toast('已应用此功能的模板与 CSS 版本。');
-    await renderPreview(selectedPreview.id, $('preview-image'), 'preview-error');
-    $('preview-image-wrap').querySelector('.preview-placeholder').hidden = true;
+    const success = await renderPreview(selectedPreview.id, $('preview-image'), 'preview-error');
+    if (success) $('preview-image-wrap').querySelector('.preview-placeholder').hidden = true;
   } catch (error) {
     showError('preview-error', error);
   } finally {
-    button.disabled = false;
+    button.disabled = !selectedPreview.has_data;
   }
 }
 $('preview-filter').addEventListener('input', drawPreviewList);
-$('refresh-preview').addEventListener('click', () => {
-  if (selectedPreview) selectPreview(selectedPreview.id);
-});
+$('refresh-preview').addEventListener('click', loadPreviews);
 $('save-preview-selection').addEventListener('click', applyPreviewSelection);
 
 /* Live template editor */
