@@ -21,7 +21,7 @@ from .charts import trend_chart
 from .viewmodels import paginate
 
 ROOT = Path(__file__).parent
-RENDER_CACHE_VERSION = 3
+RENDER_CACHE_VERSION = 4
 VOLATILE_FIELDS = {
     "fetched_at",
     "render_cache_until",
@@ -55,24 +55,15 @@ class CardRenderer:
     ):
         self.template_override_dir: Path | None = None
         self.template_selections: dict[str, str] = {}
-        self.css_selections: dict[str, str] = {}
+        self.theme = theme if theme.endswith(".css") else theme + ".css"
         self.environment = Environment(
-            loader=FileSystemLoader(ROOT / "templates"),
+            loader=FileSystemLoader(ROOT / "html"),
             autoescape=select_autoescape(default=True),
             undefined=StrictUndefined,
         )
         self.environment.filters["beijing"] = lambda value: value.astimezone(
             timezone(timedelta(hours=8))
         )
-        styles = ROOT / "assets/css"
-        selected = styles / "themes" / (theme + ".css")
-        if selected.resolve().parent != (styles / "themes").resolve() or not selected.is_file():
-            raise ValueError("未知卡片主题：" + theme)
-        self.theme = theme
-        self._css_files = [
-            "base.css", "trader.css", "riven_values.css", "riven_market.css",
-            "trend.css", "relics.css", "riven_analysis.css", f"themes/{theme}.css",
-        ]
         self._load_css()
         self.asset_fingerprint = self._asset_fingerprint()
         self.now_provider = now_provider
@@ -85,22 +76,23 @@ class CardRenderer:
         self.render_durations: deque[float] = deque(maxlen=512)
 
     def _load_css(self) -> None:
-        styles = ROOT / "assets/css"
-        override = self.template_override_dir / "css" if self.template_override_dir else None
-        parts = []
-        for name in self._css_files:
-            candidate = override / name if override else None
-            if candidate is None or not candidate.is_file():
-                candidate = styles / name
-            parts.append(candidate.read_text(encoding="utf-8"))
-        self.css = "\n".join(parts)
+        name = Path(self.theme).name
+        if not name.endswith(".css"):
+            raise ValueError("CSS 主题必须是 .css 文件")
+        package_css = ROOT / "css" / name
+        override_css = self.template_override_dir / "css" / name if self.template_override_dir else None
+        selected = override_css if override_css and override_css.is_file() else package_css
+        root = (self.template_override_dir / "css").resolve() if override_css and selected == override_css else (ROOT / "css").resolve()
+        if not selected.resolve().is_relative_to(root) or not selected.is_file():
+            raise ValueError("未知卡片主题：" + name)
+        self.css = selected.read_text(encoding="utf-8")
 
     def configure_admin_overrides(self, directory: Path) -> None:
-        """Enable persisted admin template/CSS overrides and invalidate render caches."""
+        """Enable persisted HTML/CSS overrides and invalidate render caches."""
         self.template_override_dir = Path(directory)
-        template_dir = self.template_override_dir / "templates"
+        html_dir = self.template_override_dir / "html"
         self.environment.loader = ChoiceLoader(
-            [FileSystemLoader(template_dir), FileSystemLoader(ROOT / "templates")]
+            [FileSystemLoader(html_dir), FileSystemLoader(ROOT / "html")]
         )
         self.environment.cache.clear()
         self._load_css()
@@ -109,10 +101,12 @@ class CardRenderer:
         self.page_cache.entries.clear()
 
     def configure_admin_selections(
-        self, templates: dict[str, str] | None = None, css: dict[str, str] | None = None
+        self, templates: dict[str, str] | None = None, theme: str | None = None
     ) -> None:
         self.template_selections = dict(templates or {})
-        self.css_selections = dict(css or {})
+        if theme:
+            self.theme = Path(theme).name
+            self._load_css()
         self.environment.cache.clear()
         self.asset_fingerprint = self._asset_fingerprint()
         self.cache.entries.clear()
@@ -124,24 +118,26 @@ class CardRenderer:
         digest.update(self.theme.encode())
         digest.update(self.css.encode())
         digest.update(json.dumps(
-            {"templates": self.template_selections, "css": self.css_selections},
+            {"templates": self.template_selections, "theme": self.theme},
             ensure_ascii=False, sort_keys=True,
         ).encode("utf-8"))
-        roots = [ROOT / "templates"]
+        roots = [ROOT / "html"]
         if self.template_override_dir:
-            roots.insert(0, self.template_override_dir / "templates")
+            roots.insert(0, self.template_override_dir / "html")
         for root in roots:
             if root.exists():
-                for path in sorted(root.rglob("*")):
+                for path in sorted(root.rglob("*.html")):
                     if path.is_file():
                         digest.update(path.relative_to(root).as_posix().encode())
                         digest.update(path.read_bytes())
+        css_roots = [ROOT / "css"]
         if self.template_override_dir:
-            css_versions = self.template_override_dir / "css" / "versions"
-            if css_versions.exists():
-                for path in sorted(css_versions.rglob("*.css")):
+            css_roots.insert(0, self.template_override_dir / "css")
+        for root in css_roots:
+            if root.exists():
+                for path in sorted(root.rglob("*.css")):
                     if path.is_file():
-                        digest.update(path.relative_to(css_versions).as_posix().encode())
+                        digest.update(path.relative_to(root).as_posix().encode())
                         digest.update(path.read_bytes())
         return digest.hexdigest()
 
@@ -245,16 +241,6 @@ class CardRenderer:
             return "fissures.html"
         return "card.html"
 
-    def _css_for_card(self, card: Card) -> str:
-        selected = self.css_selections.get(self._feature_name(card))
-        if not selected or not self.template_override_dir:
-            return self.css
-        root = (self.template_override_dir / "css").resolve()
-        path = (root / selected).resolve()
-        if not path.is_relative_to(root) or not path.is_file():
-            return self.css
-        return self.css + "\n" + path.read_text(encoding="utf-8")
-
     def template_context(
         self, card: Card, page: int | None = None, total: int | None = None
     ) -> dict:
@@ -267,12 +253,17 @@ class CardRenderer:
             ] if card.trend_board else [],
         }
 
+    def template_source(self, card: Card) -> str:
+        template = self._template_name(card)
+        source, _, _ = self.environment.loader.get_source(self.environment, template)
+        return source
+
     def html(self, card: Card, page: int | None = None, total: int | None = None) -> str:
         template = self._template_name(card)
         document = self.environment.get_template(template).render(
             **self.template_context(card, page, total)
         )
-        return document.replace("</head>", "<style>" + self._css_for_card(card) + "</style></head>", 1)
+        return document.replace("</head>", "<style>" + self.css + "</style></head>", 1)
 
     def _deadlines(self, card: Card) -> list[tuple[str, datetime]]:
         deadlines: list[tuple[str, datetime]] = []
