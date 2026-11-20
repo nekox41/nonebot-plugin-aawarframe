@@ -641,16 +641,9 @@ class AdminServer:
         self.runtime, self.config = runtime, config
         self.server = None
         self.task = None
-        self.preview_store = PreviewDataStore(
-            config.aawarframe_cache_dir / "admin" / "preview-data.json"
-        )
-
     def record_preview(self, feature: str, arguments: str, card: Card) -> None:
-        if feature == "list_subscriptions":
-            return
-        preview_id = self.runtime.renderer._feature_name(card)
-        if preview_id in _feature_ids():
-            self.preview_store.record(feature, preview_id, arguments, card)
+        """Kept as a no-op compatibility hook; WebUI previews use fixed source fixtures."""
+        return
 
     def start(self):
         config = self.config
