@@ -34,6 +34,7 @@ AAWARFRAME_ADMIN_PASSWORD=请替换为自己的长随机密码
 | `AAWARFRAME_ADMIN_HOST` | `127.0.0.1` | 管理台监听地址 |
 | `AAWARFRAME_ADMIN_PORT` | `8443` | 管理台端口 |
 | `AAWARFRAME_ADMIN_PASSWORD` | 自动生成 | 管理台登录口令 |
+
 管理台使用 HTTP。建议保持监听地址为 `127.0.0.1`，通过 SSH 本地端口转发访问；不要直接暴露在公网。
 
 管理台涉及本地配置与模板修改。通过 SSH 隧道访问时，浏览器使用 `http://localhost:本地端口`。HTTP 不提供传输加密，因此应保持回环地址监听，并通过 SSH 隧道远程访问。
