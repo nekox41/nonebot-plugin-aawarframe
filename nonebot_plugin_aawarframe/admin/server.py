@@ -1,4 +1,4 @@
-# 作用：提供带口令认证的 HTTPS 管理 API 和网页管理台。
+# 作用：提供带口令认证的 HTTP 管理 API 和网页管理台。
 # 编写日期：2026-11-13
 # 作者：Aameow
 
@@ -6,15 +6,14 @@ import asyncio
 import base64
 import hashlib
 import hmac
+import json
 import logging
 import os
+import re
 import secrets
-import ssl
-import subprocess
 from collections import OrderedDict, deque
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
-from ipaddress import ip_address
 from pathlib import Path
 from time import monotonic
 from typing import Literal
@@ -48,6 +47,19 @@ class EditorInput(BaseModel):
 
 class PreviewInput(BaseModel):
     template: str = Field(min_length=1, max_length=80)
+
+
+class PreviewSelectionInput(BaseModel):
+    feature: str = Field(min_length=1, max_length=80)
+    template_version: str = Field(default="", max_length=240)
+    css_version: str = Field(default="", max_length=240)
+
+
+class EditorVersionInput(BaseModel):
+    kind: Literal["html", "css"]
+    feature: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=80)
+    content: str = Field(max_length=1_000_000)
 
 
 EDITOR_TEMPLATES = {
@@ -87,6 +99,10 @@ PREVIEW_CATALOG = [
 ]
 
 
+def _feature_ids() -> set[str]:
+    return {item[0] for item in PREVIEW_CATALOG}
+
+
 def _editor_paths(name: str, override_dir: Path):
     templates = Path(__file__).parents[1] / "rendering" / "templates"
     styles = Path(__file__).parents[1] / "rendering" / "assets" / "css"
@@ -96,11 +112,66 @@ def _editor_paths(name: str, override_dir: Path):
     if name.startswith("css/") and name.removeprefix("css/") in EDITOR_CSS:
         relative = name.removeprefix("css/")
         return styles / relative, override_dir / "css" / relative
+    match = re.fullmatch(r"(templates|css)/versions/([a-z0-9_-]+)/([a-z0-9_-]+)\.(html|css)", name)
+    if match:
+        kind, feature, filename, extension = match.groups()
+        if feature not in _feature_ids() or (kind == "templates") != (extension == "html"):
+            raise HTTPException(404, "找不到此模板或样式文件")
+        version = override_dir / kind / "versions" / feature / f"{filename}.{extension}"
+        return version, version
     raise HTTPException(404, "找不到此模板或样式文件")
 
 
 def _file_revision(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+def _version_items(override_dir: Path, kind: str, feature: str) -> list[dict[str, str]]:
+    extension = "html" if kind == "templates" else "css"
+    root = override_dir / kind / "versions" / feature
+    if not root.is_dir():
+        return []
+    return [
+        {
+            "id": f"versions/{feature}/{path.name}",
+            "title": path.stem,
+        }
+        for path in sorted(root.glob(f"*.{extension}"))
+        if path.is_file()
+    ]
+
+
+def _sample_fields(feature: str) -> list[dict[str, str]]:
+    sample = _preview_card(feature).model_dump(mode="json")
+    fields: list[dict[str, str]] = []
+
+    def visit(path: str, value, depth: int = 0):
+        example = json.dumps(value, ensure_ascii=False, default=str)
+        if len(example) > 100:
+            example = example[:97] + "..."
+        fields.append({
+            "path": path,
+            "placeholder": "{{ " + path + " }}",
+            "example": example,
+        })
+        if depth >= 3:
+            return
+        if isinstance(value, dict):
+            for key, child in value.items():
+                visit(f"{path}.{key}", child, depth + 1)
+        elif isinstance(value, list) and value and isinstance(value[0], dict):
+            for key, child in value[0].items():
+                visit(f"{path}[0].{key}", child, depth + 1)
+
+    for key, value in sample.items():
+        visit("card." + key, value)
+    for key, value in (("page", 1), ("total", 1), ("trend_charts", [])):
+        fields.append({
+            "path": key,
+            "placeholder": "{{ " + key + " }}",
+            "example": json.dumps(value, ensure_ascii=False),
+        })
+    return fields
 
 
 def _preview_card(template: str):
@@ -489,8 +560,54 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
 
     if override_dir is not None:
         override_dir.mkdir(parents=True, exist_ok=True)
+        selection_file = override_dir / "selections.json"
+        selections = {"templates": {}, "css": {}}
+        if selection_file.is_file():
+            try:
+                loaded = json.loads(selection_file.read_text(encoding="utf-8"))
+                if isinstance(loaded, dict):
+                    for key in ("templates", "css"):
+                        if isinstance(loaded.get(key), dict):
+                            selections[key] = loaded[key]
+            except (OSError, ValueError):
+                logger.warning("管理台模板选择配置无法读取，将使用默认模板。")
         if getattr(runtime, "renderer", None):
             runtime.renderer.configure_admin_overrides(override_dir)
+            runtime.renderer.configure_admin_selections(
+                selections["templates"], selections["css"]
+            )
+
+        @app.get("/api/previews/selection", dependencies=auth)
+        async def preview_selections():
+            return selections
+
+        @app.put("/api/previews/selection", dependencies=auth)
+        async def save_preview_selection(payload: PreviewSelectionInput):
+            if payload.feature not in _feature_ids():
+                raise HTTPException(404, "找不到此预览功能")
+            template_versions = {item["id"] for item in _version_items(override_dir, "templates", payload.feature)}
+            css_versions = {item["id"] for item in _version_items(override_dir, "css", payload.feature)}
+            if payload.template_version and payload.template_version not in template_versions:
+                raise HTTPException(404, "找不到所选模板版本")
+            if payload.css_version and payload.css_version not in css_versions:
+                raise HTTPException(404, "找不到所选 CSS 版本")
+            selections["templates"][payload.feature] = payload.template_version
+            selections["css"][payload.feature] = payload.css_version
+            temporary = selection_file.with_name(selection_file.name + ".tmp")
+            temporary.write_text(json.dumps(selections, ensure_ascii=False, indent=2), encoding="utf-8")
+            temporary.chmod(0o600)
+            temporary.replace(selection_file)
+            runtime.renderer.configure_admin_selections(
+                selections["templates"], selections["css"]
+            )
+            return {"ok": True, "template_version": payload.template_version,
+                    "css_version": payload.css_version}
+
+        @app.get("/api/editor/schema", dependencies=auth)
+        async def editor_schema(feature: str):
+            if feature not in _feature_ids():
+                raise HTTPException(404, "找不到此功能")
+            return {"feature": feature, "fields": _sample_fields(feature)}
 
         @app.get("/api/editor/files", dependencies=auth)
         async def editor_files():
@@ -507,6 +624,19 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
                 content = override.read_text(encoding="utf-8") if override.is_file() else source.read_text(encoding="utf-8")
                 result.append({"name": relative, "kind": "css",
                                "overridden": override.is_file(), "revision": _file_revision(content)})
+            for kind, extension in (("templates", "html"), ("css", "css")):
+                root = override_dir / kind / "versions"
+                if root.is_dir():
+                    for path in sorted(root.glob(f"*/*.{extension}")):
+                        relative = path.relative_to(override_dir).as_posix()
+                        content = path.read_text(encoding="utf-8")
+                        result.append({
+                            "name": relative,
+                            "kind": "html" if kind == "templates" else "css",
+                            "overridden": True,
+                            "version": True,
+                            "revision": _file_revision(content),
+                        })
             return {"items": result}
 
         @app.get("/api/editor/file", dependencies=auth)
@@ -519,6 +649,8 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
 
         @app.put("/api/editor/file", dependencies=auth)
         async def save_editor_file(payload: EditorInput):
+            if "/versions/" in payload.name:
+                raise HTTPException(409, "已保存的版本不可覆盖，请使用“另存为新版本”。")
             source, override = _editor_paths(payload.name, override_dir)
             current_path = override if override.is_file() else source
             current_content = current_path.read_text(encoding="utf-8")
@@ -541,11 +673,51 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
 
         @app.delete("/api/editor/file", dependencies=auth)
         async def reset_editor_file(name: str):
+            if "/versions/" in name:
+                raise HTTPException(409, "版本文件不可删除，以保留历史模板。")
             _, override = _editor_paths(name, override_dir)
             if override.exists():
                 override.unlink()
             runtime.renderer.configure_admin_overrides(override_dir)
+            runtime.renderer.configure_admin_selections(
+                selections["templates"], selections["css"]
+            )
             return {"ok": True, "overridden": False}
+
+        @app.post("/api/editor/versions", dependencies=auth)
+        async def create_editor_version(payload: EditorVersionInput):
+            if payload.feature not in _feature_ids():
+                raise HTTPException(404, "找不到此功能")
+            if "\\x00" in payload.content:
+                raise HTTPException(400, "文件内容包含无效字符")
+            slug = re.sub(r"[^a-z0-9_-]+", "-", payload.name.casefold()).strip("-_")[:48]
+            if not slug:
+                slug = "custom"
+            kind = "templates" if payload.kind == "html" else "css"
+            extension = payload.kind
+            directory = override_dir / kind / "versions" / payload.feature
+            directory.mkdir(parents=True, exist_ok=True)
+            target = directory / f"{slug}.{extension}"
+            suffix = 2
+            while target.exists():
+                target = directory / f"{slug}-{suffix}.{extension}"
+                suffix += 1
+            if payload.kind == "html":
+                try:
+                    runtime.renderer.environment.from_string(payload.content)
+                except TemplateSyntaxError as exc:
+                    raise HTTPException(422, f"Jinja 模板语法错误：{exc.message}") from exc
+            temporary = target.with_name(target.name + ".tmp")
+            temporary.write_text(payload.content, encoding="utf-8")
+            temporary.chmod(0o600)
+            temporary.replace(target)
+            runtime.renderer.configure_admin_overrides(override_dir)
+            runtime.renderer.configure_admin_selections(
+                selections["templates"], selections["css"]
+            )
+            relative = target.relative_to(override_dir).as_posix()
+            return {"ok": True, "name": kind + "/" + relative.removeprefix(kind + "/"),
+                    "revision": _file_revision(payload.content)}
 
     return app
 
@@ -581,51 +753,12 @@ class AdminServer:
             raise ValueError("管理口令至少需要 16 个字符")
         cert = config.aawarframe_admin_cert or directory / "cert.pem"
         key = config.aawarframe_admin_key or directory / "key.pem"
-        if bool(config.aawarframe_admin_cert) != bool(config.aawarframe_admin_key):
-            raise ValueError("必须同时配置管理台证书和私钥")
-        if not config.aawarframe_admin_cert and not (cert.exists() and key.exists()):
-            host = config.aawarframe_admin_public_host or "localhost"
-            try:
-                ip_address(host)
-                san = "IP:" + host
-            except ValueError:
-                if not all(c.isalnum() or c in "-." for c in host):
-                    raise ValueError("管理台域名无效") from None
-                san = "DNS:" + host
-            subprocess.run(
-                [
-                    "openssl",
-                    "req",
-                    "-x509",
-                    "-newkey",
-                    "rsa:2048",
-                    "-nodes",
-                    "-keyout",
-                    str(key),
-                    "-out",
-                    str(cert),
-                    "-days",
-                    "365",
-                    "-subj",
-                    "/CN=" + host,
-                    "-addext",
-                    "subjectAltName=" + san,
-                ],
-                check=True,
-                capture_output=True,
-                timeout=20,
-            )
-            key.chmod(0o600)
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        context.load_cert_chain(cert, key)
         app = create_app(self.runtime, token, directory / "overrides")
         self.server = EmbeddedServer(
             uvicorn.Config(
                 app,
                 host=config.aawarframe_admin_host,
                 port=config.aawarframe_admin_port,
-                ssl_certfile=str(cert),
-                ssl_keyfile=str(key),
                 access_log=True,
                 proxy_headers=False,
                 log_config=None,
@@ -635,7 +768,7 @@ class AdminServer:
         )
         self.task = asyncio.create_task(self._serve(), name="aawarframe-admin")
         self.task.add_done_callback(self._done)
-        logger.info("管理台 HTTPS 端口 %s；口令文件：%s", config.aawarframe_admin_port, token_file)
+        logger.info("管理台 HTTP 端口 %s；口令文件：%s", config.aawarframe_admin_port, token_file)
 
     async def _serve(self):
         try:
