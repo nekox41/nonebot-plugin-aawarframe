@@ -156,7 +156,7 @@ def _sample_fields(feature: str) -> list[dict[str, str]]:
             "placeholder": "{{ " + path + " }}",
             "example": example,
         })
-        if depth >= 3:
+        if depth >= 4:
             return
         if isinstance(value, dict):
             for key, child in value.items():
