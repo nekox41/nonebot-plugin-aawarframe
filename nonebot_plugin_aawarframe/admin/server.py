@@ -185,9 +185,6 @@ def _sample_fields(card: Card, renderer) -> list[dict[str, str]]:
 
 def create_app(runtime, token: str, override_dir: Path | None = None):
     grq = runtime.grq
-    preview_store = getattr(getattr(runtime, "admin", None), "preview_store", None)
-    if preview_store is None and override_dir is not None:
-        preview_store = PreviewDataStore(override_dir.parent / "preview-data.json")
     digest = hashlib.sha256(token.encode()).digest()
     failures = OrderedDict()
 
@@ -259,7 +256,7 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
         return FileResponse(STATIC / "style.css", media_type="text/css")
 
     auth = [Depends(authenticate)]
-    selections = {"templates": {}, "css": {}}
+    selections = {"templates": {}, "theme": "default.css"}
 
     @app.get("/api/session", dependencies=auth)
     async def session():
@@ -385,10 +382,55 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
 
     @app.get("/api/previews", dependencies=auth)
     async def previews():
+        html_options = _html_options(override_dir) if override_dir is not None else [
+            {"id": path.name, "title": path.name}
+            for path in sorted((Path(__file__).parents[1] / "rendering" / "html").glob("*.html"))
+        ]
+        theme_options = _theme_options(override_dir) if override_dir is not None else [
+            {"id": path.name, "title": path.name}
+            for path in sorted((Path(__file__).parents[1] / "rendering" / "css").glob("*.css"))
+        ]
         items = []
         for key, title, template, description in PREVIEW_CATALOG:
-            item = {"id": key, "title": title, "template": template, "description": description}
-            if override_dir is not None:
+            items.append({
+                "id": key,
+                "title": title,
+                "template": template,
+                "description": description,
+                "selected_template": selections["templates"].get(key, template),
+                "has_data": True,
+            })
+        return {"items": items, "html_options": html_options, "theme_options": theme_options,
+                "selected_theme": selections["theme"]}
+
+    @app.post("/api/previews", dependencies=auth)
+    async def render_preview(payload: PreviewInput):
+        if payload.template not in _feature_ids():
+            raise HTTPException(404, "找不到此预览项目")
+        renderer = getattr(runtime, "renderer", None)
+        if renderer is None:
+            raise HTTPException(503, "图片渲染器尚未启动")
+        try:
+            card = get_preview_card(payload.template)
+            raw_template = renderer.template_source(card)
+            rendered_html = renderer.html(card)
+            images = await renderer.render(card)
+        except Exception as exc:
+            logger.exception("管理台固定数据预览失败：%s", payload.template)
+            raise HTTPException(503, "预览渲染失败：" + str(exc)[:160]) from exc
+        if not images:
+            raise HTTPException(503, "渲染器没有返回图片")
+        return {
+            "template": payload.template,
+            "html_template": renderer._template_name(card),
+            "theme": renderer.theme,
+            "raw_template": raw_template,
+            "rendered_html": rendered_html,
+            "images": [base64.b64encode(image).decode("ascii") for image in images],
+            "media_type": "image/webp",
+        }
+
+    if override_dir is not None:
                 item["template_versions"] = [
                     {"id": "", "title": "内置模板 · " + template},
                     *_version_items(override_dir, "templates", key),
