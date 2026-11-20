@@ -102,6 +102,10 @@ async def test_alias_api_and_removed_admin_endpoints(grq):
         base_url="https://test",
     ) as client:
         assert (await client.get("/api/aliases")).status_code == 401
+        favicon = await client.get("/favicon.svg")
+        assert favicon.status_code == 200
+        assert favicon.headers["content-type"].startswith("image/svg+xml")
+        assert "<svg" in favicon.text and "Aa Warframe" in favicon.text
         client.headers["Authorization"] = "Bearer long-test-password-12345"
         result = (await client.get("/api/items", params={"q": "伯斯顿"})).json()
         assert any(r["id"] == BURSTON for r in result["items"])
@@ -328,6 +332,85 @@ async def test_html_binding_and_global_theme_versions_can_be_deleted(grq, tmp_pa
     assert restored_renderer.theme == "default.css"
     assert not restored_renderer.template_selections
     await restored_renderer.close()
+    await renderer.close()
+
+
+async def test_editor_creates_unbound_html_and_css_files(grq, tmp_path):
+    from nonebot_plugin_aawarframe.rendering.preview_data import get_preview_card
+    from nonebot_plugin_aawarframe.rendering.renderer import CardRenderer
+
+    renderer = CardRenderer()
+    override_dir = tmp_path / "admin-overrides"
+    app = create_app(
+        SimpleNamespace(grq=grq, renderer=renderer),
+        "long-test-password-12345",
+        override_dir,
+    )
+    html_content = (
+        "<!doctype html><html><head><title>{{ card.title }}</title></head>"
+        "<body><h1>{{ card.title }}</h1></body></html>"
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        client.headers["Authorization"] = "Bearer long-test-password-12345"
+
+        created_html = await client.post(
+            "/api/editor/files",
+            json={"kind": "html", "name": "Tenno layout", "content": html_content},
+        )
+        assert created_html.status_code == 200
+        html_name = created_html.json()["name"]
+        assert html_name == "html/custom/tenno-layout.html"
+        listed = (await client.get("/api/editor/files")).json()["items"]
+        assert any(item["name"] == html_name and item["custom"] for item in listed)
+
+        source = (await client.get("/api/editor/file", params={"name": html_name})).json()
+        changed_html = html_content.replace("<h1>", "<h2>").replace("</h1>", "</h2>")
+        saved = await client.put(
+            "/api/editor/file",
+            json={"name": html_name, "content": changed_html, "revision": source["revision"]},
+        )
+        assert saved.status_code == 200
+        assert (await client.get("/api/editor/file", params={"name": html_name})).json()["content"] == changed_html
+
+        created_css = await client.post(
+            "/api/editor/files",
+            json={"kind": "css", "name": "Soft colors", "content": "body { color: rgb(12, 34, 56); }"},
+        )
+        assert created_css.status_code == 200
+        css_name = created_css.json()["name"]
+        assert css_name == "css/soft-colors.css"
+
+        selected = await client.put(
+            "/api/previews/selection",
+            json={
+                "feature": "cycles",
+                "html_template": "custom/tenno-layout.html",
+                "theme": "soft-colors.css",
+            },
+        )
+        assert selected.status_code == 200
+        assert renderer._template_name(get_preview_card("cycles")) == "custom/tenno-layout.html"
+        assert "rgb(12, 34, 56)" in renderer.css
+
+        deleted_html = await client.delete(
+            "/api/editor/file", params={"name": html_name}
+        )
+        assert deleted_html.status_code == 200
+        assert "cycles" not in deleted_html.json()["selections"]["templates"]
+        deleted_css = await client.delete(
+            "/api/editor/file", params={"name": css_name}
+        )
+        assert deleted_css.status_code == 200
+        assert deleted_css.json()["selections"]["theme"] == "default.css"
+
+        duplicate = await client.post(
+            "/api/editor/files",
+            json={"kind": "css", "name": "default", "content": "body {}"},
+        )
+        assert duplicate.status_code == 409
+
     await renderer.close()
 
 
