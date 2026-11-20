@@ -213,7 +213,7 @@ async def test_preview_api_uses_fixed_card_and_returns_three_render_stages(grq, 
         assert "<style>" in data["rendered_html"]
         assert data["html_template"] == "operations.html"
         assert data["theme"] == "default.css"
-        assert data["images"] == ["d2VicHAtcHJldmlldw=="]
+        assert data["images"] == ["d2VicC1wcmV2aWV3"]
         renderer.render.assert_awaited_once()
     await renderer.close()
 
