@@ -658,6 +658,10 @@ function previewKeyForFile(name) {
 }
 async function previewEditorFile() {
   if (!selectedFile) return;
+  if ($('editor-content').value !== editorOriginal) {
+    toast('请先另存为新版本，再预览当前修改。');
+    return;
+  }
   if (!previewItems.length) {
     try {
       previewItems = (await api('previews')).items || [];
