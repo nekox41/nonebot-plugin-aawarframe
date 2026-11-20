@@ -525,7 +525,7 @@ function drawEditorFiles() {
     const button = node('button', undefined, 'editor-file-option' + (selectedFile === item.name ? ' active' : ''));
     button.type = 'button';
     button.append(node('span', item.kind === 'html' ? 'HTML' : 'CSS', 'file-type'));
-    button.append(node('span', item.name.replace(/^(templates|css)\//, ''), 'editor-file-name'));
+    button.append(node('span', item.name.replace(/^(html|css)\//, ''), 'editor-file-name'));
     if (item.overridden) button.append(node('i', undefined, 'override-dot'));
     button.addEventListener('click', () => selectEditorFile(item.name));
     list.append(button);
@@ -538,6 +538,7 @@ function updateEditorState() {
   const dirty = $('editor-content').value !== editorOriginal;
   $('editor-save').disabled = !selectedFile || !$('editor-version-name').value.trim() || !$('editor-content').value;
   $('editor-reset').disabled = !selectedFile || !editorOverridden() || isVersion;
+  $('editor-delete').disabled = !file || !(file.version || file.theme);
   $('editor-preview').disabled = !selectedFile;
   $('editor-file-status').textContent = dirty ? '有未保存修改' : (isVersion ? '历史版本（只读保存）' : (editorOverridden() ? '使用本地覆盖' : '使用安装包原版'));
   $('editor-file-status').classList.toggle('modified', dirty);
@@ -671,9 +672,13 @@ async function previewEditorFile() {
     toast('请先另存为新版本，再预览当前修改。');
     return;
   }
-  if (!previewItems.length) {
+  if (!previewItems.length || !htmlOptions.length || !themeOptions.length) {
     try {
-      previewItems = (await api('previews')).items || [];
+      const data = await api('previews');
+      previewItems = data.items || [];
+      htmlOptions = data.html_options || [];
+      themeOptions = data.theme_options || [];
+      selectedTheme = data.selected_theme || 'default.css';
     } catch (error) {
       showError('editor-error', error);
       return;
@@ -681,22 +686,16 @@ async function previewEditorFile() {
   }
   const feature = selectedEditorFeature;
   try {
-    const templateVersion = selectedFile.startsWith('templates/versions/')
-      ? selectedFile.replace('templates/', '')
-      : (selectedFile.startsWith('templates/') ? '' : undefined);
-    const cssVersion = selectedFile.startsWith('css/versions/')
-      ? selectedFile.replace('css/', '')
-      : (selectedFile.startsWith('css/') ? '' : undefined);
     const preview = previewItems.find(item => item.id === feature);
-    await api('previews/selection', 'PUT', {
-      feature,
-      template_version: templateVersion === undefined ? (preview.selected_template || '') : templateVersion,
-      css_version: cssVersion === undefined ? (preview.selected_css || '') : cssVersion
-    });
-    if (preview) {
-      if (templateVersion !== undefined) preview.selected_template = templateVersion;
-      if (cssVersion !== undefined) preview.selected_css = cssVersion;
-    }
+    const htmlTemplate = selectedFile.startsWith('html/')
+      ? selectedFile.replace(/^html\//, '')
+      : (preview.selected_template || preview.template);
+    const theme = selectedFile.startsWith('css/')
+      ? selectedFile.replace(/^css\//, '')
+      : selectedTheme;
+    await api('previews/selection', 'PUT', { feature, html_template: htmlTemplate, theme });
+    if (preview) preview.selected_template = htmlTemplate;
+    selectedTheme = theme;
     $('editor-preview-panel').hidden = false;
     $('editor-preview-image').hidden = true;
     const success = await renderPreview(feature, $('editor-preview-image'), 'editor-error');
@@ -705,8 +704,32 @@ async function previewEditorFile() {
     showError('editor-error', error);
   }
 }
+async function deleteEditorFile() {
+  const file = editorFiles.find(item => item.name === selectedFile);
+  if (!file || !(file.version || file.theme)) return;
+  if (!window.confirm('确定删除自定义文件「' + selectedFile + '」？所有指向该 HTML 的功能绑定会被清理。')) return;
+  try {
+    await api('editor/file?' + new URLSearchParams({ name: selectedFile }), 'DELETE');
+    editorFiles = (await api('editor/files')).items || [];
+    $('editor-file-count').textContent = editorFiles.length + ' 个文件';
+    selectedFile = null;
+    editorRevision = '';
+    editorOriginal = '';
+    $('editor-file-name').textContent = '选择一个文件';
+    $('editor-content').value = '';
+    $('editor-content').disabled = true;
+    $('editor-file-status').textContent = '未选择';
+    drawEditorFiles();
+    updateEditorState();
+    await loadPreviews();
+    toast('自定义文件已删除，关联选择已同步清理。');
+  } catch (error) {
+    showError('editor-error', error);
+  }
+}
 $('editor-save').addEventListener('click', saveEditorVersion);
 $('editor-reset').addEventListener('click', resetEditorFile);
+$('editor-delete').addEventListener('click', deleteEditorFile);
 $('editor-preview').addEventListener('click', previewEditorFile);
 $('close-editor-preview').addEventListener('click', () => $('editor-preview-panel').hidden = true);
 
