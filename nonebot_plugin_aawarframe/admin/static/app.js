@@ -666,7 +666,7 @@ async function previewEditorFile() {
       return;
     }
   }
-  const feature = previewKeyForFile(selectedFile);
+  const feature = selectedEditorFeature;
   try {
     const templateVersion = selectedFile.startsWith('templates/versions/')
       ? selectedFile.replace('templates/', '')
