@@ -72,6 +72,7 @@ EDITOR_TEMPLATES = {
     "void_trader.html", "weekly.html",
 }
 EDITOR_CSS = {"default.css"}
+LEGACY_CSS_FRAGMENTS = {"base.css", "trader.css", "riven_values.css", "riven_market.css", "trend.css", "relics.css", "riven_analysis.css"}
 PREVIEW_CATALOG = [
     ("card", "通用信息卡片", "card.html", "基础信息、表格和说明"),
     ("cycles", "环境周期", "card.html", "地球、夜灵平原等周期状态"),
@@ -145,7 +146,7 @@ def _theme_options(override_dir: Path) -> list[dict[str, str]]:
     names = {path.name for path in css_root.glob("*.css") if path.is_file()}
     custom_root = override_dir / "css"
     if custom_root.exists():
-        names.update(path.name for path in custom_root.glob("*.css") if path.is_file())
+        names.update(path.name for path in custom_root.glob("*.css") if path.is_file() and path.name not in LEGACY_CSS_FRAGMENTS)
     return [{"id": name, "title": name} for name in sorted(names)]
 
 
@@ -522,7 +523,7 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
             custom_css = override_dir / "css"
             if custom_css.is_dir():
                 for path in sorted(custom_css.glob("*.css")):
-                    if path.is_file() and path.name not in EDITOR_CSS:
+                    if path.is_file() and path.name not in EDITOR_CSS and path.name not in LEGACY_CSS_FRAGMENTS:
                         content = path.read_text(encoding="utf-8")
                         result.append({
                             "name": "css/" + path.name, "kind": "css",
