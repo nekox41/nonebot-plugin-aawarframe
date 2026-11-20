@@ -161,9 +161,8 @@ def _sample_fields(feature: str) -> list[dict[str, str]]:
         if isinstance(value, dict):
             for key, child in value.items():
                 visit(f"{path}.{key}", child, depth + 1)
-        elif isinstance(value, list) and value and isinstance(value[0], dict):
-            for key, child in value[0].items():
-                visit(f"{path}[0].{key}", child, depth + 1)
+        elif isinstance(value, list) and value:
+            visit(f"{path}[0]", value[0], depth + 1)
 
     for key, value in sample.items():
         visit("card." + key, value)
