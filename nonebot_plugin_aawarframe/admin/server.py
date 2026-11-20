@@ -583,12 +583,22 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
                             selections[key] = loaded[key]
             except (OSError, ValueError):
                 logger.warning("管理台模板选择配置无法读取，将使用默认模板。")
+        for key in ("templates", "css"):
+            selections[key] = {
+                feature: value
+                for feature, value in selections[key].items()
+                if feature in _feature_ids() and isinstance(value, str)
+            }
         for feature in _feature_ids():
-            valid_templates = {item["id"] for item in _version_items(override_dir, "templates", feature)}
-            valid_css = {item["id"] for item in _version_items(override_dir, "css", feature)}
-            if selections["templates"].get(feature) not in valid_templates:
+            valid_templates = {
+                item["id"] for item in _version_items(override_dir, "templates", feature)
+            }
+            valid_css = {
+                item["id"] for item in _version_items(override_dir, "css", feature)
+            }
+            if selections["templates"].get(feature, "") not in valid_templates | {""}:
                 selections["templates"].pop(feature, None)
-            if selections["css"].get(feature) not in valid_css:
+            if selections["css"].get(feature, "") not in valid_css | {""}:
                 selections["css"].pop(feature, None)
         if getattr(runtime, "renderer", None):
             runtime.renderer.configure_admin_overrides(override_dir)
