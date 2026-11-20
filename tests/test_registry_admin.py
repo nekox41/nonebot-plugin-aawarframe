@@ -309,6 +309,17 @@ async def test_versioned_templates_and_css_are_selectable(grq, tmp_path):
         cycles = next(item for item in previews if item["id"] == "cycles")
         assert cycles["selected_template"] == "versions/cycles/tenno-layout.html"
         assert cycles["selected_css"] == "versions/cycles/soft-colors.css"
+
+    restored_renderer = CardRenderer()
+    create_app(
+        SimpleNamespace(grq=grq, renderer=restored_renderer),
+        "long-test-password-12345",
+        override_dir,
+    )
+    restored_card = _preview_card("cycles")
+    assert restored_renderer._template_name(restored_card) == "versions/cycles/tenno-layout.html"
+    assert "rgb(12, 34, 56)" in restored_renderer._css_for_card(restored_card)
+    await restored_renderer.close()
     await renderer.close()
 
 
