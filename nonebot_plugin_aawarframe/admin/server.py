@@ -587,6 +587,8 @@ def create_app(runtime, token: str, override_dir: Path | None = None):
             else:
                 raise HTTPException(409, "内置文件不能直接删除；只能删除自定义版本或恢复本地覆盖。")
             persist_selections()
+            # 先切换到仍然存在的全局主题，再重载文件系统，避免已删除主题触发加载异常。
+            runtime.renderer.configure_admin_selections(selections["templates"], selections["theme"])
             runtime.renderer.configure_admin_overrides(override_dir)
             runtime.renderer.configure_admin_selections(selections["templates"], selections["theme"])
             return {"ok": True, "deleted": True, "selections": selections}
